@@ -427,18 +427,21 @@ def pipeline_filter_summarytable(summary_table, table_gene_colname, summary_cols
     # # update review for KS genes
     for i in range(0, len(new_table)):
         if new_table[table_gene_colname][i] in actionable_genes:
-            new_table['Review'][i] = 'KS'
+            # new_table['Review'][i] = 'KS' # <-- this is bad don't do this.. ?
+            new_table.loc[i, 'Review'] = 'KS'
     # sort the cols
-    new_table = new_table.sort(['Sample_Name'])
+    # new_table = new_table.sort(['Sample_Name'])
+    new_table = new_table.sort_values(['Sample_Name'])
     return new_table
 
 
 # ~~~~ COMMON LOCATIONS & ITEMS ~~~~~~ #
-build_version = "hg19"
-project_dir = "/ifs/home/kellys04/projects/clinical_genomic_reporting/clinical_genomics_development"
-panel_genes = list_file_lines(project_dir + "/panel_genes.txt")
-actionable_genes = list_file_lines(project_dir + "/actionable_genes.txt")
-summary_cols = list_file_lines(project_dir + "/summary_fields.txt")
+# build_version = "hg19"
+# project_dir = "."
+# data_dir = project_dir + '/data'
+# panel_genes = list_file_lines(data_dir + "/panel_genes.txt")
+# actionable_genes = list_file_lines(data_dir + "/actionable_genes.txt")
+# summary_cols = list_file_lines(data_dir + "/summary_fields.txt")
 divider = '\n---------------------------------------------------\n'
 
 # ~~~~ GET SCRIPT ARGS ~~~~~~ #
@@ -447,12 +450,23 @@ divider = '\n---------------------------------------------------\n'
 # print 'Argument List:', str(sys.argv)
 # print 'script name is:', sys.argv[0]
 parser = argparse.ArgumentParser(description='IonTorrent annotation pipeline.')
-parser.add_argument("input_files",help="Path to input files; .zip IonTorrent run files", nargs=2)
-parser.add_argument("-o", help="Path to output directory. Defaults to the current directory", default = '.', type = str, dest = 'output')
-parser.add_argument("-id", help="Run ID value. Defaults to the portion of the input filename preceeding the first '.' character ")
+parser.add_argument("input_files", nargs=2, help="Path to input files; vcf.zip and xls.zip IonTorrent run files")
+parser.add_argument("-o", default = './output', type = str, dest = 'output', metavar = '/OUTPUT_DIR', help="Path to output directory. Defaults to ./output")
+parser.add_argument("-b", default = 'hg19', type = str, dest = 'build_version', metavar = 'build version', help="Build version. Name of the reference genome, Defaults to hg19")
+parser.add_argument("-dd", default = './data', type = str, dest = 'data_dir', metavar = 'data dir', help="Path to data directory. Defaults to the ./data")
+parser.add_argument("-pg", default = './data/panel_genes.txt', type = str, dest = 'panel_genes_file', metavar = 'panel genes file' , help="Path to panel genes file. Defaults to ./data/panel_genes.txt")
+parser.add_argument("-ag", default = './data/actionable_genes.txt', type = str, dest = 'actionable_genes_file', metavar = 'actionable genes file', help="Path to actionable genes file. Defaults to ./data/actionable_genes.txt")
+parser.add_argument("-sf", default = './data/summary_fields.txt', type = str, dest = 'summary_fields_file', metavar = 'summary fields file', help="Path to summary fields file. Defaults to ./data/summary_fields.txt")
+parser.add_argument("-id", dest = 'run_id', metavar = 'run ID', help="Run ID value. Defaults to the portion of the input filename preceeding the first '.' character ")
 args = parser.parse_args()
 
-print 'outdir is:', args.output
+outdir = args.output
+input_files = args.input_files
+build_version = args.build_version
+data_dir = args.data_dir
+panel_genes = list_file_lines(args.panel_genes_file)
+actionable_genes = list_file_lines(args.actionable_genes_file)
+summary_cols = list_file_lines(args.summary_fields_file)
 
 
 
@@ -461,21 +475,20 @@ print 'outdir is:', args.output
 run_dict = collections.defaultdict(dict)
 
 # process and load each input file
-for value in args.input_files:
-    input_file = value
-    print 'file is:\t', input_file
+for file in input_files:
+    print 'file is:\t', file
     # get run ID from filename
-    if not args.id:
-        run_ID = os.path.basename(value).split('.')[0]
+    if not args.run_id:
+        run_ID = os.path.basename(file).split('.')[0]
     else:
-        run_ID = args.id
+        run_ID = args.run_id
     print 'run ID is:\t', run_ID
     # add entries to the dict
-    run_dict[run_ID]['input_dir'] = os.path.dirname(value)
+    run_dict[run_ID]['input_dir'] = os.path.dirname(file)
     outdir_path = args.output + '/' + run_ID
     run_dict[run_ID]['output_dir'] = mkdir_p(path= outdir_path, return_path=True)
     # unzip the input file
-    pipeline_unzip(input_file, outdir_path)
+    pipeline_unzip(file, outdir_path)
     # find samples among the unzipped output
     run_dict[run_ID]['samples'] = pipeline_find_annotate_samples(outdir_path)
 
