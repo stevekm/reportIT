@@ -1,0 +1,11 @@
+.DS_Store
+.Rproj.user
+*.Rproj
+.Rhistory
+*_multianno*
+*.avinput
+*~
+venv
+*.vcf
+*.xlz
+*.gz
