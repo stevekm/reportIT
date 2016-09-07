@@ -1,0 +1,37 @@
+---
+title: "Untitled"
+author: "Stephen Kelly"
+date: "9/6/2016"
+output:
+  html_document:
+    keep_md: yes
+    toc: yes
+    # toc_float: yes
+  rtf_document:
+    keep_md: yes
+---
+
+https://blog.rstudio.org/2016/03/21/rmarkdown-v0-9-5/
+
+# First Title
+
+This is the test report
+
+
+# Test Report
+
+```{r, echo=FALSE}
+library("rmarkdown")
+```
+
+use this:
+http://stackoverflow.com/questions/24726680/conditionally-evaluate-heading-using-knitr-in-rmd-file
+```{r}
+eval_cell = TRUE
+```
+
+```{r child='child.Rmd', eval=eval_cell}
+```
+
+also this
+http://mpastell.com/pweave/
