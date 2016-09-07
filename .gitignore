@@ -8,4 +8,7 @@
 venv
 *.vcf
 *.xlz
-*.gz
+*.gz*.html
+*.pdf
+*.rtf
+*.html

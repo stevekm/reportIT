@@ -17,7 +17,7 @@ import collections
 import pickle
 import argparse
 
-
+    
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def mkdir_p(path, return_path=False):
     # make a directory, and all parent dir's in the path
@@ -435,13 +435,6 @@ def pipeline_filter_summarytable(summary_table, table_gene_colname, summary_cols
     return new_table
 
 
-# ~~~~ COMMON LOCATIONS & ITEMS ~~~~~~ #
-# build_version = "hg19"
-# project_dir = "."
-# data_dir = project_dir + '/data'
-# panel_genes = list_file_lines(data_dir + "/panel_genes.txt")
-# actionable_genes = list_file_lines(data_dir + "/actionable_genes.txt")
-# summary_cols = list_file_lines(data_dir + "/summary_fields.txt")
 divider = '\n---------------------------------------------------\n'
 
 # ~~~~ GET SCRIPT ARGS ~~~~~~ #
