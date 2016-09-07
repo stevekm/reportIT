@@ -17,21 +17,113 @@ https://blog.rstudio.org/2016/03/21/rmarkdown-v0-9-5/
 
 This is the test report
 
+use this:
+
+http://stackoverflow.com/questions/24726680/conditionally-evaluate-heading-using-knitr-in-rmd-file
+
+also this
+http://mpastell.com/pweave/
 
 # Test Report
 
 ```{r, echo=FALSE}
-library("rmarkdown")
+# clinical comment inclusions
+EGFR_L858R <- FALSE
+NRAS_Q61R <- FALSE
+ERBB2_V777_G777insGSP <- TRUE
+JAK2 <- FALSE
+KRAS_CODON_61 <- FALSE
+GNA11 <- FALSE
+KRAS <- FALSE
+KIT <- FALSE
+BRAF_V600K <- FALSE
+EGFR_T790M <- TRUE
+BRAF_V600E <- FALSE
+EGFR_L861Q <- FALSE
+EGFR_E746_A750del <- FALSE
+IDH1_R132H <- FALSE
+BRAF_G466V <- FALSE
+EGFR_G719A <- FALSE
+GNAQ <- FALSE
+EGFR_exon_20_insertion <- FALSE
+EGFR_delE709_T710insD <- FALSE
+NPM1 <- FALSE
 ```
 
-use this:
-http://stackoverflow.com/questions/24726680/conditionally-evaluate-heading-using-knitr-in-rmd-file
+
 ```{r}
-eval_cell = TRUE
+summary_table_file <- "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_output/R_2015_08_20_10_54_39_user_SN2-76-IT15-060-2/summary_table.tsv"
+
+# load summary report table
+summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
+gene_colname <- "Gene_ID"
+
+# load the list of actioanble genes
+act_gene_file <- "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/actionable_genes.txt"
+act_genes <- scan(act_gene_file, what="", sep="\n")
+
+act_genes[which(act_genes %in% summary_df[[gene_colname]])]
+
 ```
 
-```{r child='child.Rmd', eval=eval_cell}
+
+
+```{r child='clinical_comments/EGFR-L858R.md', eval=EGFR_L858R}
 ```
 
-also this
-http://mpastell.com/pweave/
+```{r child='clinical_comments/NRAS-Q61R.md', eval=NRAS_Q61R}
+```
+
+```{r child='clinical_comments/ERBB2-V777_G777insGSP.md', eval=ERBB2_V777_G777insGSP}
+```
+
+```{r child='clinical_comments/JAK2.md', eval=JAK2}
+```
+
+```{r child='clinical_comments/KRAS-CODON_61.md', eval=KRAS_CODON_61}
+```
+
+```{r child='clinical_comments/GNA11.md', eval=GNA11}
+```
+
+```{r child='clinical_comments/KRAS.md', eval=KRAS}
+```
+
+```{r child='clinical_comments/KIT.md', eval=KIT}
+```
+
+```{r child='clinical_comments/BRAF-V600K.md', eval=BRAF_V600K}
+```
+
+```{r child='clinical_comments/EGFR-T790M.md', eval=EGFR_T790M}
+```
+
+```{r child='clinical_comments/BRAF_V600E.md', eval=BRAF_V600E}
+```
+
+```{r child='clinical_comments/EGFR-L861Q.md', eval=EGFR_L861Q}
+```
+
+```{r child='clinical_comments/EGFR-E746_A750del.md', eval=EGFR_E746_A750del}
+```
+
+```{r child='clinical_comments/IDH1-R132H.md', eval=IDH1_R132H}
+```
+
+```{r child='clinical_comments/BRAF-G466V.md', eval=BRAF_G466V}
+```
+
+```{r child='clinical_comments/EGFR-G719A.md', eval=EGFR_G719A}
+```
+
+```{r child='clinical_comments/GNAQ.md', eval=GNAQ}
+```
+
+```{r child='clinical_comments/EGFR-exon_20_insertion.md', eval=EGFR_exon_20_insertion}
+```
+
+```{r child='clinical_comments/EGFR-delE709_T710insD.md', eval=EGFR_delE709_T710insD}
+```
+
+```{r child='clinical_comments/NPM1.md', eval=NPM1}
+```

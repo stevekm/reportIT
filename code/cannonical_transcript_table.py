@@ -13,9 +13,10 @@ import sys
 import os
 import pandas as pd
 
-crossref_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/clinical_genomics_development/data/hg19/kgXref.txt"
-canon_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/clinical_genomics_development/data/hg19/knownCanonical.txt"
-outdir= "/ifs/home/kellys04/projects/clinical_genomic_reporting/clinical_genomics_development/data/hg19"
+crossref_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19/kgXref.txt"
+canon_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19/knownCanonical.txt"
+comments_dir = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/report_comments"
+outdir= "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19"
 
 # df of the crossrefence ID's
 cross_cols = ['UCSC_id', 'B', 'C', 'D', 'Gene', 'Ref_id', 'G', 'Description', 'I']
@@ -32,11 +33,14 @@ merge_df = pd.merge(canon_df, crossref_df, on = 'UCSC_id', how = 'inner')
 # remove some cols
 cols_to_keep = ['UCSC_id', 'Ref_id', 'Chrom', 'Start', 'Stop', 'Gene', 'Description']
 merge_df = merge_df[merge_df.columns.drop([col for col in merge_df.columns if col not in cols_to_keep])]
-
+print merge_df
 # save file
-merge_df.to_csv(outdir + "/" + "canonical_transcript_table.tsv", sep='\t', index=False)
+# merge_df.to_csv(outdir + "/" + "canonical_transcript_table.tsv", sep='\t', index=False)
 
 # peel off just the transcripts
-canon_refs = merge_df['Ref_id'].dropna()
+canon_refs = merge_df[['Gene','Ref_id']]
+canon_refs = canon_refs.dropna()
 canon_refs.drop_duplicates(inplace = True)
-canon_refs.to_csv(outdir + "/" + "canonical_transcript_list.tsv", sep='\t', index=False)
+# canon_refs.to_csv(outdir + "/" + "canonical_transcript_list.tsv", sep='\t', index=False)
+
+print canon_refs
