@@ -1,73 +1,29 @@
-# Untitled
+# NYU Langone NGS-Tumor 50 Next Generation Sequencing Panel
 Stephen Kelly  
 9/6/2016  
 
-https://blog.rstudio.org/2016/03/21/rmarkdown-v0-9-5/
-
-# First Title
-
-This is the test report
-
-
-# Test Report
 
 
 
-use this:
+# The following mutations are detected:
 
-http://stackoverflow.com/questions/24726680/conditionally-evaluate-heading-using-knitr-in-rmd-file
-
-also this
-http://mpastell.com/pweave/
-
-
+<table border=1>
+<tr> <th> Gene </th> <th> Description </th>  </tr>
+  <tr> <td> EGFR </td> <td> Homo sapiens epidermal growth factor receptor (EGFR), transcript variant 1, mRNA. </td> </tr>
+   </table>
 
 
+# Clinical Comments:
 
 
+EGFR L858R (c.2573T>G) mutation is detected 
 
-ERBB2 V777_G777insGSP (c.2330_2331insGGGCTCCCC) mutation is detected
-COMMENT: ERRB2 insertions in exon 20 have been reported in approximately 6% of cases of lung adenocarcinoma which are negative for EGFR, KRAS, ALK alterations and these variants are more frequent in patients who were never-smokers. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-EGFR T790M (c.2369C>T) mutation is detected 
-
-COMMENT: The T790M mutation can be detected in more than 50% of EGFR-mutated lung cancers that have developed acquired resistance to erlotinib or gefitinib (1,2). This finding has been associated with secondary resistance to certain EGFR inhibitors.
+COMMENT: The L858R mutation results in an amino acid substitution at position 858 in EGFR, from a leucine (L) to an arginine (R). This mutation occurs within exon 21 and occurs with a frequency of approximately 43% in E​GFR-mutated lung tumors. EGFR exon 21 mutations are strong predictors of efficacy for the EGFR tyrosine kinase inhibitors. The diagnostic sensitivity of the assay is >95%. 
 
 REFERENCES:
-1. Kobayashi S, et al. EGFR mutation and resistance of non-small-cell lung cancer to gefitinib. N Engl J Med. 2005 Feb 24;352(8):786-92. 
-2, Pao W, et al. Acquired resistance of lung adenocarcinomas to gefitinib or erlotinib is associated with a second mutation in the EGFR kinase domain. PLoS Med. 2005 Mar;2(3):e73. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+1. Ladanyi, M. and W. Pao, Lung adenocarcinoma: guiding EGFR-targeted therapy and beyond. Mod Pathol, 2008. 21 Suppl 2: p. S16-22.
+2. Maemondo, M., et al., Gefitinib or chemotherapy for non-small-cell lung cancer with mutated EGFR. N Engl J Med, 2010. 362(25): p. 2380-8.
+3. Sequist, L.V., et al., Molecular predictors of response to epidermal growth factor receptor antagonists in non-small-cell lung cancer. J Clin Oncol, 2007. 25(5): p. 587-95.
 
 
 

@@ -2,10 +2,11 @@
 # python 2.7
 
 # need to get the UCSC Known Canonical Transcripts
-# UCSC transcripts with unique ID's (also available for hg38)
+# UCSC transcripts with unique ID's (also available for hg38) (UCSC_id) from here: 
 # http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/knownCanonical.txt.gz
-# need to match 5th col ID's with RefGene ID's from here:
+# need to match 5th col ID's with RefGene ID's (Ref_id) from here:
 # http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/kgXref.txt.gz
+# # as per this dicussion
 # # https://groups.google.com/a/soe.ucsc.edu/forum/#!topic/genome/_6asF5KciPc
 
 
@@ -13,10 +14,29 @@ import sys
 import os
 import pandas as pd
 
+def get_files(dir_path, ends_with = '', trunc = False):
+    # get the files in the dir that match the end pattern
+    # trunc : return just the file dirname + basename (truncate)
+    file_list = []
+    for subdir, dirs, files in os.walk(dir_path):
+        for file in files:
+            if file.endswith(ends_with):
+                file_path = os.path.join(subdir,file)
+                if (trunc):
+                    file_dir = os.path.basename(os.path.dirname(file_path))
+                    file_base = os.path.basename(file_path)
+                    file_path = os.path.join(file_dir,file_base)
+                file_list.append(file_path)
+    return file_list
+
+# files & places to use
 crossref_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19/kgXref.txt"
 canon_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19/knownCanonical.txt"
 comments_dir = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/report_comments"
 outdir= "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19"
+
+# get the report comment files from the dir
+comment_files = get_files(comments_dir, ends_with = ".md", trunc = True)
 
 # df of the crossrefence ID's
 cross_cols = ['UCSC_id', 'B', 'C', 'D', 'Gene', 'Ref_id', 'G', 'Description', 'I']
@@ -33,14 +53,27 @@ merge_df = pd.merge(canon_df, crossref_df, on = 'UCSC_id', how = 'inner')
 # remove some cols
 cols_to_keep = ['UCSC_id', 'Ref_id', 'Chrom', 'Start', 'Stop', 'Gene', 'Description']
 merge_df = merge_df[merge_df.columns.drop([col for col in merge_df.columns if col not in cols_to_keep])]
-print merge_df
+# print merge_df
 # save file
 # merge_df.to_csv(outdir + "/" + "canonical_transcript_table.tsv", sep='\t', index=False)
 
 # peel off just the transcripts
-canon_refs = merge_df[['Gene','Ref_id']]
+canon_refs = merge_df[['Gene','Ref_id', 'Description']]
 canon_refs = canon_refs.dropna()
 canon_refs.drop_duplicates(inplace = True)
-# canon_refs.to_csv(outdir + "/" + "canonical_transcript_list.tsv", sep='\t', index=False)
+# fix indexes
+canon_refs = canon_refs.reset_index(drop=True)
 
-print canon_refs
+
+# add the Comment file
+# !! THIS IS GOING TO PICK UP PARTIAL MATCHES, CHANGE LATER !!
+canon_refs['Comment'] = ''
+for i in range(0, len(canon_refs)):
+    gene = canon_refs['Gene'][i]
+    canon_refs.loc[i, 'Comment'] = next((comm for comm in comment_files if gene.upper() in os.path.basename(comm.upper())), None)
+
+# save file
+canon_refs.to_csv(outdir + "/" + "canonical_transcr_descr_comment.tsv", sep='\t', index=False)
+
+
+sys.exit()
