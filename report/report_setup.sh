@@ -10,10 +10,11 @@ summary_table="$(readlink -f $2)"
 actionable_genes="$(readlink -f $3)"
 canonical_transcript_file="$(readlink -f $4)"
 report_template="$(readlink -f $5)"
+report_comments="$(readlink -f $6)"
 
 # ~~~~ setup report outdir ~~~~~~ #
 run_name="$(basename $(dirname ${summary_table}) )"
-outdir="${outdir}/"
+outdir="${outdir}/${run_name}"
 
 mkdir -p "$outdir"
 
@@ -22,4 +23,5 @@ cd "$outdir"
 ln -fs $summary_table
 ln -fs $actionable_genes
 ln -fs $canonical_transcript_file
+ln -fs $report_comments
 cp $report_template "${run_name}_report.Rmd" 
