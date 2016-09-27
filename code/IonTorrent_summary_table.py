@@ -16,6 +16,8 @@ import csv
 import collections
 import pickle
 import argparse
+import zipfile
+import gzip
 
     
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
@@ -222,17 +224,47 @@ def shell_gunzip(file):
     # gunzip a file with the shell command
     subprocess_cmd('file="{}"; [ ! -f "${{file%%.gz}}" ] && gunzip {}'.format(file,file))
 
+def py_unzip(zip_file, outdir = "."):
+    zip_ref = zipfile.ZipFile(zip_file, 'r')
+    zip_ref.extractall(outdir)
+    zip_ref.close()
+
+def py_gunzip(gz_file, outdir = "."):
+    # extract a .gz file
+    # read in the contents
+    print gz_file
+    print outdir
+    print "Reading file:\t" + gz_file
+    input_file = gzip.GzipFile(gz_file, 'rb')
+    file_contents = input_file.read()
+    input_file.close()
+    print "Finished reading file"
+    # get the output path from the outdir and filename
+    output_file_base = os.path.basename(os.path.splitext(gz_file)[0])
+    print output_file_base
+    output_file_path = os.path.join(outdir, output_file_base)
+    print output_file_path
+    # write the contents
+    print "Writing contents to file:\t" + output_file_path
+    print type(output_file_path)
+    # output_file = file(output_file_path, 'wb')
+    output_file = open(output_file_path, 'wb')
+    output_file.write(file_contents)
+    output_file.close()
+
 def pipeline_unzip(input_file, outdir):
     # unzip the input files
-    if input_file.endswith('.zip'): shell_unzip(input_file,outdir = outdir)
+    if input_file.endswith('.zip'): 
+        # shell_unzip(input_file,outdir = outdir)
+        py_unzip(input_file,outdir = outdir)
     # find and unzip the .gz files extracted
     for subdir, dirs, files in os.walk(outdir):
         for file in files:
             if file.endswith('.gz'):
-                # print os.path.join(subdir,file)
-                shell_gunzip(os.path.join(subdir,file))
+                py_gunzip(os.path.join(subdir,file), outdir = outdir)
+                # shell_gunzip(os.path.join(subdir,file))
 
-def pipeline_find_annotate_samples(input_dir):
+def pipeline_find_annotate_samples(input_dir, output_dir):
     divider = '\n---------------------------------------------------\n'
     # ~~~~ ANNOTATION PIPELINE ~~~~~~ #
     # make dict of dict's to hold all the sample datas
@@ -253,8 +285,10 @@ def pipeline_find_annotate_samples(input_dir):
                 samples_dict[barcode]['barcode'] = barcode
                 #
                 # set a sample outdir
-                output_dir = mkdir_p(input_dir + '/' + barcode, return_path=True)
-                print 'Outdir is:\t', output_dir
+                # sample_output_dir = os.path.join(input_dir, barcode)
+                sample_output_dir = os.path.join(output_dir, barcode)
+                mkdir_p(sample_output_dir)
+                print 'Outdir is:\t', sample_output_dir
                 #
                 # ~~~~ FILTER VCF QUALITY ~~~~~~ #
                 # raw VCF file path
@@ -271,9 +305,9 @@ def pipeline_find_annotate_samples(input_dir):
                 # ~~~~ ANNOTATE VCF FILES ~~~~~~ #
                 # convert filtered VCF to AVINPUT
                 print 'Converting to ANNOVAR format'
-                avinput = os.path.dirname(raw_vcf_path) + '/' + os.path.basename(raw_vcf_path).replace('.vcf', '.avinput')
+                avinput = os.path.join(os.path.dirname(raw_vcf_path), os.path.basename(raw_vcf_path).replace('.vcf', '.avinput'))
                 # ANNOVAR output file path
-                annovar_output = output_dir + '/' + os.path.basename(raw_vcf_path).replace('.vcf', '')
+                annovar_output = os.path.join(sample_output_dir, os.path.basename(raw_vcf_path).replace('.vcf', ''))
                 print 'ANNOVAR input is:\n', avinput
                 print 'ANNOVAR output is:\n', annovar_output
                 # convert the file to ANNOVAR format
@@ -302,6 +336,7 @@ def pipeline_find_annotate_samples(input_dir):
                 barcode = barcode.group(1)
                 print 'Barcode is:\t', barcode
                 samples_dict[barcode]['barcode'] = barcode
+                #
                 # ~~~~ PROCESS XLS FILE ~~~~~~ #
                 # raw XLS file path
                 raw_xls_path = (os.path.join(subdir,file))
@@ -360,9 +395,9 @@ def pipeline_filter_merge_sampledata(samples_dict, summary_cols, outdir):
         av_df = samples_dict[sample]['raw_annovar_dataframe']
         xls_df = samples_dict[sample]['raw_xls_dataframe']
         # save copies of the originals..
-        output_dir = outdir + '/' + samples_dict[sample]['barcode']
-        xls_df.to_csv(output_dir + "/" + sample + "_xls_table_raw.tsv", sep='\t', index=False)
-        av_df.to_csv(output_dir + "/" + sample + "_av_table_raw.tsv", sep='\t', index=False)
+        output_dir = os.path.join(outdir, samples_dict[sample]['barcode'])
+        xls_df.to_csv(os.path.join(output_dir, sample + "_xls_table_raw.tsv"), sep='\t', index=False)
+        av_df.to_csv(os.path.join(output_dir, sample + "_av_table_raw.tsv"), sep='\t', index=False)
         #
         # ~~~~ MERGE AV AND XLS DATAFRAMES ~~~~~~ #
         # rename some colnames for the merge
@@ -395,9 +430,9 @@ def pipeline_filter_merge_sampledata(samples_dict, summary_cols, outdir):
         samples_dict[sample]['merged_dataframe'] = merge_df
         #
         # ~~~~ SAVE TABLES TO FILES ~~~~~~ #
-        merge_df.to_csv(output_dir + "/" + sample + "_merge_table.tsv", sep='\t', index=False)
-        xls_df.to_csv(output_dir + "/" + sample + "_xls_table.tsv", sep='\t', index=False)
-        av_df.to_csv(output_dir + "/" + sample + "_av_table.tsv", sep='\t', index=False)
+        merge_df.to_csv(os.path.join(output_dir, sample + "_merge_table.tsv"), sep='\t', index=False)
+        xls_df.to_csv(os.path.join(output_dir, sample + "_xls_table.tsv"), sep='\t', index=False)
+        av_df.to_csv(os.path.join(output_dir, sample + "_av_table.tsv"), sep='\t', index=False)
     return samples_dict
 
 def pipeline_concat_sampledata(samples_dict):
@@ -454,7 +489,7 @@ parser.add_argument("-id", dest = 'run_id', metavar = 'run ID', help="Run ID val
 args = parser.parse_args()
 
 outdir = args.output
-input_files = args.input_files
+input_files = args.input_files # vcf.zip and xls.zip IonTorrent run files
 build_version = args.build_version
 data_dir = args.data_dir
 panel_genes = list_file_lines(args.panel_genes_file)
@@ -467,7 +502,7 @@ summary_cols = list_file_lines(args.summary_fields_file)
 # create a dict of dicts to hold information on the input files
 run_dict = collections.defaultdict(dict)
 
-# process and load each input file
+# process and load each input file; vcf.zip and xls.zip IonTorrent run files
 for file in input_files:
     print 'file is:\t', file
     # get run ID from filename
@@ -477,13 +512,27 @@ for file in input_files:
         run_ID = args.run_id
     print 'run ID is:\t', run_ID
     # add entries to the dict
+    # the input vcf.zip and xls.zip parent directory
     run_dict[run_ID]['input_dir'] = os.path.dirname(file)
-    outdir_path = args.output + '/' + run_ID
+    #
+    # the dir to hold data for this run
+    run_dir_path = os.path.join(args.output, run_ID)
+    run_dict[run_ID]['run_dir'] = mkdir_p(path= run_dir_path, return_path=True)
+    # 
+    # the dir to hold data output # THIS IS BEING DEPRECATED TO RUN DIR
+    outdir_path = os.path.join(args.output, run_ID)
     run_dict[run_ID]['output_dir'] = mkdir_p(path= outdir_path, return_path=True)
-    # unzip the input file
-    pipeline_unzip(file, outdir_path)
+    #
+    # dir to hold the unzipped raw data
+    raw_data_dir = os.path.join(run_dir_path, "raw_data")
+    run_dict[run_ID]['raw_data_dir'] = mkdir_p(path= raw_data_dir, return_path=True)
+    #
+    # unzip the input vcf.zip and xls.zip file
+    # pipeline_unzip(file, outdir_path)
+    pipeline_unzip(file, raw_data_dir)
+    # 
     # find samples among the unzipped output
-    run_dict[run_ID]['samples'] = pipeline_find_annotate_samples(outdir_path)
+    run_dict[run_ID]['samples'] = pipeline_find_annotate_samples(raw_data_dir, run_dir_path) # input_dir, output_dir
 
 
 # filter and merge the loaded data
@@ -493,15 +542,17 @@ for value in run_dict.iterkeys():
     print 'Run samples are:\n', run_dict[run_ID]['samples'].keys()
     # process the data for each sample; filter & merge the XLS with the ANNOVAR data
     run_dict[run_ID]['samples'] = pipeline_filter_merge_sampledata(samples_dict = run_dict[run_ID]['samples'],
-        summary_cols = summary_cols, outdir = run_dict[run_ID]['output_dir'])
+        summary_cols = summary_cols, 
+        outdir = run_dict[run_ID]['run_dir'])
     # create a summary table for all samples
     run_dict[run_ID]['merged_summary'] = pipeline_concat_sampledata(run_dict[run_ID]['samples'])
     # filter the summary table for desired entries
     run_dict[run_ID]['filtered_summary'] = pipeline_filter_summarytable(run_dict[run_ID]['merged_summary'], table_gene_colname = 'Gene ID', summary_cols=summary_cols, 
-        panel_genes = panel_genes, actionable_genes = actionable_genes)
+        panel_genes = panel_genes, 
+        actionable_genes = actionable_genes)
     # save files
-    summary_outpath = run_dict[run_ID]['output_dir'] + "/summary_table.tsv"
+    summary_outpath = os.path.join(run_dict[run_ID]['run_dir'], "summary_table.tsv")
     run_dict[run_ID]['filtered_summary'].to_csv(summary_outpath, sep='\t', index=False)
     print "\nFinal summary file:\n", summary_outpath
-    save_pydata(run_dict, run_dict[run_ID]['output_dir'] + '/run_data.py.pickle')
+    save_pydata(run_dict, os.path.join(run_dict[run_ID]['run_dir'], "run_data.py.pickle"))
 

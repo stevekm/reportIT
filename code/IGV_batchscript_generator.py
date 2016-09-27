@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # python 2.7
 
+# USAGE: $ code/IGV_batchscript_generator.py output/<run_dir>
 
 # this script will load an IonTorrent summary table
 # parse out the variants to create snapshots of
