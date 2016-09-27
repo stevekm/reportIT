@@ -12,3 +12,5 @@ venv
 *.pdf
 *.rtf
 *.html
+report/R_20*
+runs.txt
