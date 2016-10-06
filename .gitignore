@@ -14,3 +14,4 @@ venv
 *.html
 report/R_20*
 runs.txt
+report/R*
