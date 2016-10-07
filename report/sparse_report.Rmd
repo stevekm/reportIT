@@ -2,36 +2,35 @@
 title: "NYU Langone NGS-Tumor 50 Next Generation Sequencing Panel"
 author: "Stephen Kelly"
 date: "9/6/2016"
-output:
-  html_document:
-    keep_md: yes
-    # toc: yes
-    # toc_float: yes
-  rtf_document:
-    keep_md: yes
+output: html_document
+params:
+  summary_table_file: summary_table.tsv
+  act_gene_file: gene_file.txt
+  canonical_transcript_file: canon_file.txt
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 
 ```{r, echo = FALSE, include = FALSE}
 library("xtable")
-# get the items for the report
 
-# summary_table_file <- "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_output/R_2015_08_20_10_54_39_user_SN2-76-IT15-060-2/summary_table.tsv"
-summary_table_file <- "./summary_table.tsv"
+# get the items for the report
+summary_table_file <- params$summary_table_file
 
 # load summary report table
 summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
 gene_colname <- "Gene_ID"
 
 # load the list of actioanble genes
-# act_gene_file <- "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/actionable_genes.txt"
-act_gene_file <- "./actionable_genes.txt"
+act_gene_file <- params$act_gene_file
 act_genes <- scan(act_gene_file, what="", sep="\n")
 
 act_genes[which(act_genes %in% summary_df[[gene_colname]])]
 
-
-# canonical_transcript_file <- "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19/canonical_transcr_descr_comment_demo.tsv"
-canonical_transcript_file <- "./canonical_transcr_descr_comment_demo.tsv"
+canonical_transcript_file <- params$canonical_transcript_file
 canon_transcr_df <- read.delim(canonical_transcript_file, header = TRUE, sep = '\t')
 
 
@@ -58,5 +57,4 @@ print(xtable(report_descr[c('Gene','Description')]),type='html', comment=FALSE, 
 
 ```{r, child = child_doc}
 ```
-
 
