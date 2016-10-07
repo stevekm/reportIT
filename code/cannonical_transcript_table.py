@@ -30,10 +30,12 @@ def get_files(dir_path, ends_with = '', trunc = False):
     return file_list
 
 # files & places to use
-crossref_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19/kgXref.txt"
-canon_file = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19/knownCanonical.txt"
-comments_dir = "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/report_comments"
-outdir= "/ifs/home/kellys04/projects/clinical_genomic_reporting/reporter_data/hg19"
+proj_dir = "/ifs/home/kellys04/projects/clinical_genomic_reporting/variant_reporter"
+
+crossref_file = os.path.join(proj_dir, "data/hg19/kgXref.txt")
+canon_file = os.path.join(proj_dir, "data/hg19/knownCanonical.txt")
+comments_dir = os.path.join(proj_dir, "data/report_comments")
+outdir= os.path.join(proj_dir, "data/hg19")
 
 # get the report comment files from the dir
 comment_files = get_files(comments_dir, ends_with = ".md", trunc = True)
@@ -65,15 +67,17 @@ canon_refs.drop_duplicates(inplace = True)
 canon_refs = canon_refs.reset_index(drop=True)
 
 
-# add the Comment file
-# !! THIS IS GOING TO PICK UP PARTIAL MATCHES, CHANGE LATER !!
+# add the Comment file path
+# !! THIS MATCHES ONLY THE FIRST COMMENT FILE WITH THE GENE NAME; DOES NOT DISTINGUISH WHICH MUTATION
 canon_refs['Comment'] = ''
 for i in range(0, len(canon_refs)):
+    # get Gene ID
     gene = canon_refs['Gene'][i]
-    canon_refs.loc[i, 'Comment'] = next((comm for comm in comment_files if gene.upper() in os.path.basename(comm.upper())), None)
+    # match the Gene ID against the Gene ID in the comment file filename, ex: EGFR-G719A.md
+    canon_refs.loc[i, 'Comment'] = next((comm for comm in comment_files if gene.upper() == os.path.splitext(os.path.basename(comm.upper()))[0].split('-')[0] ), None)
 
 # save file
-canon_refs.to_csv(outdir + "/" + "canonical_transcr_descr_comment.tsv", sep='\t', index=False)
+canon_refs.to_csv(os.path.join(outdir, "canonical_transcr_descr_comment.tsv"), sep='\t', index=False)
 
 
 sys.exit()
