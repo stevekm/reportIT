@@ -4,7 +4,7 @@ This program will annotate, aggregate, and summarize clinical variant informatio
 
 # Overview
 
-Data from an IonTorrent sequencing run (<Run_data>.xls.zip, <Run_data>.vcf.zip) will be extracted and parsed to create a summary table highlightling desired information on detected genomic variants which have been deemed significant based on sequencing quality and attributes, and known attributes of the established variants. 
+Data from an IonTorrent sequencing run (`<Run_data>.xls.zip`, `<Run_data>.vcf.zip`) will be extracted and parsed to create a summary table highlightling desired information on detected genomic variants which have been deemed significant based on sequencing quality and attributes, and known attributes of the established variants. 
 
 A sparse plain text report will then be created to summarize this information, including clinical comments describing the known significance of the variants drawn from scientific literature. 
 
