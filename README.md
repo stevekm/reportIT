@@ -25,6 +25,9 @@ $ code/move_bams.sh output/R_2016_07_28_15_04_57_user_ABV-999-GH360-974 output/t
 # code/IGV_batchscript_generator.py <output_run_directory>
 $ code/IGV_batchscript_generator.py output/R_2016_07_28_15_04_57_user_ABV-999-GH360-974
 
+# generate a sparse plain text report
+$ code/compile_sparse_report.R output/<run_dir>/summary_table.tsv report/sparse_report.Rmd data/actionable_genes.txt data/hg19/canonical_transcr_descr_comment.tsv
+
 ```
 
 
@@ -60,3 +63,28 @@ API Plug-in
 ## Software Requirements
 
     - Python 2.7
+    - pandoc version 1.12.3 or higher
+    - R 3.3.0 or higher
+    - IGV_2.3.81
+    - ANNOVAR version 2015-06-17 21:43:53 -0700 (Wed, 17 Jun 2015)
+
+### Python packages
+
+    - sys
+    - os
+    - errno
+    - pandas
+    - numpy
+    - fnmatch
+    - re
+    - subprocess
+    - csv
+    - collections
+    - pickle
+    - argparse
+    - zipfile
+    - gzip
+
+### R packages
+
+    - rmarkdown

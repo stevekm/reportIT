@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 run_dir="output/"
 compile_script="code/compile_sparse_report.R"
@@ -11,6 +12,6 @@ FILES="$(find ${run_dir} -type f -name "summary_table.tsv")"
 for i in $FILES; do
 echo "$i"
 
-"$compile_script" "$i" "$report_template" "$act_genes" "$canon_transcr"
+"$compile_script" -f "$i"
 
 done
