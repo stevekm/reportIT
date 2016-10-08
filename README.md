@@ -2,6 +2,16 @@
 
 This program will annotate, aggregate, and summarize clinical variant information from the IonTorrent suite
 
+# Overview
+
+Data from an IonTorrent sequencing run (<Run_data>.xls.zip, <Run_data>.vcf.zip) will be extracted and parsed to create a summary table highlightling desired information on detected genomic variants which have been deemed significant based on sequencing quality and attributes, and known attributes of the established variants. 
+
+A sparse plain text report will then be created to summarize this information, including clinical comments describing the known significance of the variants drawn from scientific literature. 
+
+Snapshots of each significant variant will be created by passing the BAM files for each sample and its control to IGV. These snapshots will be used for manual review of the detected variants and quality control measures. 
+
+Variants that passed manual review will be included in downstream processing to create a full report designed for use by clinicians for patient cancer diagnosis and treatment. 
+
 # Usage
 
 Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks. 
@@ -88,3 +98,4 @@ API Plug-in
 ### R packages
 
     - rmarkdown
+    - optparse
