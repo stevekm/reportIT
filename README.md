@@ -26,7 +26,7 @@ $ code/move_bams.sh output/R_2016_07_28_15_04_57_user_ABV-999-GH360-974 output/t
 $ code/IGV_batchscript_generator.py output/R_2016_07_28_15_04_57_user_ABV-999-GH360-974
 
 # generate a sparse plain text report
-$ code/compile_sparse_report.R output/<run_dir>/summary_table.tsv report/sparse_report.Rmd data/actionable_genes.txt data/hg19/canonical_transcr_descr_comment.tsv
+$ code/compile_sparse_report.R -f output/<run_dir>/summary_table.tsv
 
 ```
 
