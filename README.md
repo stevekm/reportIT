@@ -120,11 +120,14 @@ API Plug-in
 
 ## Software Requirements
 
+This program has been developed in a Linux environment running CentOS 6. Some scripts issue system commands which rely on standard GNU Linux utilities.  
+
     - Python 2.7
     - pandoc version 1.12.3 or higher
     - R 3.3.0 or higher
     - IGV_2.3.81
     - ANNOVAR version 2015-06-17 21:43:53 -0700 (Wed, 17 Jun 2015)
+    - GNU bash, version 4.1.2(1)-release (x86_64-redhat-linux-gnu)
 
 ### Python packages
 
