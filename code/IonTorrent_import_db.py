@@ -2,6 +2,11 @@
 # python 2.7
 
 # http://sebastianraschka.com/Articles/2014_sqlite_in_python_tutorial.html
+# http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html
+# https://docs.python.org/2/library/sqlite3.html
+# http://sebastianraschka.com/Articles/2013_sqlite_database.html#results-and-conclusions
+# http://www.datacarpentry.org/python-ecology-lesson/08-working-with-sql
+# http://stackoverflow.com/questions/14431646/how-to-write-pandas-dataframe-to-sqlite-with-index
 
 import sqlite3
 
