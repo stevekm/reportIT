@@ -78,7 +78,7 @@ def find_sample_bam(samplename, sampledir):
     if check_file_list(res) and file_exists(res[0]):
         return res[0]
 
-def write_IGV_script(IGV_batch_file, IGV_snapshot_dir, bam_file, build_version, image_height, locations):
+def write_IGV_script(IGV_batch_file, IGV_snapshot_dir, bam_file, build_version, image_height, locations, Control_bam_file = False):
     # generate an IGV script for batch processing
     # IGV_batch_file : file the script will be written to
     # IGV_snapshot_dir : dir to hold the snapshots that will be created
@@ -89,6 +89,8 @@ def write_IGV_script(IGV_batch_file, IGV_snapshot_dir, bam_file, build_version, 
     initialize_file("new", IGV_batch_file)
     append_string("snapshotDirectory " + IGV_snapshot_dir, IGV_batch_file)
     append_string("load " + bam_file, IGV_batch_file) 
+    if Control_bam_file:
+        append_string("load " + Control_bam_file, IGV_batch_file)
     append_string("genome " + build_version, IGV_batch_file)
     append_string("maxPanelHeight " + image_height, IGV_batch_file)
     for location in locations: 
@@ -101,13 +103,30 @@ def run_IGV_script(igv_script, igv_jar = "bin/IGV_2.3.81/igv.jar", memMB = "750"
     # run the IGV script
     subprocess_cmd("(Xvfb :10 &) && DISPLAY=:10 java -Xmx{}m -jar {} -b {} && killall Xvfb".format(memMB, igv_jar, igv_script))
 
+def get_NC_barcode(run_xls_table):
+    NC_barcode = run_xls_table.loc[run_xls_table['Sample Name'] == 'NC']['Barcode'].unique()[0]
+    return NC_barcode
+
 # ~~~~ GET SCRIPT ARGS ~~~~~~ #
 
 run_dir = sys.argv[1]
 
 summary_table_file = os.path.join(run_dir, "summary_table.tsv")
 build_version = "hg19"
-image_height = "2000"
+image_height = "500" 
+# 400 = 25 rows
+
+
+# get the run XLS table to find the barcode of the NC sample
+run_xls_file = os.path.join(run_dir, os.path.basename(os.path.dirname(run_dir)) + ".xls")
+# get the NC control sample name
+run_xls_table = pd.read_table(run_xls_file)
+NC_barcode = get_NC_barcode(run_xls_table)
+NC_barcode_dir = os.path.join(run_dir, NC_barcode)
+NC_bam = find_sample_bam(NC_barcode, NC_barcode_dir)
+print NC_barcode
+
+# sys.exit()
 
 
 # ~~~~ RUN PIPELINE ~~~~~~ #
@@ -141,7 +160,14 @@ for run_name in summary_df['Run_Name'].unique():
         # make a list of the unique entries to be printed
         locations = subset_df[['Chrom','Position', 'Position']].apply(lambda x : '{}:{}-{}'.format(x[0],x[1], x[2]), axis=1).unique()
         # start the IGV script
-        write_IGV_script(IGV_batch_file, IGV_snapshot_dir, bam_file, build_version, image_height, locations)
+        write_IGV_script(IGV_batch_file = IGV_batch_file, 
+            IGV_snapshot_dir = IGV_snapshot_dir, 
+            bam_file = bam_file, 
+            build_version = build_version, 
+            image_height = image_height, 
+            locations = locations, 
+            Control_bam_file = NC_bam)
+        # write_IGV_script(IGV_batch_file, IGV_snapshot_dir, bam_file, Control_bam_file = NC_bam, build_version, image_height, locations)
         run_IGV_script(IGV_batch_file)
 
 
