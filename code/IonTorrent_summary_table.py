@@ -7,8 +7,8 @@
 import sys
 import os
 import errno
-import pandas as pd
-import numpy as np
+import pandas as pd # pandas==0.17.1
+import numpy as np # numpy==1.11.0
 import fnmatch
 import re
 import subprocess as sp
