@@ -17,6 +17,7 @@ server_info="$(head -1 $server_info_file)"
 if [[ -z "$server_info" ]]; then echo "No info read from file, exiting"; exit; fi
 
 # get the latest runs
+echo "PLEASE LOG INTO SERVER TO GET RUN ANALYSIS LIST"
 ssh $server_info << EOF
     ls -1tr /results/analysis/output/Home | tail -10
 EOF

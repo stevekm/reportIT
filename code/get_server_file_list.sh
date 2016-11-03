@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## USAGE: get_server_run_files.sh /path/to/server_info_file.txt <run ID> /path/to/outdir
+## USAGE: get_server_run_files.sh /path/to/server_info_file.txt <analysis ID> /path/to/outdir
 
 ## DESCRIPTION: This script will generate a list of files needed for the pipeline
 ## based on the supplied IonTorrent run ID 
@@ -10,18 +10,18 @@
 # username@server
 
 server_info_file="$1"
-run_ID="$2"
+analysis_ID="$2"
 outdir="$3"
 
 if [[ -z "$outdir" ]]; then 
 echo "No outdir supplied" 
-echo 'USAGE: get_server_run_files.sh /path/to/server_info_file.txt <run ID> /path/to/outdir'
+echo 'USAGE: get_server_run_files.sh /path/to/server_info_file.txt <analysis ID> /path/to/outdir'
 echo 'Exiting'
 exit
 else 
 mkdir -p "${outdir}"
-run_manifest_file="${outdir}/${run_ID}_run_manifest.txt"
-run_files_file="${outdir}/${run_ID}_run_files.txt"
+analysis_manifest_file="${outdir}/${analysis_ID}_analysis_manifest.txt"
+analysis_files_file="${outdir}/${analysis_ID}_analysis_files.txt"
 fi
 
 # get info from the file
@@ -37,23 +37,28 @@ if [[ -z "$server_info" ]]; then echo "No info read from file, exiting"; exit; f
 # log into the server and find the files
 # write out all the files and information needed 
 echo "PLEASE LOG INTO SERVER TO GET RUN FILE LIST"
-ssh $server_info > "$run_manifest_file" << EOF
-    echo "# Run ID: $run_ID"
+ssh $server_info > "$analysis_manifest_file" << EOF
+    echo "# Analysis ID: $analysis_ID"
     #
     # parent dir for the run
-    run_dir="\$(find /results/analysis/output/Home/ -mindepth 1 -maxdepth 1 -type d -name "$run_ID")"
-    echo "# Run dir: \$run_dir"
+    analysis_dir="\$(find /results/analysis/output/Home/ -mindepth 1 -maxdepth 1 -type d -name "$analysis_ID")"
+    echo "# Analysis dir: \$analysis_dir"
     #
     # dir for XLS and VCF
-    variant_dir="\$(find \$run_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*variantCaller_out*")"
+    variant_dir="\$(find \$analysis_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*variantCaller_out*")"
     echo "# Variants dir: \$variant_dir"
     #
     # dir for BAMs and BAIs
-    coverage_dir="\$(find \$run_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*coverageAnalysis_out*")"
+    coverage_dir="\$(find \$analysis_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*coverageAnalysis_out*")"
     echo "# Coverage dir: \$coverage_dir"
     #
     run_xls="\$(find \$variant_dir -maxdepth 1 -name "*.xls" ! -name "*.cov.xls" | sed -n 's|^/results/analysis/output/Home/||p')"
     echo -e "# Run XLS:\n\$run_xls"
+    #
+    # run XLS name = run ID
+    run_ID="\$(basename \$run_xls)"
+    run_ID="\${run_ID%%.xls}"
+    echo "# Run ID: \$run_ID"
     #
     sample_dirs="\$(find \$variant_dir -type d -name "*IonXpress_*")"
     # echo "# Sample dirs: \$sample_dirs"
@@ -73,11 +78,17 @@ ssh $server_info > "$run_manifest_file" << EOF
     #
 EOF
 
-echo -e "Run manifest written to:\n$run_manifest_file"
+echo -e "\nRun manifest written to:\n$analysis_manifest_file\n"
 
 # # make files list for rsync
-grep -Ev '^#' "$run_manifest_file" > "$run_files_file" && echo -e "Run files written to:\n$run_files_file"
+grep -Ev '^#' "$analysis_manifest_file" > "$analysis_files_file" && echo -e "Run files written to:\n$analysis_files_file\n"
 
-# copy the files
-echo "PLEASE LOG INTO SERVER TO GET COPY RUN FILES"
-rsync --dry-run -vzheR --copy-links --progress -e "ssh" --files-from="$run_files_file" ${server_info}:/results/analysis/output/Home/ "${outdir}"
+
+
+
+echo -e "Analysis ID:\n$(cat $analysis_manifest_file | grep 'Analysis ID' | cut -d ':' -f2 | cut -d ' ' -f2)\n"
+echo -e "Run ID:\n$(cat $analysis_manifest_file | grep 'Run ID' | cut -d ':' -f2 | cut -d ' ' -f2)\n"
+
+
+
+
