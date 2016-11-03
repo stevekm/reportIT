@@ -79,9 +79,9 @@ xls_df = xls_dict.itervalues().next()
 # peel off the citation colums
 cite_df = xls_df.iloc[:, 6:]
 # get rid of NaN's
-cite_df.fillna('',inplace=True)
+cite_df.fillna('',inplace = True)
 # concatenate all row entries with newlines
-cite_df = cite_df.apply(lambda row: u"\n".join(map(unicode, row)), axis=1)
+cite_df = cite_df.apply(lambda row: u"\n".join(map(unicode, row)), axis = 1)
 # print cite_df
 
 
@@ -92,10 +92,10 @@ cite_df = cite_df.map(lambda x: x.rstrip())
 
 
 # merge the two back together
-final_df = pd.concat([xls_df.iloc[:,0:6].reset_index(drop=True), cite_df], axis=1)
+final_df = pd.concat([xls_df.iloc[:,0:6].reset_index(drop = True), cite_df], axis = 1)
 
 # rename the column
-final_df.rename(columns={0 : 'Citation'},inplace=True)
+final_df.rename(columns = {0 : 'Citation'}, inplace = True)
 # print final_df.head()
 
 # need UTF-16 encoding !! 
