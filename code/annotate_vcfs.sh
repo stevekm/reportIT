@@ -1,23 +1,23 @@
 #!/bin/bash
-set -x
+# set -x
 
+## USAGE: annotate_vcfs.sh output/run_dir
 
+## Description: This script will find all VCF files in your Run dir and annotate them with ANNOVAR
 
  
 # ~~~~~~ script args ~~~~~~ #
 input_dir="$1"
 
+# ANNOVAR version: 
+# Version: $Date: 2015-06-17 21:43:53 -0700 (Wed, 17 Jun 2015) $
 build_version="hg19"
 annovar_db_dir="$(readlink -f "bin/annovar/db")"
 convert2annovar_bin="$(readlink -f "bin/annovar/convert2annovar.pl")"
 table_annovar_bin="$(readlink -f "bin/annovar/table_annovar.pl")"
-# Version: $Date: 2015-06-17 21:43:53 -0700 (Wed, 17 Jun 2015) $
 annovar_protocol="-protocol refGene,cosmic68,clinvar_20150629,1000g2015aug_all -operation g,f,f,f"
 # ~~~~~~~~~~~~ # 
 
-echo "$input_dir"
-pwd
-echo $0
 
 # find VCF files
 vcf_files="$(find "$input_dir" -type f -name "*.vcf")"
@@ -49,12 +49,9 @@ avoutput_file="${avinput_file%%.avinput}"
         echo "Exiting.."
         exit
     fi
-) & 
+) # & 
 done
 
-
-# $convert2annovar_bin
-# $table_annovar_bin
 
 
 
