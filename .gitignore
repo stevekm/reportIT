@@ -15,3 +15,7 @@ venv
 report/R_20*
 runs.txt
 report/R*
+code/IonTorrent_import_db-test.py
+my_db.db
+code/data
+my_first_db.sqlite

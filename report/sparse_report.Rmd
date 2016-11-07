@@ -2,7 +2,9 @@
 title: "NYU Langone NGS-Tumor 50 Next Generation Sequencing Panel"
 author: "Stephen Kelly"
 date: "9/6/2016"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 params:
   summary_table_file: summary_table.tsv
   act_gene_file: gene_file.txt
