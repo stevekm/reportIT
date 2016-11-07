@@ -19,20 +19,21 @@ library("xtable")
 
 # get the items for the report
 summary_table_file <- params$summary_table_file
-
-# load summary report table
-summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
-gene_colname <- "Gene_ID"
-
-# load the list of actioanble genes
 act_gene_file <- params$act_gene_file
+canonical_transcript_file <- params$canonical_transcript_file
+
+# load report tables
+summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
+canon_transcr_df <- read.delim(canonical_transcript_file, header = TRUE, sep = '\t')
 act_genes <- scan(act_gene_file, what="", sep="\n")
 
+# save current session
+save.image(file="report_import.Rdata",compress = TRUE)
+
+
+# filter the genes
+gene_colname <- "Gene_ID"
 act_genes[which(act_genes %in% summary_df[[gene_colname]])]
-
-canonical_transcript_file <- params$canonical_transcript_file
-canon_transcr_df <- read.delim(canonical_transcript_file, header = TRUE, sep = '\t')
-
 
 # get Known Significance actionable genes from summary table
 known_gene_matches <- as.character(summary_df[which(act_genes %in% summary_df[[gene_colname]]),gene_colname])
