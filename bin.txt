@@ -1,0 +1,17 @@
+.
+|-- IGV_2.3.81
+|   |-- batik-codec__V1.7.jar
+|   |-- goby-io-igv__V1.0.jar
+|   |-- igv.bat
+|   |-- igv.command
+|   |-- igv.jar
+|   |-- igv.sh
+|   `-- readme.txt
+|-- IGV_2.3.81.zip
+|-- annovar -> /ifs/home/kellys04/software/annovar
+|-- bcftools -> /ifs/home/kellys04/software/bcftools-1.3.1/bcftools
+|-- samtools -> /ifs/home/kellys04/software/samtools-1.3.1/samtools
+|-- tabix -> /ifs/home/kellys04/software/htslib-1.3.1/tabix
+`-- vcf2tsv -> /ifs/home/kellys04/software/vcflib/bin/vcf2tsv
+
+2 directories, 12 files
