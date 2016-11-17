@@ -69,7 +69,7 @@ query_output_file="${file_dir}/${barcode_ID}_query.tsv"
     if [ -f $vcf_input ]; then 
         echo -e "Running bcftools on:\n${i}\nOutputting to:\n${query_output_file}\n"
         echo -e 'You can probably ignore "contig is not defined in the header" messages...'
-        echo -e "Chrom\tPosition\tRef\tVariant\tQuality\tAllele Frequency\tCoverage\tAllele Coverage\tStrand Bias" > "$query_output_file"
+        echo -e "Chrom\tPosition\tRef\tVariant\tQuality\tFrequency\tCoverage\tAllele Coverage\tStrand Bias" > "$query_output_file"
         $bcftools_bin query -f '%CHROM\t%POS\t%REF\t%ALT\t%QUAL\t%AF\t%FDP\t%FAO\t%STB\n' "$vcf_input" >> "$query_output_file"
         # sanity tests
         [ ! -f $query_output_file ] && echo -e "ERROR: File not created properly:\n${query_output_file}\nExiting.." && exit
