@@ -38,6 +38,41 @@ $ code/compile_sparse_report.R -f output/<run_dir>/summary_table.tsv
 
 ```
 
+
+
+```bash
+# 'Auto_user_SNX-XXX-XXXX-XXX' = example analysis ID
+# 'R_2016_09_01_XX_XX_XX_XX-ITXX' = example run ID
+
+
+# get list of recent analysis runs
+code/get_server_run_list.sh data/server_info.txt
+
+
+# pick one from the list and get its file list
+code/get_server_file_list.sh data/server_info.txt Auto_user_SNX-XXX-XXXX-XXX /path/to/output_dir
+# this generates:
+# /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_manifest.txt : verbose description of files
+# /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_files.txt : simple file list
+
+
+# download the files in the list to a dir named with the run ID
+code/download_server_files.sh data/server_info.txt /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_files.txt /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
+
+
+# annotate all the VCFs, and make TSV files we need for the summary tables
+code/annotate_vcfs.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
+
+
+# get a list of sample IDs, barcodes, and run ID, needed to map between Barcode & SampleID in the pipeline
+code/get_run_IDs.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
+
+
+# make the summary tables for all the samples
+code/merge_vcf_annotations_wrapper.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
+```
+
+
 Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks. The current directory structure is:
 
 ```
