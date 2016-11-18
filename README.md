@@ -16,30 +16,6 @@ Variants that passed manual review will be included in downstream processing to 
 
 Program usage will change as development progresses. Current usage is:
 
-```
-# change to the program's directory
-$ cd ion_variant_reporter
-
-# make summary table from IonTorrent Suite data
-# code/IonTorrent_summary_table.py -o <output_parent_directory> <IonTorrent_data.vcf.zip> <IonTorrent_data.xls.zip>
-$ code/IonTorrent_summary_table.py -o output input/R_2016_07_28_15_04_57_user_ABV-999-GH360-974.*
-
-# copy the previously downloaded IonTorrent run bams from some dir 
-# into the correct subdirs for the run that was just processed
-# code/move_bams.sh <output_run_directory> <dir_containing_run_bams>
-$ code/move_bams.sh output/R_2016_07_28_15_04_57_user_ABV-999-GH360-974 output/tmp_bams
-
-# generate IGV screenshots for the run bams just copied
-# code/IGV_batchscript_generator.py <output_run_directory>
-$ code/IGV_batchscript_generator.py output/R_2016_07_28_15_04_57_user_ABV-999-GH360-974
-
-# generate a sparse plain text report
-$ code/compile_sparse_report.R -f output/<run_dir>/summary_table.tsv
-
-```
-
-
-
 ```bash
 # 'Auto_user_SNX-XXX-XXXX-XXX' = example analysis ID
 # 'R_2016_09_01_XX_XX_XX_XX-ITXX' = example run ID
