@@ -13,7 +13,7 @@ input_dir="$1"
 
 # ~~~~~~ parameters ~~~~~~ #
 # list of canonical transcripts to use; one per line
-transcr_file="data/hg19/canonical_transcript_list.tsv"
+transcr_file="ref/hg19/canonical_transcript_list.txt"
 
 # genes in the panel
 panel_genes_file="data/panel_genes.txt"
