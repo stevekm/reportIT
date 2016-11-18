@@ -1,0 +1,2 @@
+wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/kgXref.txt.gz
+wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/knownCanonical.txt.gz
