@@ -3,23 +3,16 @@
 
 
 """
+USAGE: merge_vcf_annotations.py run_barcodes_file.txt vcf_query_file.tsv annovar_annotations_file.txt transcript_list.txt panel_genes.txt actionable_genes.txt
+
+DESCRIPTION:
+0. Get Sample ID's and Barcode ID's from the sample_barcode_IDs.tsv file previously created by the pipeline
 1. Get VCF Query and Annotation files (IonXpress_008_query.tsv, IonXpress_008.hg19_multianno.txt), and sample_barcode_IDs.tsv
 2. Merge the VCF and Annotation tables
 3. Split the Annotaton transcript fields into separate rows
 4. Add sample ID, barcode, and run fields
-5. Save full merged table
+5. Save summary, full, and filtered tables
 
-
-code/make_merged_summary_tables.py $outdir $run_xls $FILES
-
-qfile="output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/Auto_user_SN2-192-IT16-039-1_243_275/plugin_out/variantCaller_out.778/IonXpress_001/IonXpress_001_query.tsv"
-afile="output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/Auto_user_SN2-192-IT16-039-1_243_275/plugin_out/variantCaller_out.778/IonXpress_001/IonXpress_001.hg19_multianno.txt"
-bfile="output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/Auto_user_SN2-192-IT16-039-1_243_275/plugin_out/variantCaller_out.778/sample_barcode_IDs.tsv"
-tlist="data/hg19/canonical_transcript_list.tsv"
-pgenes="data/panel_genes.txt"
-agenes="data/actionable_genes.txt"
-
-code/merge_vcf_annotations.py $bfile $qfile $afile $tlist $pgenes $agenes
 """
 
 # ~~~~ LOAD PACKAGES ~~~~~~ #
@@ -57,7 +50,7 @@ def split_df_col2rows(dataframe, split_col, split_char, new_colname, delete_old 
 
 
 def split_df_col2cols(dataframe, split_col, split_char, new_colnames, delete_old = False):
-    # # Splits a column into multiple columns # # import pandas as pd
+    # # Splits a column into multiple columns 
     # dataframe : pandas dataframe to be processed
     # split_col : chr string of the column name to be split
     # split_char : chr to split the col on
@@ -135,6 +128,7 @@ canon_trancr_list = list_file_lines(canon_trancr_file)
 panel_genes = list_file_lines(panel_genes_file)
 actionable_genes = list_file_lines(actionable_genes_file)
 outdir = os.path.dirname(annotation_file)
+
 # Summary Table Fields:
 summary_cols = ["Chrom", "Position", "Ref", "Variant", "Gene", "Quality", "Coverage", "Allele Coverage", "Strand Bias", "Coding", "Amino Acid Change", "Transcript", "Frequency", "Sample Name", "Barcode", "Run Name", "Review"]
 
@@ -144,7 +138,6 @@ summary_cols = ["Chrom", "Position", "Ref", "Variant", "Gene", "Quality", "Cover
 barcodes_df = pd.read_table(barcodes_file,sep='\t',header=0,na_values=['.'])
 query_df = pd.read_table(query_file,sep='\t',header=0,na_values=['.'])
 annotation_df = pd.read_table(annotation_file,sep='\t',header=0,na_values=['.'])
-
 
 
 # ~~~~ GET SAMPLE BARCODE ID ~~~~~~ #
@@ -174,8 +167,6 @@ merge_df = split_df_col2cols(dataframe = merge_df, split_col = 'AAChange', split
 # Quality Allele Frequency    Coverage    Allele Coverage Strand Bias Gene    
 # Transcript  Exon    Coding  Amino Acid Change   Barcode Sample Name Run Name
 
-
-
 # ~~~~ FILTER TABLE ~~~~~~ #
 '''
 merge table: 
@@ -196,7 +187,8 @@ merge_df = merge_df[merge_df['Transcript'].isin(canon_trancr_list)]
 # make sure only canonical transcripts passed the filter
 test_canonical_transcripts(merge_df, canon_trancr_list)
 # make sure that all unique genes are represented after filtering for canonical transcripts
-test_filtered_genes(merge_df, table_genes)
+# test_filtered_genes(merge_df, table_genes)
+# don't do this it doesn't work for variants that had no trainscript..
 
 
 
@@ -207,17 +199,14 @@ merge_df['Run Name'] = run_ID
 
 
 # keep only the panel genes; default Unknown Significance
-# panel_genes
 merge_df = merge_df[merge_df["Gene"].isin(panel_genes)]
 
 
-# actionable_genes
 # add review; Known Signficance, Unknown Significance ; panel genes
 # default is Unknown Signficiance
 merge_df['Review'] = 'US'
 # change actionable genes to Known Signficance
 merge_df.loc[merge_df["Gene"].isin(actionable_genes), 'Review'] = "KS"
-
 # !! need tests for these ^^ 
 
 # make a copy of the complete table before filtering for qualities
@@ -234,15 +223,16 @@ summary_df = merge_df[summary_cols]
 # ~~~~ SAVE TABLES ~~~~~~ #
 summary_file = os.path.join(outdir, barcode_ID + "_summary.tsv")
 summary_df.to_csv(summary_file, sep='\t', index=False)
-print "Summary table saved to:\n" + summary_file + "\n"
+print "Summary table (filtered rows & columns) saved to:\n" + summary_file + "\n"
+
+merge_file = os.path.join(outdir, barcode_ID + "_filtered.tsv")
+merge_df.to_csv(merge_file, sep='\t', index=False)
+print "Filtered table (rows only) saved to:\n" + merge_file + "\n"
 
 full_table_file = os.path.join(outdir, barcode_ID + "_full_table.tsv")
 full_df.to_csv(full_table_file, sep='\t', index=False)
 print "Full table saved to :\n" + full_table_file + "\n"
 
 
-merge_file = os.path.join(outdir, barcode_ID + "_filtered.tsv")
-merge_df.to_csv(merge_file, sep='\t', index=False)
-print "Merged table saved to:\n" + merge_file + "\n"
 
 # sys.exit()

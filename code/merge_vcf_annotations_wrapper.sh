@@ -1,21 +1,12 @@
 #!/bin/bash
-set -x
+# set -x
 
 ## USAGE: merge_vcf_annotations_wrapper.sh output/run_dir
 
 ## Description: This script will find parse an annotated run dir, 
 ## find all files needed to make the merged summary tables, 
 ## and pass them to the merge_vcf_annotations.py script for merging
- 
 
-# qfile="output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/Auto_user_SN2-192-IT16-039-1_243_275/plugin_out/variantCaller_out.778/IonXpress_001/IonXpress_001_query.tsv"
-# afile="output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/Auto_user_SN2-192-IT16-039-1_243_275/plugin_out/variantCaller_out.778/IonXpress_001/IonXpress_001.hg19_multianno.txt"
-# bfile="output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/Auto_user_SN2-192-IT16-039-1_243_275/plugin_out/variantCaller_out.778/sample_barcode_IDs.tsv"
-# tlist="data/hg19/canonical_transcript_list.tsv"
-# pgenes="data/panel_genes.txt"
-# agenes="data/actionable_genes.txt"
-
-# code/merge_vcf_annotations.py $bfile $qfile $afile $tlist $pgenes $agenes
 
 # ~~~~~~ script args ~~~~~~ #
 input_dir="$1"
@@ -54,12 +45,14 @@ sample_dirs="$(find "$input_dir" -type d -path "*variantCaller_out*" -name "IonX
 
 for i in $sample_dirs; do
     samplei="$i"
-    # echo $samplei
+    echo -e "---------------------------------------"
+    echo -e "\nMaking summary tables for:\n$samplei\n"
     query_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*_query.tsv")"
     # echo $query_file
     annot_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*.hg19_multianno.txt")"
     # echo $annot_file
 
     $merge_script "$barcodes_file" "$query_file" "$annot_file" "$transcr_file" "$panel_genes_file" "$actionable_genes_file"
+    echo -e "---------------------------------------"
 done
 
