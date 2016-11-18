@@ -149,8 +149,8 @@ annotation_df = pd.read_table(annotation_file,sep='\t',header=0,na_values=['.'])
 
 # ~~~~ GET SAMPLE BARCODE ID ~~~~~~ #
 barcode_ID = os.path.basename(os.path.dirname(query_file))
-sample_ID = barcodes_df.loc[barcodes_df['Barcode'] == barcode_ID]['Sample Name'][0]
-run_ID = barcodes_df.loc[barcodes_df['Barcode'] == barcode_ID]['Run Name'][0]
+sample_ID = barcodes_df.loc[barcodes_df['Barcode'] == barcode_ID, 'Sample Name'].values[0]
+run_ID = barcodes_df.loc[barcodes_df['Barcode'] == barcode_ID, 'Run Name'].values[0]
 
 
 # ~~~~ PROCESS & MERGE TABLES ~~~~~~ #

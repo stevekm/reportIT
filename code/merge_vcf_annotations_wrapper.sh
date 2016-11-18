@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -x
+set -x
 
 ## USAGE: merge_vcf_annotations_wrapper.sh output/run_dir
 
@@ -59,5 +59,7 @@ for i in $sample_dirs; do
     # echo $query_file
     annot_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*.hg19_multianno.txt")"
     # echo $annot_file
+
+    $merge_script "$barcodes_file" "$query_file" "$annot_file" "$transcr_file" "$panel_genes_file" "$actionable_genes_file"
 done
 
