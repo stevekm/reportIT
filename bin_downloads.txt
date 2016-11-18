@@ -1,0 +1,13 @@
+download bcftools
+http://www.htslib.org/download/
+https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2
+
+download samtools
+https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2
+
+hstlib
+https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2
+
+vcflib for vcf2tsv
+https://github.com/vcflib/vcflib
+
