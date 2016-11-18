@@ -4,13 +4,14 @@ This program will annotate, aggregate, and summarize clinical variant informatio
 
 # Overview
 
-Data from an IonTorrent sequencing run (`<Run_data>.xls.zip`, `<Run_data>.vcf.zip`) will be extracted and parsed to create a summary table highlightling desired information on detected genomic variants which have been deemed significant based on sequencing quality and attributes, and known attributes of the established variants. 
+Data from an IonTorrent sequencing run will be parsed to create a summary report for each sample in the run. Variant data will be downloaded from the IonTorrent server in VCF format for each sample, paired with a tab-separated XLS table of analyzed data (not used but needed for metadata). Coverage data will be downloaded from the server for each sample in BAM format files.
 
-A sparse plain text report will then be created to summarize this information, including clinical comments describing the known significance of the variants drawn from scientific literature. 
+All VCF files will be annotated and processed with ANNOVAR and bcftools, and a summary table will be created based on established lists of canonical gene transcripts, and genes included in the panel. 
 
-Snapshots of each significant variant will be created by passing the BAM files for each sample and its control to IGV. These snapshots will be used for manual review of the detected variants and quality control measures. 
+Sequencing reads will be visualized by loading the BAM file for each test sample, paired with the corresponding control sample for the run, into IGV for automated snapshots to manually review & determine variant qualities. 
 
-Variants that passed manual review will be included in downstream processing to create a full report designed for use by clinicians for patient cancer diagnosis and treatment. 
+A preliminary sparse plain-text report will be generated from the summary table of variants, and a rich full report will be generated from the IGV snapshots, summary table, and other visualizations. Both reports will include clinical significance and interpretations supplied by the Weill Cornell [Precision Medicine Knowledgebase](https://pmkb.weill.cornell.edu/). 
+
 
 # Usage
 
@@ -89,29 +90,38 @@ drwxr-s--- 2 kellys04 1.7K Oct  8 15:15 report_comments
 
 Important files:
 
-`data/panel_genes.txt` : A list of genes to be included in the gene panel; one per line
+`data/panel_genes.txt` : A list of genes to be included in the gene panel. Example:
 
-`data/actionable_genes.txt` : A list of genes detertmined to be actionable; one per line
+```bash
+$ head data/panel_genes.txt
+AKT1
+ALK
+APC
+ATM
+```
 
-`data/summary_fields.txt` : A list of fields (column names) from the `<Run_data>.xls` files to be included in the summary report; one per line
+`data/actionable_genes.txt` : A list of genes detertmined to be actionable. Example:
 
-`data/report_comments` : A directory containing clinical comments to be included in the reports. Each clinical comment should be a separate markdown file following the naming convention`data/report_comments/EGFR-T790M.md` (naming convention details in development)
+```
+$ head data/actionable_genes.txt
+BRAF
+EGFR
+FLT3
+```
 
-`data/hg19/canonical_transcr_descr_comment.tsv` : A table containing gene ID, RefSeq ID, description, and path to comment file for each variant's canonical transcript
+`data/hg19/canonical_transcript_list.tsv` : A list of canonical transcripts . Example:
+
+```
+$ head data/hg19/canonical_transcript_list.tsv
+NR_026820
+NM_001005484
+NR_039983
+NM_001005277
+```
 
 
 ## To Do:
 
-Summary table
-
-- fix coverage filter
-- fix canonical transcript filter
-- fix canonical transcript db for cross referencing
-- make sub-table saved separately per sample in the run
-
-IGV Screenshots
-
-- add control bam to screenshot track
 
 Sparse Report
 
@@ -124,38 +134,25 @@ Full Report
 - IGV screenshot review feedback integration
 - create full report
 
-API Plug-in
-
-- get data from IonTorrent API automatically per run, pass to program scripts
-
 
 ## Software Requirements
 
-This program has been developed in a Linux environment running CentOS 6. Some scripts issue system commands which rely on standard GNU Linux utilities.  
+This program has been developed in a Linux environment running CentOS 6. Some scripts issue system commands which rely on standard GNU Linux utilities. The current list of all binary dependencies are contained in the file `bin.txt`. Some download notes for obtaining these programs can be found in `bin_downloads.txt`
 
     - Python 2.7
     - pandoc version 1.12.3 or higher
     - R 3.3.0 or higher
     - IGV_2.3.81
+    - bcftools-1.3.1
+    - htslib-1.3.1
+    - samtools-1.3.1
     - ANNOVAR version 2015-06-17 21:43:53 -0700 (Wed, 17 Jun 2015)
     - GNU bash, version 4.1.2(1)-release (x86_64-redhat-linux-gnu)
 
 ### Python packages
 
-    - sys
-    - os
-    - errno
-    - pandas
-    - numpy
-    - fnmatch
-    - re
-    - subprocess
-    - csv
-    - collections
-    - pickle
-    - argparse
-    - zipfile
-    - gzip
+    - numpy==1.11.0
+    - pandas==0.17.1
 
 ### R packages
 
