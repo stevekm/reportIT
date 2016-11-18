@@ -76,15 +76,12 @@ variant_reporter$ tree
 The `data` directory should contain the following items:
 
 ```
-$ ll -g  data/
-total 432K
-drwxr-s--- 8 kellys04  339 Oct  8 15:15 .
-drwxr-s--- 5 kellys04   69 Sep  9 12:42 ..
--rw-r----- 1 kellys04   50 Sep  6 16:07 actionable_genes.txt
-drwxr-s--- 2 kellys04  299 Oct  7 14:49 hg19
--rw-r----- 1 kellys04  266 Aug 18 16:53 panel_genes.txt
-drwxr-s--- 2 kellys04 1.7K Oct  8 15:15 report_comments
--rw-r----- 1 kellys04  159 Aug 20 01:34 summary_fields.txt
+data/
+|-- actionable_genes.txt
+|-- hg19
+|   |-- canonical_transcript_list.tsv
+|-- panel_genes.txt
+|-- server_info.txt
 
 ```
 
@@ -102,16 +99,23 @@ ATM
 
 `data/actionable_genes.txt` : A list of genes detertmined to be actionable. Example:
 
-```
+```bash
 $ head data/actionable_genes.txt
 BRAF
 EGFR
 FLT3
 ```
 
+`server_info.txt` : The login info for the IonTorrent server. Example:
+
+```bash
+$ cat data/server_info.txt
+username@server_IP
+```
+
 `data/hg19/canonical_transcript_list.tsv` : A list of canonical transcripts . Example:
 
-```
+```bash
 $ head data/hg19/canonical_transcript_list.tsv
 NR_026820
 NM_001005484
