@@ -88,8 +88,6 @@ The `data` directory should contain the following items:
 ```
 data/
 |-- actionable_genes.txt
-|-- hg19
-|   |-- canonical_transcript_list.tsv
 |-- panel_genes.txt
 |-- server_info.txt
 
