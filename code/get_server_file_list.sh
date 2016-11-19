@@ -81,7 +81,7 @@ EOF
 echo -e "\nRun manifest written to:\n$analysis_manifest_file\n"
 
 # # make files list for rsync
-grep -Ev '^#' "$analysis_manifest_file" > "$analysis_files_file" && echo -e "Run files written to:\n$analysis_files_file\n"
+grep -Ev '^#' "$analysis_manifest_file" > "$analysis_files_file" && echo -e "Run file list written to:\n$analysis_files_file\n"
 
 
 
