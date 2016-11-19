@@ -54,9 +54,11 @@ code/get_run_IDs.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
 # make the summary tables for all the samples
 code/merge_vcf_annotations_wrapper.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
 ```
+# Files & Directories
 
+## Program Directory
 
-Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks. The current directory structure is:
+Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks. The current program directory structure is:
 
 ```
 variant_reporter$ tree
@@ -78,6 +80,8 @@ variant_reporter$ tree
     |-- report_comments -> ../data/report_comments/
     `-- sparse_report.Rmd
 ```
+
+## Data directory
 
 The `data` directory should contain the following items:
 
@@ -119,18 +123,154 @@ $ cat data/server_info.txt
 username@server_IP
 ```
 
+
+
+## References Directory
+
+This directory contains the following items:
+
+```bash
+ref
+|-- cannonical_transcript_table.py
+`-- hg19
+    |-- canonical_transcript_list.txt
+    |-- download_refs.txt
+    |-- kgXref.txt
+    |-- kgXref.txt.gz
+    |-- knownCanonical.txt
+    `-- knownCanonical.txt.gz
+```
+
+Important files:
+
 `data/hg19/canonical_transcript_list.tsv` : A list of canonical transcripts . Example:
 
 ```bash
-$ head data/hg19/canonical_transcript_list.tsv
+$ head ref/hg19/canonical_transcript_list.tsv
 NR_026820
 NM_001005484
 NR_039983
 NM_001005277
 ```
 
+## Output Directory
 
-## To Do:
+The current data output directory format mirrors the directory format of the analysis results on the IonTorrent server. An example output directory looks like this:
+
+```
+output
+|-- Auto_user_SNX-XXX-XXX-XXX-X_analysis_files.txt
+|-- Auto_user_SNX-XXX-XXX-XXX-X_analysis_manifest.txt
+|-- R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1
+|   `-- Auto_user_SNX-XXX-XXX-XXX-X
+|       `-- plugin_out
+|           |-- coverageAnalysis_out.777
+|           |   |-- IonXpress_001
+|           |   |   |-- IonXpress_001_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |   |   `-- IonXpress_001_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           |   |-- IonXpress_002
+|           |   |   |-- IonXpress_002_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |   |   `-- IonXpress_002_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           |   |-- IonXpress_003
+|           |   |   |-- IonXpress_003_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |   |   `-- IonXpress_003_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           |   |-- IonXpress_004
+|           |   |   |-- IonXpress_004_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |   |   `-- IonXpress_004_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           |   |-- IonXpress_005
+|           |   |   |-- IonXpress_005_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |   |   `-- IonXpress_005_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           |   |-- IonXpress_006
+|           |   |   |-- IonXpress_006_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |   |   `-- IonXpress_006_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           |   |-- IonXpress_007
+|           |   |   |-- IonXpress_007_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |   |   `-- IonXpress_007_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           |   `-- IonXpress_008
+|           |       |-- IonXpress_008_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
+|           |       `-- IonXpress_008_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
+|           `-- variantCaller_out.778
+|               |-- IonXpress_001
+|               |   |-- IonXpress_001.avinput
+|               |   |-- IonXpress_001.hg19_multianno.txt
+|               |   |-- IonXpress_001.tsv
+|               |   |-- IonXpress_001_filtered.tsv
+|               |   |-- IonXpress_001_full_table.tsv
+|               |   |-- IonXpress_001_query.tsv
+|               |   |-- IonXpress_001_summary.tsv
+|               |   `-- TSVC_variants.vcf
+|               |-- IonXpress_002
+|               |   |-- IonXpress_002.avinput
+|               |   |-- IonXpress_002.hg19_multianno.txt
+|               |   |-- IonXpress_002.tsv
+|               |   |-- IonXpress_002_filtered.tsv
+|               |   |-- IonXpress_002_full_table.tsv
+|               |   |-- IonXpress_002_query.tsv
+|               |   |-- IonXpress_002_summary.tsv
+|               |   |-- TSVC_variants.vcf
+|               |   |-- TSVC_variants.vcf.gz
+|               |   `-- TSVC_variants.vcf.gz.tbi
+|               |-- IonXpress_003
+|               |   |-- IonXpress_003.avinput
+|               |   |-- IonXpress_003.hg19_multianno.txt
+|               |   |-- IonXpress_003.tsv
+|               |   |-- IonXpress_003_filtered.tsv
+|               |   |-- IonXpress_003_full_table.tsv
+|               |   |-- IonXpress_003_query.tsv
+|               |   |-- IonXpress_003_summary.tsv
+|               |   `-- TSVC_variants.vcf
+|               |-- IonXpress_004
+|               |   |-- IonXpress_004.avinput
+|               |   |-- IonXpress_004.hg19_multianno.txt
+|               |   |-- IonXpress_004.tsv
+|               |   |-- IonXpress_004_filtered.tsv
+|               |   |-- IonXpress_004_full_table.tsv
+|               |   |-- IonXpress_004_query.tsv
+|               |   |-- IonXpress_004_summary.tsv
+|               |   `-- TSVC_variants.vcf
+|               |-- IonXpress_005
+|               |   |-- IonXpress_005.avinput
+|               |   |-- IonXpress_005.hg19_multianno.txt
+|               |   |-- IonXpress_005.tsv
+|               |   |-- IonXpress_005_filtered.tsv
+|               |   |-- IonXpress_005_full_table.tsv
+|               |   |-- IonXpress_005_query.tsv
+|               |   |-- IonXpress_005_summary.tsv
+|               |   `-- TSVC_variants.vcf
+|               |-- IonXpress_006
+|               |   |-- IonXpress_006.avinput
+|               |   |-- IonXpress_006.hg19_multianno.txt
+|               |   |-- IonXpress_006.tsv
+|               |   |-- IonXpress_006_filtered.tsv
+|               |   |-- IonXpress_006_full_table.tsv
+|               |   |-- IonXpress_006_query.tsv
+|               |   |-- IonXpress_006_summary.tsv
+|               |   `-- TSVC_variants.vcf
+|               |-- IonXpress_007
+|               |   |-- IonXpress_007.avinput
+|               |   |-- IonXpress_007.hg19_multianno.txt
+|               |   |-- IonXpress_007.tsv
+|               |   |-- IonXpress_007_filtered.tsv
+|               |   |-- IonXpress_007_full_table.tsv
+|               |   |-- IonXpress_007_query.tsv
+|               |   |-- IonXpress_007_summary.tsv
+|               |   `-- TSVC_variants.vcf
+|               |-- IonXpress_008
+|               |   |-- IonXpress_008.avinput
+|               |   |-- IonXpress_008.hg19_multianno.txt
+|               |   |-- IonXpress_008.tsv
+|               |   |-- IonXpress_008_filtered.tsv
+|               |   |-- IonXpress_008_full_table.tsv
+|               |   |-- IonXpress_008_query.tsv
+|               |   |-- IonXpress_008_summary.tsv
+|               |   `-- TSVC_variants.vcf
+|               |-- R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1.xls
+|               `-- sample_barcode_IDs.tsv
+```
+
+
+
+# To Do:
 
 
 Sparse Report
@@ -145,7 +285,7 @@ Full Report
 - create full report
 
 
-## Software Requirements
+# Software Requirements
 
 This program has been developed in a Linux environment running CentOS 6. Some scripts issue system commands which rely on standard GNU Linux utilities. The current list of all binary dependencies are contained in the file `bin.txt`. Some download notes for obtaining these programs can be found in `bin_downloads.txt`
 
@@ -159,12 +299,12 @@ This program has been developed in a Linux environment running CentOS 6. Some sc
     - ANNOVAR version 2015-06-17 21:43:53 -0700 (Wed, 17 Jun 2015)
     - GNU bash, version 4.1.2(1)-release (x86_64-redhat-linux-gnu)
 
-### Python packages
+## Python packages
 
     - numpy==1.11.0
     - pandas==0.17.1
 
-### R packages
+## R packages
 
     - rmarkdown
     - optparse
