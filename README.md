@@ -33,6 +33,12 @@ code/get_server_file_list.sh data/server_info.txt Auto_user_SNX-XXX-XXXX-XXX /pa
 # /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_files.txt : simple file list
 
 
+# at this point you can use this handy wrapper script to run the next several scripts automatically
+code/multi_wrapper.sh data/server_info.txt Auto_user_SNX-XXX-XXXX-XXX R_2016_09_01_XX_XX_XX_XX-ITXX /path/to/output_dir
+
+
+# OR if you want to do it manually, you can run these commands:
+
 # download the files in the list to a dir named with the run ID
 code/download_server_files.sh data/server_info.txt /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_files.txt /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
 
