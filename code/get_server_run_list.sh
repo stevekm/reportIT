@@ -8,7 +8,16 @@
 # $ cat data/server_info.txt
 # username@server
 
+#~~~~~ PARSE ARGS ~~~~~~# 
+if (( $# != 1 )); then
+    echo "ERROR: Wrong number of arguments supplied"
+    grep '^##' $0
+    exit
+fi
+
 server_info_file="$1"
+# make sure its actually a file
+[ ! -f $server_info_file ] && echo -e "ERROR: File not recognized:\n${1}\n\nExiting..." && exit
 
 # get info from the file
 server_info="$(head -1 $server_info_file)"

@@ -10,9 +10,29 @@
 # username@server
 
 server_info_file="$1"
+
+#~~~~~ PARSE ARGS ~~~~~~# 
+if (( $# != 1 )); then
+    echo "ERROR: Wrong number of arguments supplied"
+    grep '^##' $0
+    exit
+fi
+
+server_info_file="$1"
+# make sure its actually a file
+[ ! -f $server_info_file ] && echo -e "ERROR: File not recognized:\n${1}\n\nExiting..." && exit
+
+# get info from the file
+# username@server
+server_info="$(head -1 $server_info_file)"
+
+# make sure there is info
+if [[ -z "$server_info" ]]; then echo "No info read from file, exiting"; exit; fi
+
 analysis_ID="$2"
 outdir="$3"
 
+# make sure outdir provided
 if [[ -z "$outdir" ]]; then 
 echo "No outdir supplied" 
 echo 'USAGE: get_server_run_files.sh /path/to/server_info_file.txt <analysis ID> /path/to/outdir'
@@ -24,12 +44,6 @@ analysis_manifest_file="${outdir}/${analysis_ID}_analysis_manifest.txt"
 analysis_files_file="${outdir}/${analysis_ID}_analysis_files.txt"
 fi
 
-# get info from the file
-# username@server
-server_info="$(head -1 $server_info_file)"
-
-# make sure there is info
-if [[ -z "$server_info" ]]; then echo "No info read from file, exiting"; exit; fi
 
 
 # pick a run dir to access
