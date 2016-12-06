@@ -31,7 +31,26 @@ vcf2tsv_bin="$(readlink -f bin/vcf2tsv)"
 vcf_files="$(find "$input_dir" -type f -name "*.vcf")"
 
 
+# ~~~~~~~~~~~~ # Split multi-alt entries in VCF files # ~~~~~~~~~~~~ # 
+echo -e "\nSplitting multi-allele variant entries in VCF files\n"
+# bin/bcftools norm -m-both output_20161206t181850.output/R_2016_11_18_11_38_15_user_SN2-216-IT16-050-2/Auto_user_SN2-216-IT16-050-2_273_305/plugin_out/variantCaller_out.869/IonXpress_012/TSVC_variants.vcf
+for i in $vcf_files; do 
+vcf_input="$i"
+file_dir="$(dirname $i)"
+vcf_split_output="${vcf_input%%.vcf}.vcf_split"
+
+$bcftools_bin norm -m-both "$vcf_input" -o "$vcf_split_output"
+done
+
+# reset VCF file list with new split VCFs
+vcf_files="$(find "$input_dir" -type f -name "*.vcf_split")"
+
+# for i in $vcf_files; do echo $i; done
+# exit
+
+
 # ~~~~~~~~~~~~ # Annotate with ANNOVAR # ~~~~~~~~~~~~ # 
+echo -e "\nAnnotating VCF with ANNOVAR\n"
 for i in $vcf_files; do 
 # vcf_input="$(basename $i)"
 vcf_input="$i"
@@ -41,6 +60,7 @@ avinput_file="${file_dir}/${barcode_ID}.avinput"
 avoutput_file="${avinput_file%%.avinput}"
 # (
     # convert the VCF to ANNOVAR input format
+    echo -e "\nConverting to ANNOVAR format\n"
     if [ -f $vcf_input ]; then 
         [ ! -f $avinput_file ] && $convert2annovar_bin -format vcf4old "$vcf_input" -includeinfo > "$avinput_file"
     else
@@ -49,6 +69,7 @@ avoutput_file="${avinput_file%%.avinput}"
         exit
     fi
     # run ANNOVAR on the avinput
+    
     if [ -f $avinput_file ]; then
         [ ! -f ${avoutput_file}.hg19_multianno.txt ] && $table_annovar_bin "$avinput_file" "$annovar_db_dir" -buildver "$build_version" -out "$avoutput_file" -remove $annovar_protocol -nastring .
     else
@@ -108,3 +129,7 @@ done
 
 # delete the stuff we just made.. 
 # find output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/ -type f -path "*variantCaller_out.*" -name "IonXpress*" -name "*.tsv" -exec rm -f {} \;
+# -type f -path "*variantCaller_out.*" -name "IonXpress*" -name "*.avinput" -exec rm -f {} \;
+# -type f -path "*variantCaller_out.*" -name "IonXpress*" -name "*.hg19_multianno.txt" -exec rm -f {} \;
+
+

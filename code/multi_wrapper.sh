@@ -14,7 +14,8 @@ output_dir="$4"
 
 analysis_file_list="${output_dir}/${analysis_id}_analysis_files.txt"
 
-run_dir="${output_dir}/${run_ID}"
+# run_dir="${output_dir}/${run_ID}"
+run_dir="${output_dir}/${analysis_id}/${run_ID}" # !! CHECK THIS STEP !! 
 mkdir -p "$run_dir"
 
 $(dirname $0)/download_server_files.sh "$server_info_file" "$analysis_file_list" "$run_dir"
