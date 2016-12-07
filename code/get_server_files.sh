@@ -24,8 +24,8 @@ server_info_file="data/server_info.txt"
 
 
 # outdir="$1"
-outdir="output"
 # analysis_ID="$3"
+outdir="output"
 analysis_ID="${@:1}" # accept a space separated list of ID's
 
 
