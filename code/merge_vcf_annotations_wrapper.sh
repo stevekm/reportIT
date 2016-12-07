@@ -1,11 +1,12 @@
 #!/bin/bash
 # set -x
 
-## USAGE: merge_vcf_annotations_wrapper.sh output/run_dir
+## USAGE: merge_vcf_annotations_wrapper.sh /path/to/analysis_dir
 
-## Description: This script will find parse an annotated run dir, 
+## Description: This script will find parse an annotated analysis dir, 
 ## find all files needed to make the merged summary tables, 
 ## and pass them to the merge_vcf_annotations.py script for merging
+## This script operates on a single analysis dir
 
 
 # ~~~~~~ script args ~~~~~~ #

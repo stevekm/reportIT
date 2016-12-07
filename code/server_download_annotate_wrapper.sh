@@ -5,6 +5,7 @@
 ## DESCRIPTION: This script will download files needed for the pipeline from the IonTorrent server
 ## then annotate all VCF files found, and create the barcode : sample ID mappings
 ## needed for the pipeline
+## This script operates on all supplied analyses
 
 
 #~~~~~ PARSE ARGS ~~~~~~# 
@@ -30,5 +31,8 @@ for ID in $analysis_ID; do
 
     # make the barcode : sampleID mappings
     $(dirname $0)/get_run_IDs.sh "$analysis_outdir"
+
+    # make the summary tables, etc., for each sample in the analysis
+    $(dirname $0)/merge_vcf_annotations_wrapper.sh "$analysis_outdir"
 done
 

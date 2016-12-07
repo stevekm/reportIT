@@ -13,6 +13,7 @@ DESCRIPTION:
 4. Add sample ID, barcode, and run fields
 5. Save summary, full, and filtered tables
 
+This script operates on a single sample in an analysis run
 """
 
 # ~~~~ LOAD PACKAGES ~~~~~~ #
