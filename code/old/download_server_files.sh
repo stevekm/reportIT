@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## USAGE: download_server_files.sh /path/to/server_info_file.txt /path/to/file_list.txt /path/to/outdir
+## USAGE: download_server_files.sh /path/to/outdir /path/to/file_list.txt 
 
 ## DESCRIPTION: This script will download files from the IonTorrent server
 
@@ -10,9 +10,12 @@
 
 # outdir should be the parent outdir since the run folder with be created
 
-server_info_file="$1"
+# server_info_file="$1"
+server_info_file="data/server_info.txt"
+outdir="$1"
+# outdir="$(dirname "$server_file_list")"
 server_file_list="$2"
-outdir="$3"
+
 
 if [[ -z "$outdir" ]]; then 
 echo "No outdir supplied" 

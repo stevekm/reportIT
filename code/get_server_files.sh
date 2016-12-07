@@ -1,31 +1,31 @@
 #!/bin/bash
 
-## USAGE: get_server_run_files.sh /path/to/server_info_file.txt /path/to/outdir <analysis ID> 
+## USAGE: get_server_run_files.sh /path/to/outdir <analysis ID> <analysis ID> <analysis ID> ...  
 
-## DESCRIPTION: This script will generate a list of files needed for the pipeline
-## based on the supplied IonTorrent run ID 
+## DESCRIPTION: This script will download files needed for the pipeline from the IonTorrent server
 
 # server_info_file.txt = text file containing ssh login information; formatted like this:
 # $ cat data/server_info.txt
 # username@server
 
-server_info_file="$1"
 
 #~~~~~ PARSE ARGS ~~~~~~# 
-if (( $# < 3 )); then
+if (( $# < 2 )); then
     echo "ERROR: Wrong number of arguments supplied"
     grep '^##' $0
     exit
 fi
 
-server_info_file="$1"
+# server_info_file="$1"
+server_info_file="data/server_info.txt"
+
 # make sure its actually a file
-[ ! -f $server_info_file ] && echo -e "ERROR: File not recognized:\n${1}\n\nExiting..." && exit
+[ ! -f $server_info_file ] && echo -e "ERROR: File not recognized:\n${server_info_file}\n\nExiting..." && exit
 
 
-outdir="$2"
+outdir="$1"
 # analysis_ID="$3"
-analysis_ID="${@:3}" # accept a space separated list of ID's
+analysis_ID="${@:2}" # accept a space separated list of ID's
 
 
 #~~~~~ CUSTOM FUNCTIONS ~~~~~~# 
@@ -48,7 +48,9 @@ function get_server_file_mainfest {
     local analysis_manifest_file="$2"
     local analysis_ID="$3"
     
-    echo -e "\nPLEASE LOG INTO SERVER TO GET RUN FILE LIST\n"
+    echo -e "\n--------------------------------------------\n"
+    echo -e "GENERATING FILE LIST FOR ANALYSIS"
+    echo -e "\nPLEASE LOG INTO SERVER TO GET ANALYSIS FILE LIST\n"
     ssh $server_info > "$analysis_manifest_file" << EOF
         echo "# Analysis ID: $analysis_ID"
         #
@@ -90,7 +92,7 @@ function get_server_file_mainfest {
         #
 EOF
 
-    [ -f $analysis_manifest_file ] && echo -e "\nRun manifest written to:\n$analysis_manifest_file\n"
+    [ -f $analysis_manifest_file ] && echo -e "\nFile manifest written to:\n$analysis_manifest_file\n"
     [ ! -f $analysis_manifest_file ] && echo -e "ERROR: File not created:\n$analysis_manifest_file" && exit
 
 }
@@ -101,7 +103,7 @@ function make_file_list {
     local analysis_manifest_file="$1"
     local analysis_files_file="$2"
     grep -Ev '^#' "$analysis_manifest_file" > "$analysis_files_file" 
-    [ -f $analysis_files_file ] && echo -e "Run file list written to:\n$analysis_files_file\n"
+    [ -f $analysis_files_file ] && echo -e "File list written to:\n$analysis_files_file\n"
     [ ! -f $analysis_files_file ] && echo -e "ERROR: File list not created:\n$analysis_files_file\n"
 }
 
@@ -114,6 +116,22 @@ function get_run_ID {
 function get_analysis_ID {
     local analysis_manifest_file="$1"
     echo -e "Analysis ID:\n$(cat $analysis_manifest_file | grep 'Analysis ID' | cut -d ':' -f2 | cut -d ' ' -f2)\n"
+}
+
+function download_server_files {
+    local server_info_file="$1"
+    local outdir="$2"
+    local server_file_list="$3"
+
+    # get info from the file
+    # username@server
+    local server_info="$(head -1 $server_info_file)"
+
+    # download the files from the server
+    echo -e "\n--------------------------------------------\n"
+    echo -e "DOWNLOADING ANALYSIS FILES FROM SERVER"
+    echo -e "\nPLEASE LOG INTO SERVER TO GET COPY RUN FILES\n"
+    rsync -vzheR --copy-links --progress -e "ssh" --files-from="$server_file_list" ${server_info}:/results/analysis/output/Home/ "${outdir}"
 }
 
 
@@ -138,13 +156,18 @@ function get_server_files_pipeline {
     analysis_manifest_file="${analysis_outdir}/analysis_manifest.txt"
     analysis_files_file="${analysis_outdir}/analysis_files.txt"
 
-
+    echo -e "\n--------------------------------------------"
+    echo -e "--------------------------------------------\n"
+    echo -e "PROCESSING ANALYSIS:\n${analysis_ID}\n"
     get_server_file_mainfest "$server_info" "$analysis_manifest_file" "$analysis_ID"
     make_file_list "$analysis_manifest_file" "$analysis_files_file"
     get_analysis_ID "$analysis_manifest_file"
     get_run_ID "$analysis_manifest_file"
+    download_server_files "$server_info_file" "$outdir" "$analysis_files_file"
 
 }
+
+
 
 #~~~~~ RUN PIPELINE ~~~~~~# 
 for ID in $analysis_ID; do
