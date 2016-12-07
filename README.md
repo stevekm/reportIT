@@ -19,27 +19,12 @@ Program usage will change as development progresses. Current usage is:
 
 ```bash
 # example analysis ID = 'Auto_user_SNX-XXX-XXXX-XXX'
-# example run ID = 'R_2016_09_01_XX_XX_XX_XX-ITXX'
-
 
 # get list of recent analysis runs
 code/get_server_run_list.sh
 
 # pick one or more from the list and download files for the pipeline
-code/get_server_files.sh Auto_user_SNX-XXX-XXXX-XXX
-
-
-## THIS SECTION UNDER CONSTRUCTION:
-# annotate all the VCFs, and make TSV files we need for the summary tables
-code/annotate_vcfs.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
-
-
-# get a list of sample IDs, barcodes, and run ID, needed to map between Barcode & SampleID in the pipeline
-code/get_run_IDs.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
-
-
-# make the summary tables for all the samples
-code/merge_vcf_annotations_wrapper.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
+code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 ```
 # Files & Directories
 
