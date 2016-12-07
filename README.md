@@ -18,31 +18,18 @@ A preliminary sparse plain-text report will be generated from the summary table 
 Program usage will change as development progresses. Current usage is:
 
 ```bash
-# 'Auto_user_SNX-XXX-XXXX-XXX' = example analysis ID
-# 'R_2016_09_01_XX_XX_XX_XX-ITXX' = example run ID
+# example analysis ID = 'Auto_user_SNX-XXX-XXXX-XXX'
+# example run ID = 'R_2016_09_01_XX_XX_XX_XX-ITXX'
 
 
 # get list of recent analysis runs
-code/get_server_run_list.sh data/server_info.txt
+code/get_server_run_list.sh
+
+# pick one or more from the list and download files for the pipeline
+code/get_server_files.sh Auto_user_SNX-XXX-XXXX-XXX
 
 
-# pick one from the list and get its file list
-code/get_server_file_list.sh data/server_info.txt Auto_user_SNX-XXX-XXXX-XXX /path/to/output_dir
-# this generates:
-# /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_manifest.txt : verbose description of files
-# /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_files.txt : simple file list
-
-
-# at this point you can use this handy wrapper script to run the next several scripts automatically
-code/multi_wrapper.sh data/server_info.txt Auto_user_SNX-XXX-XXXX-XXX R_2016_09_01_XX_XX_XX_XX-ITXX /path/to/output_dir
-
-
-# OR if you want to do it manually, you can run these commands:
-
-# download the files in the list to a dir named with the run ID
-code/download_server_files.sh data/server_info.txt /path/to/output_dir/Auto_user_SNX-XXX-XXXX-XXX_analysis_files.txt /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
-
-
+## THIS SECTION UNDER CONSTRUCTION:
 # annotate all the VCFs, and make TSV files we need for the summary tables
 code/annotate_vcfs.sh /path/to/output_dir/R_2016_09_01_XX_XX_XX_XX-ITXX
 
