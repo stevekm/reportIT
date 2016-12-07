@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## USAGE: get_server_run_files.sh /path/to/outdir <analysis ID> <analysis ID> <analysis ID> ...  
+## USAGE: get_server_run_files.sh <analysis ID> <analysis ID> <analysis ID> ...  
 
 ## DESCRIPTION: This script will download files needed for the pipeline from the IonTorrent server
 
@@ -10,7 +10,7 @@
 
 
 #~~~~~ PARSE ARGS ~~~~~~# 
-if (( $# < 2 )); then
+if (( $# < 1 )); then
     echo "ERROR: Wrong number of arguments supplied"
     grep '^##' $0
     exit
@@ -23,9 +23,10 @@ server_info_file="data/server_info.txt"
 [ ! -f $server_info_file ] && echo -e "ERROR: File not recognized:\n${server_info_file}\n\nExiting..." && exit
 
 
-outdir="$1"
+# outdir="$1"
+outdir="output"
 # analysis_ID="$3"
-analysis_ID="${@:2}" # accept a space separated list of ID's
+analysis_ID="${@:1}" # accept a space separated list of ID's
 
 
 #~~~~~ CUSTOM FUNCTIONS ~~~~~~# 
