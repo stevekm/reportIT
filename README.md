@@ -23,7 +23,7 @@ Program usage will change as development progresses. Current usage is:
 # get list of recent analysis runs
 code/get_server_run_list.sh
 
-# pick one or more from the list and download files for the pipeline
+# download, annotate, and summarize the analysis data
 code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 ```
 # Files & Directories
