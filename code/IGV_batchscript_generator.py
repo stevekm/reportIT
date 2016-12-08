@@ -75,35 +75,29 @@ def mkdir_p(path, return_path=False):
 
 
 # ~~~~ GET SCRIPT ARGS ~~~~~~ #
-'''
-# argparse example
 parser = argparse.ArgumentParser(description='IGV snapshot batchscript generator.')
-parser.add_argument("input_files", nargs=2, help="Path to input files; vcf.zip and xls.zip IonTorrent run files")
-parser.add_argument("-o", default = './output', type = str, dest = 'output', metavar = '/OUTPUT_DIR', help="Path to output directory. Defaults to ./output")
+# positional args
+parser.add_argument("summary_table_file", help="Path to the summary table for the sample")
+parser.add_argument("bam_file", help="Path to the BAM file for the sample")
+parser.add_argument("IGV_snapshot_dir", help="Path to the IGV snapshot output directory for the sample")
+
+# optional args
 parser.add_argument("-b", default = 'hg19', type = str, dest = 'build_version', metavar = 'build version', help="Build version. Name of the reference genome, Defaults to hg19")
-parser.add_argument("-dd", default = './data', type = str, dest = 'data_dir', metavar = 'data dir', help="Path to data directory. Defaults to the ./data")
-parser.add_argument("-pg", default = './data/panel_genes.txt', type = str, dest = 'panel_genes_file', metavar = 'panel genes file' , help="Path to panel genes file. Defaults to ./data/panel_genes.txt")
-parser.add_argument("-ag", default = './data/actionable_genes.txt', type = str, dest = 'actionable_genes_file', metavar = 'actionable genes file', help="Path to actionable genes file. Defaults to ./data/actionable_genes.txt")
-parser.add_argument("-sf", default = './data/summary_fields.txt', type = str, dest = 'summary_fields_file', metavar = 'summary fields file', help="Path to summary fields file. Defaults to ./data/summary_fields.txt")
-parser.add_argument("-id", dest = 'run_id', metavar = 'run ID', help="Run ID value. Defaults to the portion of the input filename preceeding the first '.' character ")
+parser.add_argument("-ht", default = '500', type = str, dest = 'image_height', metavar = 'image height', help="Height for the IGV tracks")
+parser.add_argument("-cb", default = False, type = str, dest = 'NC_bam', metavar = 'control BAM', help="Path to the control BAM file (NC) for the sample")
+
+
 args = parser.parse_args()
 
-outdir = args.output
-input_files = args.input_files # vcf.zip and xls.zip IonTorrent run files
+# print args
+summary_table_file = args.summary_table_file; print summary_table_file
+bam_file = args.bam_file
+IGV_snapshot_dir = args.IGV_snapshot_dir
 build_version = args.build_version
-data_dir = args.data_dir
-panel_genes = list_file_lines(args.panel_genes_file)
-actionable_genes = list_file_lines(args.actionable_genes_file)
-summary_cols = list_file_lines(args.summary_fields_file)
-'''
+image_height = args.image_height
+NC_bam = args.NC_bam
 
-summary_table_file = sys.argv[1]
-bam_file = sys.argv[2]
-IGV_snapshot_dir = sys.argv[3]
-NC_bam = False # the control bam file
 
-build_version = "hg19"
-image_height = "500" 
 IGV_batch_file = os.path.join(IGV_snapshot_dir,"IGV_script.bat")
 mkdir_p(IGV_snapshot_dir)
 
