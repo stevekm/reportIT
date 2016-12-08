@@ -2,7 +2,7 @@
 # python 2.7
 
 '''
-USAGE: code/IGV_batchscript_generator.py 
+USAGE: code/IGV_batchscript_generator.py ...
 DESCRITPION: Generate IGV batch script for creating snapshots of BAMs PER SAMPLE
 based on the sample's summary table of variants
 
