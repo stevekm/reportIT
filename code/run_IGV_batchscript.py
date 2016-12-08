@@ -51,8 +51,9 @@ print "\nigv_jar_bin is :\n", igv_jar_bin
 print "\nigv_mem is :\n", igv_mem
 
 
-# ~~~~ RUN BATCH SCRIPT ~~~~~~ #
-run_IGV_script(igv_script = batchscript_file, igv_jar = igv_jar_bin, memMB = igv_mem)
+if __name__ == "__main__":
+    # ~~~~ RUN BATCH SCRIPT ~~~~~~ #
+    run_IGV_script(igv_script = batchscript_file, igv_jar = igv_jar_bin, memMB = igv_mem)
 
 
 

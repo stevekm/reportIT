@@ -132,12 +132,13 @@ locations = summary_df[['Chrom','Position', 'Position']].apply(lambda x : '{}:{}
 
 print locations
 
-# ~~~~ GENERATE BATCH SCRIPT ~~~~~~ #
-# start the IGV script output
-write_IGV_script(IGV_batch_file = IGV_batch_file, 
-    IGV_snapshot_dir = IGV_snapshot_dir, 
-    bam_file = bam_file, 
-    build_version = build_version, 
-    image_height = image_height, 
-    locations = locations, 
-    Control_bam_file = NC_bam)
+if __name__ == "__main__":
+    # ~~~~ GENERATE BATCH SCRIPT ~~~~~~ #
+    # start the IGV script output
+    write_IGV_script(IGV_batch_file = IGV_batch_file, 
+        IGV_snapshot_dir = IGV_snapshot_dir, 
+        bam_file = bam_file, 
+        build_version = build_version, 
+        image_height = image_height, 
+        locations = locations, 
+        Control_bam_file = NC_bam)
