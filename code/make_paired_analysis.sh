@@ -29,8 +29,8 @@ outdir="output"
 analysis_outdir_1="${outdir}/${analysis_ID_1}"
 analysis_outdir_2="${outdir}/${analysis_ID_2}"
 
-echo -e "analysis_outdir_1 is $analysis_outdir_1"
-echo -e "analysis_outdir_2 is $analysis_outdir_2"
+# echo -e "analysis_outdir_1 is $analysis_outdir_1"
+# echo -e "analysis_outdir_2 is $analysis_outdir_2"
 
 #~~~~~ SANITY CHECK ~~~~~~# 
 # make sure ID's were passed correctly, >0 characters long
@@ -49,8 +49,8 @@ combined_analysis_2_link="${analysis_outdir_2}/combined_analysis"
 
 mkdir -p "$combined_analysis_dir"
 
-echo -e "combined_analysis_dir is $combined_analysis_dir"
-echo -e "combined_analysis_2_link is $combined_analysis_2_link"
+# echo -e "combined_analysis_dir is $combined_analysis_dir"
+# echo -e "combined_analysis_2_link is $combined_analysis_2_link"
 
 ln -fs "$combined_analysis_dir" "$combined_analysis_2_link"
 
@@ -78,8 +78,8 @@ barcodes_file_2="$(find "$analysis_outdir_2_fullpath" -type f -name "sample_barc
 check_num_file_lines "$barcodes_file_1" 2
 check_num_file_lines "$barcodes_file_2" 2
 
-echo "barcodes_file_1 is $barcodes_file_1"
-echo "barcodes_file_2 is $barcodes_file_2"
+# echo "barcodes_file_1 is $barcodes_file_1"
+# echo "barcodes_file_2 is $barcodes_file_2"
 
 # get the header, add analysis ID field
 head -1 "$barcodes_file_1" | sed 's/$/\tAnalysis ID/' > "$combined_barcode_file"
@@ -89,6 +89,12 @@ tail -n +2 "$barcodes_file_1" | sed "s/$/\t$analysis_ID_1/" >> "$combined_barcod
 
 # add file 2
 tail -n +2 "$barcodes_file_2" | sed "s/$/\t$analysis_ID_2/" >> "$combined_barcode_file"
+
+# make sure the file writing worked! 
+[ ! -f $combined_barcode_file ] && echo -e "ERROR: File does not exist:\n$combined_barcode_file\nExiting..." && exit
+check_num_file_lines "$combined_barcode_file" 2
+
+
 
 
 
