@@ -4,13 +4,15 @@
 ## USAGE: merge_vcf_annotations_wrapper.sh /path/to/analysis_dir
 
 ## Description: This script will find parse an annotated analysis dir, 
-## find all files needed to make the merged summary tables, 
+## find all files needed to make the merged summary tables per sample, 
 ## and pass them to the merge_vcf_annotations.py script for merging
+## This script will output summary tables, and filtered annotation tables
 ## This script operates on a single analysis dir
 
 
 # ~~~~~~ script args ~~~~~~ #
 input_dir="$1"
+analysis_ID="$2"
 
 # ~~~~~~ parameters ~~~~~~ #
 # list of canonical transcripts to use; one per line
@@ -53,7 +55,7 @@ for i in $sample_dirs; do
     annot_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*.hg19_multianno.txt")"
     # echo $annot_file
 
-    $merge_script "$barcodes_file" "$query_file" "$annot_file" "$transcr_file" "$panel_genes_file" "$actionable_genes_file"
+    $merge_script "$barcodes_file" "$query_file" "$annot_file" "$transcr_file" "$panel_genes_file" "$actionable_genes_file" "$analysis_ID"
     echo -e "---------------------------------------"
 done
 

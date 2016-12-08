@@ -33,6 +33,6 @@ for ID in $analysis_ID; do
     $(dirname $0)/get_run_IDs.sh "$analysis_outdir"
 
     # make the summary tables, etc., for each sample in the analysis
-    $(dirname $0)/merge_vcf_annotations_wrapper.sh "$analysis_outdir"
+    $(dirname $0)/merge_vcf_annotations_wrapper.sh "$analysis_outdir" "$ID"
 done
 

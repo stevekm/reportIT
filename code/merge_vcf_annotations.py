@@ -124,6 +124,7 @@ annotation_file = sys.argv[3]
 canon_trancr_file = sys.argv[4]
 panel_genes_file = sys.argv[5]
 actionable_genes_file = sys.argv[6]
+analysis_ID = sys.argv[7]
 
 canon_trancr_list = list_file_lines(canon_trancr_file)
 panel_genes = list_file_lines(panel_genes_file)
@@ -131,7 +132,7 @@ actionable_genes = list_file_lines(actionable_genes_file)
 outdir = os.path.dirname(annotation_file)
 
 # Summary Table Fields:
-summary_cols = ["Chrom", "Position", "Ref", "Variant", "Gene", "Quality", "Coverage", "Allele Coverage", "Strand Bias", "Coding", "Amino Acid Change", "Transcript", "Frequency", "Sample Name", "Barcode", "Run Name", "Review"]
+summary_cols = ["Chrom", "Position", "Ref", "Variant", "Gene", "Quality", "Coverage", "Allele Coverage", "Strand Bias", "Coding", "Amino Acid Change", "Transcript", "Frequency", "Sample Name", "Barcode", "Run Name", "Review", "Analysis ID"]
 
 
 
@@ -197,7 +198,7 @@ test_canonical_transcripts(merge_df, canon_trancr_list)
 merge_df['Barcode'] = barcode_ID
 merge_df['Sample Name'] = sample_ID
 merge_df['Run Name'] = run_ID
-
+merge_df['Analysis ID'] = analysis_ID
 
 # keep only the panel genes; default Unknown Significance
 merge_df = merge_df[merge_df["Gene"].isin(panel_genes)]
@@ -213,7 +214,7 @@ merge_df.loc[merge_df["Gene"].isin(actionable_genes), 'Review'] = "KS"
 # make a copy of the complete table before filtering for qualities
 full_df = merge_df
 
-# filter for qualities
+# filter for qualities; filter rows
 merge_df = custom_table_filter(merge_df)
 
 # make the summary table; filter columns
