@@ -173,6 +173,7 @@ merge_df = pd.merge(annotation_df, query_df, on=['Chrom', 'Position', 'Ref', 'Va
 # split the AAChange rows in the table
 merge_df = split_df_col2rows(dataframe = merge_df, split_col = 'AAChange.refGene', split_char = ',', new_colname = 'AAChange', delete_old = True)
 
+'''
 # DEBUGGING!!
 
 import readline # optional, will allow Up/Down/History in the console
@@ -182,7 +183,7 @@ vars.update(locals())
 shell = code.InteractiveConsole(vars)
 shell.interact()
 # # 
-
+'''
 # split the new columns into separate columns
 merge_df = split_df_col2cols(dataframe = merge_df, split_col = 'AAChange', split_char = ':', new_colnames = ['Gene.AA', 'Transcript', 'Exon', 'Coding', 'Amino Acid Change'], delete_old = True)
 
