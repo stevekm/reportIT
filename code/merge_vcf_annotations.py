@@ -60,6 +60,19 @@ def split_df_col2cols(dataframe, split_col, split_char, new_colnames, delete_old
     # ~~~~~~~~~~~~~~~~ # 
     # save the split column as a separate object
     new_cols = dataframe[split_col].str.split(split_char).apply(pd.Series, 1)
+    '''
+    # PROBLEM: after split, there might be fewer columns! 
+    # add extra empty columns to fill..
+    for i in range(len(new_cols.columns)):
+        print new_cols.columns[i]
+        print new_colnames[i]
+        new_cols.rename(columns = {new_cols.columns[i]:new_colnames[i]}, inplace = True)
+    new_colnames_df = pd.DataFrame(columns=new_colnames)
+    # pd.concat([df,pd.DataFrame(columns=list('BCD'))])
+    pd.concat([new_colnames_df, new_cols])
+    ....
+    ...
+    '''
     # rename the cols
     new_cols.columns = new_colnames
     # remove the original column from the df
@@ -159,6 +172,16 @@ merge_df = pd.merge(annotation_df, query_df, on=['Chrom', 'Position', 'Ref', 'Va
 
 # split the AAChange rows in the table
 merge_df = split_df_col2rows(dataframe = merge_df, split_col = 'AAChange.refGene', split_char = ',', new_colname = 'AAChange', delete_old = True)
+
+# DEBUGGING!!
+
+import readline # optional, will allow Up/Down/History in the console
+import code
+vars = globals().copy()
+vars.update(locals())
+shell = code.InteractiveConsole(vars)
+shell.interact()
+# # 
 
 # split the new columns into separate columns
 merge_df = split_df_col2cols(dataframe = merge_df, split_col = 'AAChange', split_char = ':', new_colnames = ['Gene.AA', 'Transcript', 'Exon', 'Coding', 'Amino Acid Change'], delete_old = True)

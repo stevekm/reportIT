@@ -9,12 +9,25 @@
 ## This script will output summary tables, and filtered annotation tables
 ## This script operates on a single analysis dir
 
+#~~~~~ PARSE ARGS ~~~~~~# 
+if (( $# < 2 )); then
+    echo "ERROR: Wrong number of arguments supplied"
+    grep '^##' $0
+    exit
+fi
+
+echo -e "Now running script:\n${0}"
 
 # ~~~~~~ script args ~~~~~~ #
 input_dir="$1"
 analysis_ID="$2"
 
+echo -e "Input directory is:\n$input_dir"
+echo -e "Analysis ID is:\n$analysis_ID"
+
 # ~~~~~~ parameters ~~~~~~ #
+echo -e "Setting parameters for script..."
+set -x
 # list of canonical transcripts to use; one per line
 transcr_file="ref/hg19/canonical_transcript_list.txt"
 
@@ -26,22 +39,22 @@ actionable_genes_file="data/actionable_genes.txt"
 
 # merge script location
 merge_script="$(dirname $0)/merge_vcf_annotations.py"
-chmod +x "$merge_script"
-
+set +x
 
 
 # ~~~~~~ Find Barcode file ~~~~~~ #
-# sample_barcode_IDs.tsv
+echo -e "Finding barcodes file for the analysis..."
 barcodes_file="$(find "$input_dir" -type f -name "sample_barcode_IDs.tsv")"
-# echo $barcodes_file
+echo -e "Barcode file is:\n$barcodes_file"
 
 # ~~~~~~ Find Sample dirs ~~~~~~ #
+echo -e "Finding sample directories for the analysis..."
 # under run dir, parent subdir is variantCaller_out.*
 # sample dirs labeled IonXpress_001, IonXpress_002, ... 
-
 sample_dirs="$(find "$input_dir" -type d -path "*variantCaller_out*" -name "IonXpress_*")"
 
 # ~~~~~~ Find Sample files ~~~~~~ #
+echo -e "Finding files for each sample in the analysis..."
 # need :
 # query file; IonXpress_*_query.tsv
 # annotation file: IonXpress_*.hg19_multianno.txt
@@ -54,8 +67,9 @@ for i in $sample_dirs; do
     # echo $query_file
     annot_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*.hg19_multianno.txt")"
     # echo $annot_file
-
+    set -x
     $merge_script "$barcodes_file" "$query_file" "$annot_file" "$transcr_file" "$panel_genes_file" "$actionable_genes_file" "$analysis_ID"
+    set +x
     echo -e "---------------------------------------"
 done
 
