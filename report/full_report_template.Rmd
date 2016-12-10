@@ -1,0 +1,105 @@
+---
+title: "NYU Langone NGS-Tumor 50 Next Generation Sequencing Panel"
+author: "Stephen Kelly"
+date: "12/9/2016"
+output: 
+  html_document: 
+    keep_md: yes
+    number_sections: true
+    toc: true
+    toc_float: true
+params:
+  summary_table_file: test_data/IonXpress_008_summary.tsv
+  act_gene_file: data/actionable_genes.txt
+  IGV_snapshot_dir: test_data/IonXpress_006/IGV_snapshots
+  clinical_interpretation_table: data/WC_PMKB_clinical_interpretations/comment_files/citations.tsv
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+  # canonical_transcript_file: canon_file.txt
+
+# function for formatting text in the report
+mycat <- function(text){
+    cat(gsub(pattern = "\n", replacement = "  \n", x = text))
+}
+
+# {.tabset} # .tabset-fade .tabset-pills
+```
+
+
+```{r, echo = FALSE, include = FALSE, eval=TRUE}
+library("xtable")
+
+# get the items for the report
+summary_table_file <- params$summary_table_file
+# summary_table_file <- "test_data/IonXpress_008_summary.tsv"
+
+act_gene_file <- params$act_gene_file
+# act_gene_file <- "data/actionable_genes.txt"
+
+IGV_snapshot_dir <- params$IGV_snapshot_dir
+# IGV_snapshot_dir <- "test_data/IonXpress_006/IGV_snapshots"
+
+clinical_interpretation_table <- params$clinical_interpretation_table
+# clinical_interpretation_table <- "data/WC_PMKB_clinical_interpretations/comment_files/citations.tsv"
+
+# load report tables
+summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
+act_genes <- scan(act_gene_file, what="", sep="\n")
+
+# save current session
+# save.image(file="report_import.Rdata",compress = TRUE)
+```
+
+
+# Variant Table
+
+The following mutations are detected:
+
+```{r, echo = FALSE, results='asis', eval=TRUE}
+# for(i in seq_along())
+# colnames(summary_df)
+print(xtable(summary_df[c("Gene", "Coding", "Amino.Acid.Change")]),type='html', comment=FALSE, include.rownames=FALSE)
+```
+
+# IGV Snapshots {.tabset .tabset-pills} 
+
+## Hide 
+
+## Show {.tabset .tabset-pills}
+
+```{r, results='asis'}
+IGV_snapshots <- dir(path = IGV_snapshot_dir, pattern = "*.png", full.names = TRUE)
+
+for(i in IGV_snapshots){
+    IGV_snapshot_filepath <- i
+    variant_ID <- gsub(x = basename(IGV_snapshot_filepath), pattern = ".png", replacement = "")
+    mycat(paste0("### ", basename(IGV_snapshot_filepath), "\n\n"))
+    mycat("Variant ID:\n\n")
+    mycat(paste0(cat(unlist(strsplit(x = variant_ID, split = '_'))), "\n\n"))
+    mycat(paste0("![](", IGV_snapshot_filepath, ") \n\n"))
+}
+```
+
+# Clinical Interpretations
+
+# System Information {.tabset .tabset-pills} 
+
+## Hide 
+
+## Show
+
+```{r}
+# system info
+system("uname -srv", intern = TRUE)
+
+# dir
+system('pwd',intern=T)
+
+# date time
+system("date", intern = TRUE)
+
+# R system info, packages, etc
+sessionInfo()
+```
