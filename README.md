@@ -25,6 +25,12 @@ code/get_server_run_list.sh
 
 # download, annotate, and summarize the analysis data
 code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
+# designate two runs as a 'paired' analysis
+code/make_paired_analysis.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
+# generate IGV snapshots for an analysis
+code/IGV_snapshot_parser.sh Auto_user_SN2-1XX-XXXX-XXX
 ```
 # Files & Directories
 
@@ -242,17 +248,7 @@ output
 
 # To Do:
 
-
-Sparse Report
-
-- update clinical comments
-- fix clinical comment filename formatting
-- update variant knowledge base
-
-Full Report
-
-- IGV screenshot review feedback integration
-- create full report
+See the 'Issues' page on this GitHub repository for planned features. 
 
 
 # Software Requirements
