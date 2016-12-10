@@ -64,10 +64,13 @@ function find_NC_control_sample {
     local control_sampleID_file="$2" # "data/control_sampleIDs.txt"
     local outdir="$3"
 
+    echo -e "Searching for NC control sample in file:\n$barcode_file"
+    set -x
     nc_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f1)"
     nc_barcode="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f2)"
     nc_run_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f3)"
     nc_analysis_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f4)"
+    set +x
 
     # dir for the control sample
     nc_analysis_outdir="${outdir}/${nc_analysis_ID}"
@@ -78,15 +81,16 @@ function find_NC_control_sample {
     echo -e "\nnc_run_ID is:\n$nc_run_ID"
     echo -e "\nnc_analysis_ID is:\n$nc_analysis_ID"
     echo -e "\nnc_analysis_outdir is:\n$nc_analysis_outdir"
+    if [ ! -z $nc_ID ] && [ ! -z $nc_barcode ] && [ -d $nc_analysis_outdir ]; then
+        # find the control BAM file
+        echo -e "Finding the control bam...\n"
+        nc_bamfile="$(find_sample_file "$nc_analysis_outdir" "coverageAnalysis_out" "$nc_barcode" ".bam" | head -1)"
+        error_on_zerolength "$nc_bamfile" "TRUE" "Checking to make sure control sample BAM file was found..."
+        echo -e "nc_bamfile is :$nc_bamfile"
 
-    # find the control BAM file
-    echo -e "Finding the control bam...\n"
-    nc_bamfile="$(find_sample_file "$nc_analysis_outdir" "coverageAnalysis_out" "$nc_barcode" ".bam" | head -1)"
-    error_on_zerolength "$nc_bamfile" "TRUE" "Checking to make sure control sample BAM file was found..."
-    echo -e "nc_bamfile is :$nc_bamfile"
-
-    # save the IGV script control params
-    IGV_control_param="-cb $nc_bamfile"
+        # save the IGV script control params
+        IGV_control_param="-cb $nc_bamfile"
+    fi
 }
 
 
@@ -132,33 +136,6 @@ combined_barcode_file="$(find "$analysis_outdir" -type f -name "combined_sample_
 if [ ! -z $combined_barcode_file ]; then 
     echo -e "Combined analysis dir found..."
     echo -e "Combine analysis barcodes file is:\n$combined_barcode_file"
-    
-
-    # echo -e "Combined file found\n$combined_barcode_file" 
-    # nc_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f1)"
-    # nc_barcode="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f2)"
-    # nc_run_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f3)"
-    # nc_analysis_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f4)"
-
-    # # dir for the control sample
-    # nc_analysis_outdir="${outdir}/${nc_analysis_ID}"
-    # check_dirfile_exists "$nc_analysis_outdir" "d"
-
-    # echo -e "\nnc_ID is:\n$nc_ID"
-    # echo -e "\nnc_barcode is :\n$nc_barcode"
-    # echo -e "\nnc_run_ID is:\n$nc_run_ID"
-    # echo -e "\nnc_analysis_ID is:\n$nc_analysis_ID"
-    # echo -e "\nnc_analysis_outdir is:\n$nc_analysis_outdir"
-
-    # # find the control BAM file
-    # echo -e "Finding the control bam...\n"
-    # nc_bamfile="$(find_sample_file "$nc_analysis_outdir" "coverageAnalysis_out" "$nc_barcode" ".bam" | head -1)"
-    # error_on_zerolength "$nc_bamfile" "TRUE" "Checking to make sure control sample BAM file was found..."
-    # echo -e "nc_bamfile is :$nc_bamfile"
-
-    # # save the IGV script control params
-    # IGV_control_param="-cb $nc_bamfile"
-
     echo -e "Getting NC control sample from combined barcode file..."
     find_NC_control_sample "$combined_barcode_file" "$control_sampleID_file" "$outdir"
 
@@ -215,23 +192,34 @@ for i in $analysis_samples; do
     # only run if at least 2 lines in the summary table file..
     # with or without control!
     
+    echo -e "Checking number of lines in summary table file..."
     num_lines="$(cat "$sample_summary_file" | wc -l)"
     min_number_lines="1"
     if (( $num_lines > $min_number_lines )); then 
         echo -e "Running IGV batcscript generator script..."
+        [ -z "${IGV_control_param:-}" ] && echo -e "Including control BAM parameters:\n${IGV_control_param}"
+        set -x
         $IGV_batchscript_generator_script "$sample_summary_file" "$sample_bamfile" "$sample_IGV_dir" ${IGV_control_param:-}
+        set +x
 
         # find the new batch script.. IGV_script.bat
-        echo -e "Getting IGV batchs script..."
+        echo -e "Finding IGV batchs script..."
         sample_IGV_batchscript="$(find_sample_file "$i" "coverageAnalysis_out" "$sample_barcode" "IGV_script.bat" | head -1)"
         error_on_zerolength "$sample_IGV_batchscript" "TRUE" "Checking to make sure IGV batch script was found..."
-        echo -e "IGV batch script is:\n$sample_IGV_batchscript\n"
+        if [ ! -z $sample_IGV_batchscript ]; then
+            echo -e "IGV batch script is:\n$sample_IGV_batchscript\n"
 
-        # run IGV snapshotter
-        echo -e "Running IGV snapshot batch script..."
-        echo -e "param is:tes1${IGV_control_param:-}tes2"
-        $IGV_run_batchscript_script "$sample_IGV_batchscript" 
-
+            # run IGV snapshotter
+            echo -e "Running IGV snapshot batch script..."
+            set -x
+            $IGV_run_batchscript_script "$sample_IGV_batchscript" 
+            set +x
+        fi
+        
+    elif (( ! $num_lines > $min_number_lines )); then 
+        echo -e "Summary table has only:\n$num_lines\nnumber of lines."
+        echo -e "Minimum lines needed:\n$min_number_lines"
+        echo -e "Skipping IGV snapshot step..."
     fi
 
 
