@@ -26,7 +26,7 @@ code/get_server_run_list.sh
 # download, annotate, and summarize the analysis data
 code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
-# designate two runs as a 'paired' analysis
+# (OPTIONAL) designate two runs as a 'paired' analysis
 code/make_paired_analysis.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
 # generate IGV snapshots for an analysis
