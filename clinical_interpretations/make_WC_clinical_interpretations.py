@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # python 2.7
 
-# This script will import data from an Excel XLSX file
+# This script will convert the WC PMKB clinical interpretation Excel file into 
+# a TSV file formatted for use in the reporting pipeline    
 
 import pandas as pd
 import sys
 import os
 import errno
 import collections
+import re
 
 class OrderedDefaultDict(collections.OrderedDict, collections.defaultdict):
     def __init__(self, default_factory=None, *args, **kwargs):
@@ -35,6 +37,29 @@ def file_exists(filepath):
     elif not os.path.isfile(filepath):
         print "ERROR: File does not exist:\n{}".format(filepath)
         return False
+
+def split_df_col2rows(dataframe, split_col, split_char, new_colname, delete_old = False, reset_indexes = True):
+    # # Splits a column into multiple rows 
+    # dataframe : pandas dataframe to be processed
+    # split_col : chr string of the column name to be split
+    # split_char : chr to split the col on
+    # new_colname : new name for the 
+    # delete_old : logical True / False, remove original column?
+    # ~~~~~~~~~~~~~~~~ # 
+    # save the split column as a separate object
+    tmp_col = dataframe[split_col].str.split(split_char).apply(pd.Series, 1).stack()
+    # drop the last index level
+    tmp_col.index = tmp_col.index.droplevel(-1)
+    # set the new col name
+    tmp_col.name = new_colname
+    # remove the original column from the df
+    if delete_old is True:
+        del dataframe[split_col]
+    # join them into a new df 
+    new_df = dataframe.join(tmp_col)
+    if reset_indexes is True:
+        new_df = new_df.reset_index(drop=True)
+    return new_df
 
 def print_clinical_df(clin_df):
     # column names 
@@ -97,6 +122,29 @@ final_df = pd.concat([xls_df.iloc[:,0:6].reset_index(drop = True), cite_df], axi
 # rename the column
 final_df.rename(columns = {0 : 'Citation'}, inplace = True)
 # print final_df.head()
+
+
+# split the tissue type column into separate rows
+final_df = split_df_col2rows(final_df, 'Tissue Type(s)', ",", 'Tissue Type', delete_old = True, reset_indexes = True)
+
+# split Tumor Type(s)
+final_df = split_df_col2rows(final_df, 'Tumor Type(s)', ",", 'Tumor Type', delete_old = True, reset_indexes = True)
+
+#'''
+#######
+# DEBUGGING !!
+import readline # optional, will allow Up/Down/History in the console
+import code
+vars = globals().copy()
+vars.update(locals())
+shell = code.InteractiveConsole(vars)
+shell.interact()
+
+########
+#'''
+
+var_str = "CTNNB1 S37Y, CTNNB1 codon(s) 32, 33, 34, 35, 36, 37, 41, 45 any, CTNNB1 any mutation"
+######
 
 # need UTF-16 encoding !! For international names in citations
 final_df.to_csv("IPMKB_interpretations.tsv",sep ='\t', encoding = "utf-16", index = False)
