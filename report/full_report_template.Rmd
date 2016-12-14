@@ -1,7 +1,7 @@
 ---
-title: "NYU Langone NGS-Tumor 50 Next Generation Sequencing Panel"
+title: "NYULMC Tumor Panel Report"
 author: "Stephen Kelly"
-date: "12/9/2016"
+date: "12/14/2016"
 output: 
   html_document: 
     keep_md: yes
@@ -9,10 +9,14 @@ output:
     toc: true
     toc_float: true
 params:
-  summary_table_file: test_data/IonXpress_008_summary.tsv
+  summary_table_file: test_data/IonXpress_002_summary.tsv
   act_gene_file: data/actionable_genes.txt
-  IGV_snapshot_dir: test_data/IonXpress_006/IGV_snapshots
+  IGV_snapshot_dir: test_data/IonXpress_002/IGV_snapshots
   clinical_interpretation_table: data/WC_PMKB_clinical_interpretations/comment_files/citations.tsv
+  clinical_report_comments: test_data/IonXpress_002_comments.md
+  analysis_ID: Auto_user_SN2-212-IT16-049-1_268_301
+  sample_ID: MP16-1155
+  barcode_ID: IonXpress_002
 ---
 
 ```{r setup, include=FALSE}
@@ -44,6 +48,12 @@ IGV_snapshot_dir <- params$IGV_snapshot_dir
 clinical_interpretation_table <- params$clinical_interpretation_table
 # clinical_interpretation_table <- "data/WC_PMKB_clinical_interpretations/comment_files/citations.tsv"
 
+child_doc <- params$clinical_report_comments
+analysis_ID <- params$analysis_ID
+sample_ID <- params$sample_ID
+barcode_ID <- params$barcode_ID
+
+
 # load report tables
 summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
 act_genes <- scan(act_gene_file, what="", sep="\n")
@@ -52,6 +62,15 @@ act_genes <- scan(act_gene_file, what="", sep="\n")
 # save.image(file="report_import.Rdata",compress = TRUE)
 ```
 
+# Sample Information
+
+```{r, results='asis'}
+
+mycat(paste0("Analyis ID: ", analysis_ID, "\n\n"))
+mycat(paste0("Sample ID: ", sample_ID, "\n\n"))
+mycat(paste0("Barcode ID: ", barcode_ID, "\n\n"))
+
+```
 
 # Variant Table
 
@@ -83,6 +102,9 @@ for(i in IGV_snapshots){
 ```
 
 # Clinical Interpretations
+
+```{r, child = child_doc}
+```
 
 # System Information {.tabset .tabset-pills} 
 
