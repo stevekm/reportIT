@@ -4,35 +4,21 @@
 ## DESCRIPTION: This script will set up two analysis runs to act as a paired
 ## analysis, meaning a single set of samples was split over two analyses
 
-#~~~~~ CUSTOM FUNCTIONS ~~~~~~# 
-function check_num_file_lines {
-    local input_file="$1"
-    local min_number_lines="$2"
 
-    num_lines="$(cat "$input_file" | wc -l)"
-    (( $num_lines <  $min_number_lines )) && echo -e "ERROR: File has fewer than $min_number_lines lines:\n$input_file\nExiting..." && exit
-}
-
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+source "global_settings.sh"
 
 #~~~~~ PARSE ARGS ~~~~~~# 
-if (( $# < 2 )); then
-    echo "ERROR: Wrong number of arguments supplied"
-    grep '^##' $0
-    exit
-fi
+num_args_should_be "equal" "2" "$#" # "less_than", "greater_than", "equal"
+echo_script_name
 
 analysis_ID_1="$1"
 analysis_ID_2="$2"
-
-outdir="output"
 
 # relative paths to both dirs
 analysis_outdir_1="${outdir}/${analysis_ID_1}"
 analysis_outdir_2="${outdir}/${analysis_ID_2}"
 
-
-# echo -e "analysis_outdir_1 is $analysis_outdir_1"
-# echo -e "analysis_outdir_2 is $analysis_outdir_2"
 
 #~~~~~ SANITY CHECK ~~~~~~# 
 # make sure ID's were passed correctly, >0 characters long
@@ -93,7 +79,7 @@ check_num_file_lines "$combined_barcode_file" 2
 
 # hardlink the combined barcode file in the second analysis dir
 echo -e "\nLinking combined barcode file in analysis dir:\n${combined_analysis_dir_2}\n"
-ln "$combined_barcode_file" "${combined_analysis_dir_2}/"
+ln -f "$combined_barcode_file" "${combined_analysis_dir_2}/"
 
 
 # make sure the linking worked & the files are discoverable
@@ -108,7 +94,7 @@ echo -e "${combined_analysis_dir_1}" > "$index_file"
 echo -e "${combined_analysis_dir_2}" >> "$index_file"
 
 # hardlink in the other combined dir
-ln "$index_file" "${combined_analysis_dir_2}/"
+ln -f "$index_file" "${combined_analysis_dir_2}/"
 
 
 

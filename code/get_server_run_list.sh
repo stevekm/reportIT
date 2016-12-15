@@ -8,19 +8,17 @@
 # $ cat data/server_info.txt
 # username@server
 
-#~~~~~ PARSE ARGS ~~~~~~# 
-# if (( $# != 1 )); then
-#     echo "ERROR: Wrong number of arguments supplied"
-#     grep '^##' $0
-#     exit
-# fi
-echo -e "Now running script:\n${0}"
 
-# server_info_file="$1"
-server_info_file="data/server_info.txt"
-echo -e "Server info file is:\n$server_info_file"
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+source "global_settings.sh"
+
+#~~~~~ PARSE ARGS ~~~~~~# 
+num_args_should_be "equal" "0" "$#"
+echo_script_name
+
+echo -e "Server info file is:\n$server_info_file\n"
 # make sure its actually a file
-[ ! -f $server_info_file ] && echo -e "ERROR: File not recognized:\n${1}\n\nExiting..." && exit
+[ ! -f $server_info_file ] && echo -e "ERROR: File not recognized:\n$server_info_file\n\nExiting..." && exit
 
 # get info from the file
 echo -e "Getting data from server info file..."

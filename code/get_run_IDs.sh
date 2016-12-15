@@ -1,17 +1,16 @@
 #!/bin/bash
 
-## USAGE: get_run_IDs.sh /path/to/run.xls
+## USAGE: get_run_IDs.sh analysis_ID
 
 ## DESCRIPTION: This script will read in the run.xls file and output just the sample IDs
 
-#~~~~~ PARSE ARGS ~~~~~~# 
-if (( $# < 1 )); then
-    echo "ERROR: Wrong number of arguments supplied"
-    grep '^##' $0
-    exit
-fi
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+source "global_settings.sh"
 
-echo -e "Now running script:\n${0}"
+#~~~~~ PARSE ARGS ~~~~~~# 
+num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal"
+echo_script_name
+
 
 run_dir="$1"
 
@@ -26,9 +25,3 @@ outfile="${outdir}/sample_barcode_IDs.tsv"
 cat "$run_xls" | cut -f46-48 | uniq > "$outfile" && echo -e "Output saved to:\n$outfile"
 
 
-
-# run_xls="$1"
-# outdir="$(dirname $run_xls)"
-# outfile="${outdir}/sample_barcode_IDs.tsv"
-
-# cat "$run_xls" | cut -f46-48 | uniq > "$outfile" && echo -e "Output saved to:\n$outfile"

@@ -3,6 +3,47 @@
 # custom functions for the pipeline
 
 
+#~~~~~ PARSE ARGS ~~~~~~# 
+
+function num_args_should_be {
+    local func_type="$1" # "less_than", "greater_than", "equal"
+    local arg_limit="$2"
+    local num_args="$3"
+    # USAGE: num_args_should_be "equal" "0" "$#"
+
+    if [ "$func_type" == "less_than" ]; then
+        if (( "$num_args" >= "$arg_limit" )); then
+            echo "ERROR: Wrong number of arguments supplied"
+            grep '^##' $0
+            exit
+        fi
+    fi
+
+    if [ "$func_type" == "greater_than" ]; then
+        if (( "$num_args" <= "$arg_limit" )); then
+            echo "ERROR: Wrong number of arguments supplied"
+            grep '^##' $0
+            exit
+        fi
+    fi
+
+    if [ "$func_type" == "equal" ]; then
+        if (( "$num_args" != "$arg_limit" )); then
+            echo "ERROR: Wrong number of arguments supplied"
+            grep '^##' $0
+            exit
+        fi
+    fi
+
+}
+
+
+
+
+function echo_script_name {
+    echo -e "Now running script:\n${0}\n"
+}
+
 function check_dirfile_exists {
     local dirfile="$1"
     local dirfile_type="$2" # d or f
@@ -50,6 +91,15 @@ function find_sample_file {
     find "$analysis_dir" -type f -path "*$path_pattern*" -path "*$barcode_ID*" -name "*$file_extension"
 
 }
+
+function check_num_file_lines {
+    local input_file="$1"
+    local min_number_lines="$2"
+
+    num_lines="$(cat "$input_file" | wc -l)"
+    (( $num_lines <  $min_number_lines )) && echo -e "ERROR: File has fewer than $min_number_lines lines:\n$input_file\nExiting..." && exit
+}
+
 
 function find_NC_control_sample {
     # parse a barcodes file to find the NC control sample

@@ -11,27 +11,27 @@
 ## This script operates on all supplied analyses
 
 
-#~~~~~ CUSTOM FUNCTIONS ~~~~~~#
-source "$(dirname $0)/custom_bash_functions.sh"
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+source "global_settings.sh"
 
 #~~~~~ PARSE ARGS ~~~~~~# 
-if (( $# < 1 )); then
-    echo "ERROR: Wrong number of arguments supplied"
-    grep '^##' $0
-    exit
-fi
+num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal"
+echo_script_name
+
 
 analysis_ID="$1"
 # analysis_ID="${@:1}" # accept a space separated list of ID's
-outdir="output"
-control_sampleID_file="data/control_sampleIDs.txt" # file with extended regex NC sample ID's
+# outdir="output"
+# control_sampleID_file="data/control_sampleIDs.txt" # file with extended regex NC sample ID's
 # make sure the control sample ID file exists
-check_dirfile_exists "$control_sampleID_file" "f"
+
+
+check_dirfile_exists "$control_sample_regex_file" "f"
 
 analysis_outdir="${outdir}/${analysis_ID}"
 
-IGV_batchscript_generator_script="$(dirname $0)/IGV_batchscript_generator.py"
-IGV_run_batchscript_script="$(dirname $0)/run_IGV_batchscript.py"
+IGV_batchscript_generator_script="${codedir}/IGV_batchscript_generator.py"
+IGV_run_batchscript_script="${codedir}/run_IGV_batchscript.py"
 
 
 
@@ -57,7 +57,7 @@ if [ ! -z $combined_barcode_file ]; then
     echo -e "Combined analysis dir found..."
     echo -e "Combine analysis barcodes file is:\n$combined_barcode_file"
     echo -e "Getting NC control sample from combined barcode file..."
-    find_NC_control_sample "$combined_barcode_file" "$control_sampleID_file" "$outdir"
+    find_NC_control_sample "$combined_barcode_file" "$control_sample_regex_file" "$outdir"
 
 elif [ -z $combined_barcode_file ]; then  
     # find the single analysis barcode file instead.. 
@@ -65,13 +65,16 @@ elif [ -z $combined_barcode_file ]; then
     barcode_file="$(find "$analysis_outdir" -type f -name "sample_barcode_IDs.tsv" | head -1)"
     error_on_zerolength "$barcode_file" "TRUE" "Checking to make sure barcode file was found..."
     echo -e "Getting NC sample from barcode file:\n$barcode_file"
-    find_NC_control_sample "$barcode_file" "$control_sampleID_file" "$outdir"
+    find_NC_control_sample "$barcode_file" "$control_sample_regex_file" "$outdir"
 fi
 
 
-
-
-
+# find the analysis barcode file
+echo -e "Finding the analysis barcode file..."
+analysis_barcode_file="$(find "$analysis_outdir"  -path "*variantCaller_out*" -name "sample_barcode_IDs.tsv" | head -1)"
+error_on_zerolength "$analysis_barcode_file" "TRUE" "Checking to make sure analysis barcode file was found..."
+check_dirfile_exists "$analysis_barcode_file" "f"
+echo -e "Analysis barcode file is:\n$analysis_barcode_file\n"
 
 #~~~~~ FIND ANALYIS SAMPLES ~~~~~~# 
 # find all samples in the analysis dir
@@ -88,6 +91,20 @@ for i in $analysis_samples; do
     echo "$i"
     sample_barcode="$(basename "$i")"
     echo -e "\nSample barcode is:\n$sample_barcode"
+
+    # find sample ID
+    echo -e "Finding sample ID..."
+    sample_ID="$(grep "$sample_barcode" "$analysis_barcode_file" | cut -f1)"
+    error_on_zerolength "$sample_barcode" "TRUE" "Checking to make sure sample ID was found..."
+    echo -e "Sample ID is:\n$sample_ID\n"
+
+    # check to make sure its not a control sample..
+    set -x
+    if grep -q "$sample_ID" "$control_sample_ID_file"; then
+        echo -e "Sample is a control sample, skipping IGV steps... "
+        continue
+    fi
+    set +x 
 
     # FIND BAM FILE
     echo -e "\nFinding BAM file in sample dir..."
@@ -111,7 +128,7 @@ for i in $analysis_samples; do
     # CREATE IGV BATCH SCRIPT
     # only run if at least 2 lines in the summary table file..
     # with or without control!
-    
+
     echo -e "Checking number of lines in summary table file..."
     num_lines="$(cat "$sample_summary_file" | wc -l)"
     min_number_lines="1"

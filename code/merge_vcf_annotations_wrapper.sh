@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -x
 
-## USAGE: merge_vcf_annotations_wrapper.sh /path/to/analysis_dir
+## USAGE: merge_vcf_annotations_wrapper.sh /path/to/analysis_dir analysis_ID
 
 ## Description: This script will find parse an annotated analysis dir, 
 ## find all files needed to make the merged summary tables per sample, 
@@ -9,14 +9,15 @@
 ## This script will output summary tables, and filtered annotation tables
 ## This script operates on a single analysis dir
 
-#~~~~~ PARSE ARGS ~~~~~~# 
-if (( $# < 2 )); then
-    echo "ERROR: Wrong number of arguments supplied"
-    grep '^##' $0
-    exit
-fi
 
-echo -e "Now running script:\n${0}"
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+source "global_settings.sh"
+
+#~~~~~ PARSE ARGS ~~~~~~# 
+num_args_should_be "equal" "2" "$#" # "less_than", "greater_than", "equal"
+echo_script_name
+
+
 
 # ~~~~~~ script args ~~~~~~ #
 input_dir="$1"
@@ -26,20 +27,9 @@ echo -e "Input directory is:\n$input_dir"
 echo -e "Analysis ID is:\n$analysis_ID"
 
 # ~~~~~~ parameters ~~~~~~ #
-echo -e "Setting parameters for script..."
-set -x
-# list of canonical transcripts to use; one per line
-transcr_file="ref/hg19/canonical_transcript_list.txt"
-
-# genes in the panel
-panel_genes_file="data/panel_genes.txt"
-
-# genes considered actionable
-actionable_genes_file="data/actionable_genes.txt"
-
 # merge script location
-merge_script="$(dirname $0)/merge_vcf_annotations.py"
-set +x
+merge_script="${codedir}/merge_vcf_annotations.py"
+
 
 
 # ~~~~~~ Find Barcode file ~~~~~~ #
