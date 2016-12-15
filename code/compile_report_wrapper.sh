@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -x
 
-## USAGE: code/make_full_report_dir.sh analysis_ID
+## USAGE: .... analysis_ID
 
 ## Description: This script will set up the reports directories in an analysis dir
 
