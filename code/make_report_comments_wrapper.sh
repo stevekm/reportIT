@@ -1,57 +1,13 @@
 #!/bin/bash
 # set -x
 
-## USAGE: make_report_comments_wrapper.sh /path/to/analysis_dir
+## USAGE: make_report_comments_wrapper.sh analysis_ID
 
 ## Description: This script will find parse an annotated analysis dir, 
 
 
 #~~~~~ CUSTOM FUNCTIONS ~~~~~~# 
-function check_dirfile_exists {
-    local dirfile="$1"
-    local dirfile_type="$2" # d or f
-
-    # check if dir exists
-    if [ $dirfile_type == "d" ]; then
-        [ ! -d $dirfile ] && echo -e "ERROR: Item is not a dir:\n$dirfile\nDoes it exist?\nExiting..." && exit
-    fi
-
-        # check if dir exists
-    if [ $dirfile_type == "f" ]; then
-        [ ! -f $dirfile ] && echo -e "ERROR: Item is not a file:\n$dirfile\nDoes it exist?\nExiting..." && exit
-    fi
-}
-
-function error_on_zerolength {
-    local test_string="$1"
-    local test_type="$2" # TRUE or FALSE
-    local test_message="$3"
-
-    echo -e "$test_message"
-
-    # check if zero length string
-    if [ $test_type == "TRUE" ]; then
-        [ -z "$test_string" ] && echo -e "ERROR: String is length zero\nExiting..." && exit
-    fi
-
-    # check if non-zero length string
-    if [ $test_type == "FALSE" ]; then
-        [ ! -z "$test_string" ] && echo -e "ERROR: String is not length zero\nExiting..." && exit
-    fi
-
-}
-
-function find_sample_file {
-    # find a file from the sample's analysis directory; return first result!
-    local analysis_dir="$1"
-    local path_pattern="$2" # coverageAnalysis_out OR variantCaller_out
-    local barcode_ID="$3"
-    local file_extension="$4"
-
-    # find output/Auto_user_SN2-213-IT16-049-2_269_302 -type f -path "*coverageAnalysis_out*" -path "*IonXpress_011*" -name "*.bam"
-    find "$analysis_dir" -type f -path "*$path_pattern*" -path "*$barcode_ID*" -name "*$file_extension"
-
-}
+source "$(dirname $0)/custom_bash_functions.sh"
 
 
 #~~~~~ PARSE ARGS ~~~~~~# 
