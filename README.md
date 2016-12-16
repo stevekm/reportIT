@@ -29,8 +29,14 @@ code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN
 # (OPTIONAL) designate two runs as a 'paired' analysis
 code/make_paired_analysis.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
-# generate IGV snapshots for an analysis
-code/IGV_snapshot_parser.sh Auto_user_SN2-1XX-XXXX-XXX
+# generate IGV snapshots for analysess
+code/IGV_snapshot_parser.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
+# make clinical comment files for analyses
+code/make_report_comments_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
+# make reports for each sample in the analyses
+code/make_full_report.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 ```
 # Files & Directories
 
