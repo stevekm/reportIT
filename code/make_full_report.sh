@@ -8,143 +8,142 @@
 
 #~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
 source "global_settings.sh"
-# source "$(dirname $0)/custom_bash_functions.sh"
 
 #~~~~~ PARSE ARGS ~~~~~~# 
-if (( $# < 1 )); then
-    echo "ERROR: Wrong number of arguments supplied"
-    grep '^##' $0
-    exit
-fi
+num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal"
+echo_script_name
 
-echo -e "Now running script:\n${0}"
+
+# # ~~~~~~ script args ~~~~~~ #
+# analysis_ID="$1"
+# # analysis_ID="${@:1}" # accept a space separated list of ID's
 
 # ~~~~~~ script args ~~~~~~ #
-analysis_ID="$1"
-# analysis_ID="${@:1}" # accept a space separated list of ID's
+# analysis_ID="$1"
+analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at the first arg
 
-outdir="output"
-report_template_dir="report"
-full_report_template="${report_template_dir}/full_report.Rmd"
-actionable_genes_file="data/actionable_genes.txt"
-compile_report_script="$(dirname $0)/compile_RMD_report.R"
+for i in $analysis_ID_list; do
+    analysis_ID="$i"
+    echo -e "\nAnalysis ID is:\n$analysis_ID\n"
 
-analysis_outdir="${outdir}/${analysis_ID}"
-analysis_report_parentdir="${analysis_outdir}/reports"
+    compile_report_script="${codedir}/compile_RMD_report.R"
 
-
-echo -e "\n-----------------------------------\n"
-echo -e "\n-----------------------------------\n"
-echo -e "\nanalysis_ID is:\n$analysis_ID"
-echo -e "\nanalysis_report_parentdir is :\n$analysis_report_parentdir"
-echo -e "\nfull_report_template is :\n$full_report_template"
-echo -e "\nactionable_genes_file is :\n$actionable_genes_file"
+    analysis_outdir="${outdir}/${analysis_ID}"
+    analysis_report_parentdir="${analysis_outdir}/reports"
 
 
-
-#~~~~~ FIND ANALYIS SAMPLES ~~~~~~# 
-# find all samples in the analysis dir
-echo -e "Finding samples in analysis dir..."
-analysis_samples="$(find "$analysis_outdir" -type d -path "*variantCaller_out*" -name "*IonXpress_*")"
-error_on_zerolength "$analysis_samples" "TRUE" "Checking to make sure samples were found..."
-
-echo -e "Finding analysis barcodes file..."
-barcodes_file="$(find "$analysis_outdir" -type f -path "*variantCaller_out*" -name "sample_barcode_IDs.tsv")"
-error_on_zerolength "$barcodes_file" "TRUE" "Checking to make sure barcode file was found..."
-echo -e "Barcode file is:\n$barcodes_file"
-
-for i in $analysis_samples; do
-    (
     echo -e "\n-----------------------------------\n"
-    # need to get the following:
-    # summary_table_file
-    # IGV_snapshot_dir
-    # clinical_report_comments
-    # analysis_ID
-    # sample_ID
-    # barcode_ID
-
-    echo "$i"
-    sample_barcode="$(basename "$i")"
-    echo -e "\nSample barcode is:\n$sample_barcode"
-
-    echo -e "Searching for sample_report_dir... "
-    sample_report_dir="${analysis_report_parentdir}/${sample_barcode}"
-    echo -e "\nSample report dir is:\n$sample_report_dir"
-    mkdir -p "$sample_report_dir"
-
-    # find sample IGV dir
-    echo -e "Searching for IGV snapshot dir..."
-    sample_IGV_dir="$(find "$analysis_outdir" -type d -path "*coverageAnalysis_out*" -path "*$sample_barcode*" -name "*IGV_snapshots*")"
-    echo -e "\nIGV snapshot dir is:\n$sample_IGV_dir"
-
-    # set report IGV link path
-    set -x
-    echo -e "\nLinking IGV snapshot dir to report dir..."
-    if [ ! -z $sample_IGV_dir ] && [ -d $sample_IGV_dir ] && [ -d $sample_report_dir ]; then
-        sample_IGV_dir_fullpath="$(readlink -f "$sample_IGV_dir")"
-        sample_IGV_report_dir="$(readlink -f $sample_report_dir)/IGV_snapshots"
-        echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
-        # (cd $sample_report_dir && ln -fs "$sample_IGV_dir_fullpath")
-        ln -fs "$sample_IGV_dir_fullpath" "$sample_IGV_report_dir"
-    fi
-    set +x
-
-    # get sample ID from barcode file
-    echo -e "Searching barcodes file for sample ID..."
-    sample_ID="$(cat $barcodes_file | grep $sample_barcode | cut -f1)"
-    error_on_zerolength "$sample_ID" "TRUE" "Checking to make sample ID was found..."
-    echo -e "Sample ID is:\n$sample_ID"
-
-    # FIND SUMMARY TABLE
-    echo -e "\nFinding sample summary table file..."
-    sample_summary_file="$(find_sample_file "$analysis_outdir" "variantCaller_out" "$sample_barcode" "_summary.tsv" | head -1)"
-    # error_on_zerolength "$sample_summary_file" "TRUE" "Checking to make sure sample file was found..."
-    echo -e "\nSample summary table file is:\n$sample_summary_file\n"
-
-    # link to the SUMMARY TABLE
-    set -x
-    echo -e "\nLinking comments file to to report dir..."
-    if [ ! -z $sample_summary_file ] && [ -f $sample_summary_file ] && [ -d $sample_report_dir ]; then
-        sample_summary_file_fullpath="$(readlink -f "$sample_summary_file")"
-        sample_summary_report_file="$(readlink -f $sample_report_dir)/summary_table.tsv"
-        echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_summary_file"
-        ln -fs "$sample_summary_file_fullpath" "$sample_summary_report_file"
-    fi
-    set +x
-
-    # find comments file.. # IonXpress_008_comments.md
-    echo -e "\nFinding sample report comments file..."
-    sample_comments_file="$(find_sample_file "$analysis_outdir" "variantCaller_out" "$sample_barcode" "_comments.md" | head -1)"
-    # error_on_zerolength "$sample_summary_file" "TRUE" "Checking to make sure sample file was found..."
-    echo -e "\nSample comments file is:\n$sample_comments_file\n"
-
-    # link to the comments file
-    set -x
-    echo -e "\nLinking comments file to to report dir..."
-    if [ ! -z $sample_comments_file ] && [ -f $sample_comments_file ] && [ -d $sample_report_dir ]; then
-        sample_comments_file_fullpath="$(readlink -f "$sample_comments_file")"
-        sample_comments_report_file="$(readlink -f $sample_report_dir)/report_comments.md"
-        echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
-        ln -fs "$sample_comments_file_fullpath" "$sample_comments_report_file"
-    fi
-    set +x
+    echo -e "\n-----------------------------------\n"
+    echo -e "\nanalysis_ID is:\n$analysis_ID"
+    echo -e "\nanalysis_report_parentdir is :\n$analysis_report_parentdir"
+    echo -e "\nfull_report_template is :\n$full_report_template"
+    echo -e "\nactionable_genes_file is :\n$actionable_genes_file"
 
 
-    # copy over the report template
-    set -x
-    sample_report_file="${sample_report_dir}/$(basename "$full_report_template")"
-    /bin/cp -v "$full_report_template" "$sample_report_file"
 
-    if [ ! -z $sample_IGV_report_dir ] && [ ! -z $sample_summary_report_file ] && [ ! -z $sample_comments_report_file ] && [ -f $sample_report_file ]; then
-        # do things
-        module load pandoc/1.13.1
-        $compile_report_script "$sample_report_file"
-    fi
-    set +x
-    )
+    #~~~~~ FIND ANALYIS SAMPLES ~~~~~~# 
+    # find all samples in the analysis dir
+    echo -e "Finding samples in analysis dir..."
+    analysis_samples="$(find "$analysis_outdir" -type d -path "*variantCaller_out*" -name "*IonXpress_*")"
+    error_on_zerolength "$analysis_samples" "TRUE" "Checking to make sure samples were found..."
+
+    echo -e "Finding analysis barcodes file..."
+    barcodes_file="$(find "$analysis_outdir" -type f -path "*variantCaller_out*" -name "sample_barcode_IDs.tsv")"
+    error_on_zerolength "$barcodes_file" "TRUE" "Checking to make sure barcode file was found..."
+    echo -e "Barcode file is:\n$barcodes_file"
+
+    for i in $analysis_samples; do
+        (
+        echo -e "\n-----------------------------------\n"
+        # need to get the following:
+        # summary_table_file
+        # IGV_snapshot_dir
+        # clinical_report_comments
+        # analysis_ID
+        # sample_ID
+        # barcode_ID
+
+        echo "$i"
+        sample_barcode="$(basename "$i")"
+        echo -e "\nSample barcode is:\n$sample_barcode"
+
+        echo -e "Searching for sample_report_dir... "
+        sample_report_dir="${analysis_report_parentdir}/${sample_barcode}"
+        echo -e "\nSample report dir is:\n$sample_report_dir"
+        mkdir -p "$sample_report_dir"
+
+        # find sample IGV dir
+        echo -e "Searching for IGV snapshot dir..."
+        sample_IGV_dir="$(find "$analysis_outdir" -type d -path "*coverageAnalysis_out*" -path "*$sample_barcode*" -name "*IGV_snapshots*")"
+        echo -e "\nIGV snapshot dir is:\n$sample_IGV_dir"
+
+        # set report IGV link path
+        # set -x
+        echo -e "\nLinking IGV snapshot dir to report dir..."
+        if [ ! -z $sample_IGV_dir ] && [ -d $sample_IGV_dir ] && [ -d $sample_report_dir ]; then
+            sample_IGV_dir_fullpath="$(readlink -f "$sample_IGV_dir")"
+            sample_IGV_report_dir="$(readlink -f $sample_report_dir)/IGV_snapshots"
+            echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
+            # (cd $sample_report_dir && ln -fs "$sample_IGV_dir_fullpath")
+            ln -fs "$sample_IGV_dir_fullpath" "$sample_IGV_report_dir"
+        fi
+        # set +x
+
+        # get sample ID from barcode file
+        echo -e "Searching barcodes file for sample ID..."
+        sample_ID="$(cat $barcodes_file | grep $sample_barcode | cut -f1)"
+        error_on_zerolength "$sample_ID" "TRUE" "Checking to make sample ID was found..."
+        echo -e "Sample ID is:\n$sample_ID"
+
+        # FIND SUMMARY TABLE
+        echo -e "\nFinding sample summary table file..."
+        sample_summary_file="$(find_sample_file "$analysis_outdir" "variantCaller_out" "$sample_barcode" "_summary.tsv" | head -1)"
+        # error_on_zerolength "$sample_summary_file" "TRUE" "Checking to make sure sample file was found..."
+        echo -e "\nSample summary table file is:\n$sample_summary_file\n"
+
+        # link to the SUMMARY TABLE
+        # set -x
+        echo -e "\nLinking comments file to to report dir..."
+        if [ ! -z $sample_summary_file ] && [ -f $sample_summary_file ] && [ -d $sample_report_dir ]; then
+            sample_summary_file_fullpath="$(readlink -f "$sample_summary_file")"
+            sample_summary_report_file="$(readlink -f $sample_report_dir)/summary_table.tsv"
+            echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_summary_file"
+            ln -fs "$sample_summary_file_fullpath" "$sample_summary_report_file"
+        fi
+        # set +x
+
+        # find comments file.. # IonXpress_008_comments.md
+        echo -e "\nFinding sample report comments file..."
+        sample_comments_file="$(find_sample_file "$analysis_outdir" "variantCaller_out" "$sample_barcode" "_comments.md" | head -1)"
+        # error_on_zerolength "$sample_summary_file" "TRUE" "Checking to make sure sample file was found..."
+        echo -e "\nSample comments file is:\n$sample_comments_file\n"
+
+        # link to the comments file
+        # set -x
+        echo -e "\nLinking comments file to to report dir..."
+        if [ ! -z $sample_comments_file ] && [ -f $sample_comments_file ] && [ -d $sample_report_dir ]; then
+            sample_comments_file_fullpath="$(readlink -f "$sample_comments_file")"
+            sample_comments_report_file="$(readlink -f $sample_report_dir)/report_comments.md"
+            echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
+            ln -fs "$sample_comments_file_fullpath" "$sample_comments_report_file"
+        fi
+        # set +x
+
+
+        # copy over the report template
+        # set -x
+        sample_report_file="${sample_report_dir}/$(basename "$full_report_template")"
+        /bin/cp -v "$full_report_template" "$sample_report_file"
+
+        if [ ! -z $sample_IGV_report_dir ] && [ ! -z $sample_summary_report_file ] && [ ! -z $sample_comments_report_file ] && [ -f $sample_report_file ]; then
+            # do things
+            module load pandoc/1.13.1
+            $compile_report_script "$sample_report_file"
+        fi
+        # set +x
+        )
+    done
 done
-
 
 
 

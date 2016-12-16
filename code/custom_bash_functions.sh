@@ -2,14 +2,11 @@
 
 # custom functions for the pipeline
 
-
-#~~~~~ PARSE ARGS ~~~~~~# 
-
 function num_args_should_be {
+    # USAGE: num_args_should_be "equal" "0" "$#"
     local func_type="$1" # "less_than", "greater_than", "equal"
     local arg_limit="$2"
     local num_args="$3"
-    # USAGE: num_args_should_be "equal" "0" "$#"
 
     if [ "$func_type" == "less_than" ]; then
         if (( "$num_args" >= "$arg_limit" )); then
@@ -41,6 +38,9 @@ function num_args_should_be {
 
 
 function echo_script_name {
+    echo -e "-----------------------------------"
+    echo -e "-----------------------------------"
+    echo -e "-----------------------------------"
     echo -e "Now running script:\n${0}\n"
 }
 
