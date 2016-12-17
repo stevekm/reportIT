@@ -1,10 +1,8 @@
 #!/bin/bash
 # set -x
 
-## USAGE: code/make_full_report_dir.sh analysis_ID
-
-## Description: This script will set up the reports directories in an analysis dir
-
+## USAGE: code/make_full_report_dir.sh <analysis_ID> <analysis_ID> ...
+## Description: This script will set up the reports directories in an analysis dir and compile the reports for each sample
 
 #~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
 source "global_settings.sh"
@@ -14,12 +12,7 @@ num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal
 echo_script_name
 
 
-# # ~~~~~~ script args ~~~~~~ #
-# analysis_ID="$1"
-# # analysis_ID="${@:1}" # accept a space separated list of ID's
-
 # ~~~~~~ script args ~~~~~~ #
-# analysis_ID="$1"
 analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at the first arg
 
 for i in $analysis_ID_list; do
@@ -78,7 +71,6 @@ for i in $analysis_ID_list; do
         echo -e "\nIGV snapshot dir is:\n$sample_IGV_dir"
 
         # set report IGV link path
-        # set -x
         echo -e "\nLinking IGV snapshot dir to report dir..."
         if [ ! -z $sample_IGV_dir ] && [ -d $sample_IGV_dir ] && [ -d $sample_report_dir ]; then
             sample_IGV_dir_fullpath="$(readlink -f "$sample_IGV_dir")"
@@ -87,7 +79,6 @@ for i in $analysis_ID_list; do
             # (cd $sample_report_dir && ln -fs "$sample_IGV_dir_fullpath")
             ln -fs "$sample_IGV_dir_fullpath" "$sample_IGV_report_dir"
         fi
-        # set +x
 
         # get sample ID from barcode file
         echo -e "Searching barcodes file for sample ID..."
@@ -102,7 +93,6 @@ for i in $analysis_ID_list; do
         echo -e "\nSample summary table file is:\n$sample_summary_file\n"
 
         # link to the SUMMARY TABLE
-        # set -x
         echo -e "\nLinking comments file to to report dir..."
         if [ ! -z $sample_summary_file ] && [ -f $sample_summary_file ] && [ -d $sample_report_dir ]; then
             sample_summary_file_fullpath="$(readlink -f "$sample_summary_file")"
@@ -110,7 +100,6 @@ for i in $analysis_ID_list; do
             echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_summary_file"
             ln -fs "$sample_summary_file_fullpath" "$sample_summary_report_file"
         fi
-        # set +x
 
         # find comments file.. # IonXpress_008_comments.md
         echo -e "\nFinding sample report comments file..."
@@ -119,7 +108,6 @@ for i in $analysis_ID_list; do
         echo -e "\nSample comments file is:\n$sample_comments_file\n"
 
         # link to the comments file
-        # set -x
         echo -e "\nLinking comments file to to report dir..."
         if [ ! -z $sample_comments_file ] && [ -f $sample_comments_file ] && [ -d $sample_report_dir ]; then
             sample_comments_file_fullpath="$(readlink -f "$sample_comments_file")"
@@ -127,11 +115,9 @@ for i in $analysis_ID_list; do
             echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
             ln -fs "$sample_comments_file_fullpath" "$sample_comments_report_file"
         fi
-        # set +x
 
 
         # copy over the report template
-        # set -x
         sample_report_file="${sample_report_dir}/$(basename "$full_report_template")"
         /bin/cp -v "$full_report_template" "$sample_report_file"
 
@@ -140,7 +126,6 @@ for i in $analysis_ID_list; do
             module load pandoc/1.13.1
             $compile_report_script "$sample_report_file"
         fi
-        # set +x
         )
     done
 done

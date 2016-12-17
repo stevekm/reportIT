@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## USAGE: get_run_IDs.sh analysis_ID
+## USAGE: get_run_IDs.sh <analysis_ID>
 
 ## DESCRIPTION: This script will read in the run.xls file and output just the sample IDs
 

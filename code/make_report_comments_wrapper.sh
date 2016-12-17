@@ -1,8 +1,7 @@
 #!/bin/bash
 # set -x
 
-## USAGE: make_report_comments_wrapper.sh analysis_ID
-
+## USAGE: make_report_comments_wrapper.sh <analysis_ID> <analysis_ID> ...
 ## Description: This script will find parse an annotated analysis dir, 
 
 #~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
@@ -13,9 +12,7 @@ num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal
 echo_script_name
 
 
-
 # ~~~~~~ script args ~~~~~~ #
-# analysis_ID="$1"
 analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at the first arg
 
 for i in $analysis_ID_list; do

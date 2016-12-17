@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -x
 
-## USAGE: annotate_vcfs.sh output/run_dir
+## USAGE: annotate_vcfs.sh /path/to/output/analysis_dir
 
 ## Description: This script will find all VCF files in your Run dir and annotate them with ANNOVAR
 ## This script is set up to use Ion Torrent 5.0 VCF's
@@ -28,9 +28,7 @@ for i in $vcf_files; do
     file_dir="$(dirname $i)"
     vcf_split_output="${vcf_input%%.vcf}.vcf_split"
     echo -e "Processing file:\n$vcf_input"
-    # set -x
     $bcftools_bin norm -m-both "$vcf_input" -o "$vcf_split_output"
-    # set +x
 done
 
 # reset VCF file list with new split VCFs
@@ -51,9 +49,7 @@ for i in $vcf_files; do
     # convert the VCF to ANNOVAR input format
     echo -e "\nConverting to ANNOVAR format\n"
     if [ -f $vcf_input ]; then 
-        # set -x
         [ ! -f $avinput_file ] && $convert2annovar_bin -format vcf4old "$vcf_input" -includeinfo > "$avinput_file"
-        # set +x
     else
         echo -e "ERROR: VCF input file not found:\n$vcf_input"
         echo "Exiting.."
@@ -62,9 +58,7 @@ for i in $vcf_files; do
     # run ANNOVAR on the avinput
     echo -e "Running ANNOVAR on file:\n$avinput_file"
     if [ -f $avinput_file ]; then
-        # set -x
         [ ! -f ${avoutput_file}.hg19_multianno.txt ] && $table_annovar_bin "$avinput_file" "$annovar_db_dir" -buildver "$build_version" -out "$avoutput_file" -remove $annovar_protocol -nastring .
-        # set +x
     else
         echo -e "ERROR: AVINPUT file not found:\n${avinput_file}"
         echo "Exiting.."
@@ -82,9 +76,7 @@ if [ -f $vcf_input ]; then
     echo -e "Running bcftools on:\n${i}\nOutputting to:\n${query_output_file}\n"
     echo -e 'You can probably ignore "contig is not defined in the header" messages...'
     echo -e "Chrom\tPosition\tRef\tVariant\tQuality\tFrequency\tCoverage\tAllele Coverage\tStrand Bias" > "$query_output_file"
-    # set -x
     $bcftools_bin query -f '%CHROM\t%POS\t%REF\t%ALT\t%QUAL\t%AF\t%FDP\t%FAO\t%STB\n' "$vcf_input" >> "$query_output_file"
-    # set +x
     # sanity tests
     [ ! -f $query_output_file ] && echo -e "ERROR: File not created properly:\n${query_output_file}\nExiting.." && exit
     query_len="$(tail -n +2 ${query_output_file} | wc -l)"; # echo "query_len is $query_len"
@@ -105,9 +97,7 @@ vcf_input="$i"
 tsv_output_file="${file_dir}/${barcode_ID}.tsv"
     if [ -f $vcf_input ]; then 
         echo -e "Converting VCF to TSV:\n${vcf_input}\n${tsv_output_file}\n"
-        # set -x
         $vcf2tsv_bin "$vcf_input" > "$tsv_output_file"
-        # set +x
         [ ! -f $tsv_output_file ] && echo -e "ERROR: TSV file not created properly;\n${tsv_output_file}" && exit
         tsv_len="$(tail -n +2 ${tsv_output_file} | wc -l)"; # echo "tsv_len is $tsv_len"
         vcf_len="$(cat $vcf_input | grep -Ev '^#' | wc -l)"; # echo "vcf_len is $vcf_len"
@@ -118,10 +108,5 @@ tsv_output_file="${file_dir}/${barcode_ID}.tsv"
         exit
     fi
 done
-
-# delete the stuff we just made.. 
-# find output/R_2016_09_01_14_26_55_user_SN2-192-IT16-039-1/ -type f -path "*variantCaller_out.*" -name "IonXpress*" -name "*.tsv" -exec rm -f {} \;
-# -type f -path "*variantCaller_out.*" -name "IonXpress*" -name "*.avinput" -exec rm -f {} \;
-# -type f -path "*variantCaller_out.*" -name "IonXpress*" -name "*.hg19_multianno.txt" -exec rm -f {} \;
 
 

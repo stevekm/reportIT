@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -x
 
-## USAGE: merge_vcf_annotations_wrapper.sh /path/to/analysis_dir analysis_ID
+## USAGE: merge_vcf_annotations_wrapper.sh /path/to/analysis_dir <analysis_ID>
 
 ## Description: This script will find parse an annotated analysis dir, 
 ## find all files needed to make the merged summary tables per sample, 

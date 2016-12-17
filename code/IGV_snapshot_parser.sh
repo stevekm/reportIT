@@ -19,7 +19,6 @@ num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal
 echo_script_name
 
 
-# analysis_ID="$1"
 analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at the first arg
 
 for i in $analysis_ID_list; do
@@ -127,7 +126,6 @@ for i in $analysis_ID_list; do
         # CREATE IGV BATCH SCRIPT
         # only run if at least 2 lines in the summary table file..
         # with or without control!
-
         echo -e "Checking number of lines in summary table file..."
         num_lines="$(cat "$sample_summary_file" | wc -l)"
         min_number_lines="1"
