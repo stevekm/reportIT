@@ -18,6 +18,7 @@ params:
 ---
 
 ```{r setup, include=FALSE}
+# {.tabset} # .tabset-fade .tabset-pills
 knitr::opts_chunk$set(echo = FALSE)
   # canonical_transcript_file: canon_file.txt
 
@@ -26,7 +27,22 @@ mycat <- function(text){
     cat(gsub(pattern = "\n", replacement = "  \n", x = text))
 }
 
-# {.tabset} # .tabset-fade .tabset-pills
+# function for reading info from a text file
+file_scan <- function(my_file){
+  file_contents <- scan(my_file, what="", sep="\n")
+  return(file_contents)
+}
+
+# function to return file contents or NA if file doesn't exit
+get_file_content <- function(my_file){
+  file_contents <- "NA"
+  if (file.exists(my_file)) {
+    if (! identical(file_scan(my_file), character(0))) {
+      file_contents <- file_scan(my_file)
+    }
+  }
+  return(file_contents)
+}
 ```
 
 
@@ -41,9 +57,9 @@ IGV_snapshot_dir <- params$IGV_snapshot_dir
 # IGV_snapshot_dir <- "test_data/IonXpress_006/IGV_snapshots"
 
 child_doc <- params$clinical_report_comments
-analysis_ID <- params$analysis_ID
-sample_ID <- params$sample_ID
-barcode_ID <- params$barcode_ID
+# analysis_ID <- params$analysis_ID
+# sample_ID <- params$sample_ID
+# barcode_ID <- params$barcode_ID
 
 
 # load report tables
@@ -56,10 +72,17 @@ summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
 # Sample Information
 
 ```{r, results='asis'}
+analysis_ID <- get_file_content("analysis_ID.txt")
+sample_ID <- get_file_content("sample_ID.txt")
+barcode_ID <- get_file_content("barcode_ID.txt")
+# tumor_type <- get_file_content("tumor_type.txt")
+# tissue_type <- get_file_content("tissue_type.txt")
 
 mycat(paste0("Analyis ID: ", analysis_ID, "\n\n"))
 mycat(paste0("Sample ID: ", sample_ID, "\n\n"))
 mycat(paste0("Barcode ID: ", barcode_ID, "\n\n"))
+# mycat(paste0("Tumor Type: ", tumor_type, "\n\n"))
+# mycat(paste0("Tissue Type: ", tissue_type, "\n\n"))
 
 ```
 
@@ -70,7 +93,7 @@ The following mutations are detected:
 ```{r, echo = FALSE, results='asis', eval=TRUE}
 # for(i in seq_along())
 # colnames(summary_df)
-print(xtable(summary_df[c("Gene", "Coding", "Amino.Acid.Change")]),type='html', comment=FALSE, include.rownames=FALSE)
+print(xtable(summary_df[c("Gene", "Coding", "Amino.Acid.Change", "Review")]),type='html', comment=FALSE, include.rownames=FALSE)
 ```
 
 # IGV Snapshots {.tabset .tabset-pills} 

@@ -60,10 +60,15 @@ for i in $analysis_ID_list; do
         sample_barcode="$(basename "$i")"
         echo -e "\nSample barcode is:\n$sample_barcode"
 
-        echo -e "Searching for sample_report_dir... "
+        echo -e "Trying to create sample_report_dir... "
         sample_report_dir="${analysis_report_parentdir}/${sample_barcode}"
-        echo -e "\nSample report dir is:\n$sample_report_dir"
+        echo -e "\nSample report dir will be:\n$sample_report_dir"
         mkdir -p "$sample_report_dir"
+        sample_report_dir_fullpath="$(readlink -f $sample_report_dir)"
+        error_on_zerolength "$sample_report_dir_fullpath" "TRUE" "Checking to make sure sample report dir was created successfully..."
+        check_dirfile_exists "$sample_report_dir_fullpath" "d"
+
+
 
         # find sample IGV dir
         echo -e "Searching for IGV snapshot dir..."
@@ -115,14 +120,19 @@ for i in $analysis_ID_list; do
             echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
             ln -fs "$sample_comments_file_fullpath" "$sample_comments_report_file"
         fi
-
+        
+        # write the ID informations to files for the report
+        echo -e "Writing sample ID information for the report..."
+        echo "$sample_ID" > "${sample_report_dir_fullpath}/sample_ID.txt"
+        echo "$sample_barcode" > "${sample_report_dir_fullpath}/barcode_ID.txt"
+        echo "$analysis_ID" > "${sample_report_dir_fullpath}/analysis_ID.txt"
 
         # copy over the report template
         sample_report_file="${sample_report_dir}/$(basename "$full_report_template")"
         /bin/cp -v "$full_report_template" "$sample_report_file"
 
         if [ ! -z $sample_IGV_report_dir ] && [ ! -z $sample_summary_report_file ] && [ ! -z $sample_comments_report_file ] && [ -f $sample_report_file ]; then
-            # do things
+            # compile the report for the sample
             module load pandoc/1.13.1
             $compile_report_script "$sample_report_file"
         fi
