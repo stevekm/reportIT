@@ -92,6 +92,16 @@ function find_sample_file {
 
 }
 
+function find_analysis_files {
+    # find a list of all matching files from analysis dir
+    local analysis_dir="$1"
+    local file_pattern="$2" # coverageAnalysis_out OR variantCaller_out
+
+    # find output/Auto_user_SN2-213-IT16-049-2_269_302 -type f -path "*coverageAnalysis_out*" -path "*IonXpress_011*" -name "*.bam"
+    find "$analysis_dir" -type f -name "*$file_pattern"
+}
+
+
 function check_num_file_lines {
     local input_file="$1"
     local min_number_lines="$2"
@@ -108,12 +118,12 @@ function find_NC_control_sample {
     local outdir="$3"
 
     echo -e "Searching for NC control sample in file:\n$barcode_file"
-    set -x
+    # set -x
     nc_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f1)"
     nc_barcode="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f2)"
     nc_run_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f3)"
     nc_analysis_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f4)"
-    set +x
+    # set +x
 
     # dir for the control sample
     nc_analysis_outdir="${outdir}/${nc_analysis_ID}"

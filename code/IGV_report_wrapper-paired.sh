@@ -20,6 +20,9 @@ analysis_2="$2"
 # designate two runs as a 'paired' analysis
 ${codedir}/make_paired_analysis.sh "$analysis_1" "$analysis_2"
 
+# generate concatenated summary and annotation tables for the runs
+${codedir}/make_analysis_combined_tables.sh "$analysis_1" "$analysis_2"
+
 # generate IGV snapshots for analysess
 ${codedir}/IGV_snapshot_parser.sh "$analysis_1" "$analysis_2"
 

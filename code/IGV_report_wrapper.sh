@@ -19,6 +19,9 @@ analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at th
 for i in $analysis_ID_list; do
     analysis_ID="$i"
 
+    # generate concatenated summary and annotation tables for the run
+    ${codedir}/make_analysis_combined_tables.sh "$analysis_ID"
+
     # generate IGV snapshots for analysess
     ${codedir}/IGV_snapshot_parser.sh "$analysis_ID"
 
