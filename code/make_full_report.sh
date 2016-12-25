@@ -128,7 +128,8 @@ for i in $analysis_ID_list; do
         echo "$analysis_ID" > "${sample_report_dir_fullpath}/analysis_ID.txt"
 
         # copy over the report template
-        sample_report_file="${sample_report_dir}/$(basename "$full_report_template")"
+        # sample_report_file="${sample_report_dir}/$(basename "$full_report_template")"
+        sample_report_file="${sample_report_dir}/$(basename "${sample_report_dir}")_full_report.Rmd"
         /bin/cp -v "$full_report_template" "$sample_report_file"
 
         if [ ! -z $sample_IGV_report_dir ] && [ ! -z $sample_summary_report_file ] && [ ! -z $sample_comments_report_file ] && [ -f $sample_report_file ]; then
