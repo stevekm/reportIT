@@ -71,7 +71,6 @@ initialize_db "$sqlite_db" "$table_name" "$first_input_file"
 # import the rest of the files
 input_files="$(echo $input_data_file_list | cut -d ' ' -f 2-)"
 
-# tmp_output="tmp"
 for input_file in $input_files; do
     echo "$input_file"
     append_to_db "$sqlite_db" "$table_name" "$input_file"
