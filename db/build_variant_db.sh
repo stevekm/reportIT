@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -x
 
-## USAGE: build_variant_db.sh /path/to/output.db <table_name> <input2.tsv> <input2.tsv> ...
+## USAGE: build_variant_db.sh /path/to/output.db <table_name> <input1.tsv> <input2.tsv> ...
 ## DESCRIPTION: This script will import all given files into a common SQLite database
 ## all imported files must share the TSV format and have a common header
 ## WARNING: output.db and all intermediary files will be overwritten!
@@ -49,7 +49,7 @@ echo_script_name
 
 sqlite_db="$1"
 table_name="$2"
-input_data_file_list="${@:3}" # accept a space separated list of ID's starting at the first arg
+input_data_file_list="${@:3}" # accept a space separated list of files starting at the third arg
 
 
 echo -e "sqlite_db is:\n$sqlite_db\n"
