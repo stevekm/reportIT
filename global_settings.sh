@@ -34,8 +34,12 @@ control_sample_regex_file="data/control_sample_regex.txt"
 control_sample_ID_file="data/control_sample_IDs.txt"
 
 #~~~~~ CUSTOM FUNCTIONS ~~~~~~# 
-source "${codedir}/custom_bash_functions.sh"
-
+if [ -f "${codedir}/custom_bash_functions.sh" ]; then
+    source "${codedir}/custom_bash_functions.sh"
+elif [ ! -f "${codedir}/custom_bash_functions.sh" ]; then
+    echo -e "ERROR: file not found:\n${codedir}/custom_bash_functions.sh"
+    echo -e "WARNING: Pipeline might not work correctly unless the file has been sourced from elsewhere"
+fi
 
 
 

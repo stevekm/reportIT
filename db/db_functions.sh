@@ -18,3 +18,13 @@ E0F
     fi
 
 }
+
+# if DB exists, check for table
+# if [ -f "$sqlite_db" ] ; then
+#     if $(check_for_table "$sqlite_db" "$table_name"); then
+#         echo -e "SUCCESS: Table $table_name exists in $sqlite_db."
+#     else 
+#         echo -e "ERROR: Table $table_name does not exist in $sqlite_db."
+#     fi
+# # elif [ ! -f "$sqlite_db" ]; then
+# fi

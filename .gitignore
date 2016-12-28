@@ -20,3 +20,10 @@ my_db.db
 code/data
 my_first_db.sqlite
 IPMKB_interpretations_backup.tsv
+*.db
+append.sql
+main.sql
+tmp
+db/*.tsv
+foo.sqlite
+Auto_user_*
