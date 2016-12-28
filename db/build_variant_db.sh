@@ -32,8 +32,9 @@ function append_to_db {
     local table_name="$2"
     local input_file="$3"
     local tmp_output="tmp"
-
-        tail -n +2 "$input_file" > "$tmp_output"
+    
+    # need to strip header for appended files
+    tail -n +2 "$input_file" > "$tmp_output"
 cat > append.sql <<E0F
 .mode tabs
 .import ${tmp_output} ${table_name}
