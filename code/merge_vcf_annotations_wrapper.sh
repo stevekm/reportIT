@@ -57,8 +57,10 @@ for i in $sample_dirs; do
     # echo $query_file
     annot_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*.hg19_multianno.txt")"
     # echo $annot_file
+    vcf_file="$(find "$samplei" -type f -name "TSVC_variants.vcf")"
+    # echo $vcf_file
     set -x
-    $merge_script "$barcodes_file" "$query_file" "$annot_file" "$transcr_file" "$panel_genes_file" "$actionable_genes_file" "$analysis_ID"
+    $merge_script "$barcodes_file" "$query_file" "$annot_file" "$transcr_file" "$panel_genes_file" "$actionable_genes_file" "$analysis_ID" "$vcf_file"
     set +x
     echo -e "---------------------------------------"
 done

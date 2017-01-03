@@ -131,8 +131,8 @@ function download_server_files {
     # download the files from the server
     echo -e "\n--------------------------------------------\n"
     echo -e "DOWNLOADING ANALYSIS FILES FROM SERVER"
-    echo -e "\nPLEASE LOG INTO SERVER TO GET COPY RUN FILES\n"
-    rsync -vzheR --copy-links --progress -e "ssh" --files-from="$server_file_list" ${server_info}:/results/analysis/output/Home/ "${outdir}"
+    echo -e "\nPLEASE LOG INTO SERVER TO GET COPY FILES\n"
+    rsync -avzheR --copy-links --chmod=o-rw --progress -e "ssh" --files-from="$server_file_list" ${server_info}:/results/analysis/output/Home/ "${outdir}"
 }
 
 
@@ -165,9 +165,15 @@ function get_server_files_pipeline {
     get_analysis_ID "$analysis_manifest_file"
     get_run_ID "$analysis_manifest_file"
     download_server_files "$server_info_file" "$outdir" "$analysis_files_file"
+    # update_dirfiles_permissions "$analysis_outdir"
 
 }
 
+function update_dirfiles_permissions {
+    # remove global read write from all downloaded files; o-rw
+    local outdir="$1"
+    find "$outdir" -type f -exec chmod o-rw {} \;
+}
 
 
 #~~~~~ RUN PIPELINE ~~~~~~# 

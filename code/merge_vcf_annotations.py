@@ -126,6 +126,23 @@ def test_filtered_genes(df, unique_genes_list):
             print "Exiting..."
             sys.exit()
 
+def find_vcf_timestamp(vcf_file):
+    ##fileUTCtime=2016-09-23T16:46:51
+    with open(vcf_file) as f:
+        for line in f:
+            if "fileUTCtime" in line:
+                return line.strip().split("=")[1]
+
+
+def my_debugger():
+    # starts interactive Python terminal at location in script
+    # call with my_debugger() anywhere in your script
+    import readline # optional, will allow Up/Down/History in the console
+    import code
+    vars = globals().copy()
+    vars.update(locals())
+    shell = code.InteractiveConsole(vars)
+    shell.interact()
 
 # ~~~~ GET SCRIPT ARGS ~~~~~~ #
 # print 'script name is:', sys.argv[0]
@@ -138,14 +155,17 @@ canon_trancr_file = sys.argv[4]
 panel_genes_file = sys.argv[5]
 actionable_genes_file = sys.argv[6]
 analysis_ID = sys.argv[7]
+vcf_file = sys.argv[8]
 
+
+vcf_timestamp = find_vcf_timestamp(vcf_file)
 canon_trancr_list = list_file_lines(canon_trancr_file)
 panel_genes = list_file_lines(panel_genes_file)
 actionable_genes = list_file_lines(actionable_genes_file)
 outdir = os.path.dirname(annotation_file)
 
 # Summary Table Fields:
-summary_cols = ["Chrom", "Position", "Ref", "Variant", "Gene", "Quality", "Coverage", "Allele Coverage", "Strand Bias", "Coding", "Amino Acid Change", "Transcript", "Frequency", "Sample Name", "Barcode", "Run Name", "Review", "Analysis ID"]
+summary_cols = ["Chrom", "Position", "Ref", "Variant", "Gene", "Quality", "Coverage", "Allele Coverage", "Strand Bias", "Coding", "Amino Acid Change", "Transcript", "Frequency", "Sample Name", "Barcode", "Run Name", "Review", "Analysis ID", "Date"]
 
 
 
@@ -173,17 +193,6 @@ merge_df = pd.merge(annotation_df, query_df, on=['Chrom', 'Position', 'Ref', 'Va
 # split the AAChange rows in the table
 merge_df = split_df_col2rows(dataframe = merge_df, split_col = 'AAChange.refGene', split_char = ',', new_colname = 'AAChange', delete_old = True)
 
-'''
-# DEBUGGING!!
-
-import readline # optional, will allow Up/Down/History in the console
-import code
-vars = globals().copy()
-vars.update(locals())
-shell = code.InteractiveConsole(vars)
-shell.interact()
-# # 
-'''
 # split the new columns into separate columns
 merge_df = split_df_col2cols(dataframe = merge_df, split_col = 'AAChange', split_char = ':', new_colnames = ['Gene.AA', 'Transcript', 'Exon', 'Coding', 'Amino Acid Change'], delete_old = True)
 
@@ -223,6 +232,7 @@ merge_df['Barcode'] = barcode_ID
 merge_df['Sample Name'] = sample_ID
 merge_df['Run Name'] = run_ID
 merge_df['Analysis ID'] = analysis_ID
+merge_df['Date'] = vcf_timestamp
 
 # keep only the panel genes; default Unknown Significance
 merge_df = merge_df[merge_df["Gene"].isin(panel_genes)]
@@ -238,10 +248,11 @@ merge_df.loc[merge_df["Gene"].isin(actionable_genes), 'Review'] = "KS"
 # make a copy of the complete table before filtering for qualities
 full_df = merge_df
 
-# filter for qualities; filter rows
+# filter varaints based on quality criteria; filter rows
 merge_df = custom_table_filter(merge_df)
 
-# make the summary table; filter columns
+# make the summary table
+# filter out fields that aren't needed for reporting; filter columns
 summary_df = merge_df[summary_cols]
 
 
