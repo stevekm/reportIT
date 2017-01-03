@@ -26,10 +26,11 @@ def subprocess_cmd(command):
     proc_stdout = process.communicate()[0].strip()
     print proc_stdout
 
-def run_IGV_script(igv_script, igv_jar, memMB):
+def run_IGV_script(igv_script, igv_jar, memMB, x_serv_num):
     # run the IGV script
-    igv_command = "(Xvfb :10 &) && DISPLAY=:10 java -Xmx{}m -jar {} -b {} && killall Xvfb".format(memMB, igv_jar, igv_script)
+    igv_command = "(Xvfb :{} &) && DISPLAY=:{} java -Xmx{}m -jar {} -b {} && killall Xvfb".format(x_serv_num, x_serv_num, memMB, igv_jar, igv_script)
     startTime = datetime.now()
+    print "\nSelected X server is:\t", x_serv_num
     print "\nStarting IGV\nCurrent time is:\t", startTime
     print "\nIGV command is:\n", igv_command
     subprocess_cmd(igv_command)
@@ -45,13 +46,15 @@ parser.add_argument("batchscript_file", help="Path to the IGV batchscript file t
 
 # optional args
 parser.add_argument("-bin", default = "bin/IGV_2.3.81/igv.jar", type = str, dest = 'igv_jar_bin', metavar = 'IGV bin path', help="Path to the IGV jar binary to run")
-parser.add_argument("-mem", default = "1000", type = str, dest = 'igv_mem', metavar = 'IGV memory (MB)', help="Amount of memory to allocate to IGV, in Megabytes (MB)")
+parser.add_argument("-mem", default = "4000", type = str, dest = 'igv_mem', metavar = 'IGV memory (MB)', help="Amount of memory to allocate to IGV, in Megabytes (MB)")
+parser.add_argument("-x", default = "1", type = str, dest = 'x_serv', metavar = 'X server to use for IGV', help="X server to use for IGV")
 
 args = parser.parse_args()
 
 batchscript_file = args.batchscript_file
 igv_jar_bin = args.igv_jar_bin
 igv_mem = args.igv_mem
+x_serv = args.x_serv
 
 
 
@@ -61,7 +64,7 @@ if __name__ == "__main__":
     print "\nbatchscript_file is :\n", batchscript_file
     print "\nigv_jar_bin is :\n", igv_jar_bin
     print "\nigv_mem is :\n", igv_mem
-    run_IGV_script(igv_script = batchscript_file, igv_jar = igv_jar_bin, memMB = igv_mem)
+    run_IGV_script(igv_script = batchscript_file, igv_jar = igv_jar_bin, memMB = igv_mem, x_serv_num = x_serv)
 
 
 

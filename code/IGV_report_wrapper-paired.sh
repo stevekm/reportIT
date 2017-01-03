@@ -4,8 +4,6 @@
 
 ## DESCRIPTION: This script will run the IGV snapshot and paired analysis setup scripts, followed by the reporting scripts
 
-
-
 #~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
 source "global_settings.sh"
 

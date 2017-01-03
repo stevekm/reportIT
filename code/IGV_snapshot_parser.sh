@@ -141,6 +141,11 @@ for i in $analysis_ID_list; do
             if [ ! -z $sample_IGV_batchscript ]; then
                 echo -e "IGV batch script is:\n$sample_IGV_batchscript\n"
 
+                # find an open X server
+                echo -e "Searching for an open X server to run IGV..."
+                x_serv="$(find_open_X_server)"
+                echo -e "X server is:\n$x_serv\n"
+
                 # run IGV snapshotter
                 echo -e "Running IGV snapshot batch script..."
                 $IGV_run_batchscript_script "$sample_IGV_batchscript" 

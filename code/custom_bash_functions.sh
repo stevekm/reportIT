@@ -145,3 +145,11 @@ function find_NC_control_sample {
         IGV_control_param="-cb $nc_bamfile"
     fi
 }
+
+function find_open_X_server {
+    for serv_num in $(seq 1 1000); do
+        if ! (xdpyinfo -display :${serv_num})&>/dev/null; then 
+            echo "$serv_num" && break
+        fi
+    done
+}
