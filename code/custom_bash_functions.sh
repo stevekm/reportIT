@@ -291,39 +291,6 @@ function download_server_files {
     rsync -avzheR --copy-links --chmod=o-rw --progress -e "ssh" --files-from="$server_file_list" ${server_info}:/results/analysis/output/Home/ "${outdir}"
 }
 
-function get_server_files_pipeline {
-    local server_info_file="$1"
-    local outdir="$2"
-    local analysis_ID="$3"
-
-    # get info from the file
-    # username@server
-    local server_info="$(head -1 $server_info_file)"
-
-    # make sure there is info
-    if [[ -z "$server_info" ]]; then echo -e "No info read from file:\n${server_info}\nExiting"; exit; fi
-
-
-    make_outdir "$outdir"
-
-    analysis_outdir="${outdir}/${analysis_ID}"
-    make_outdir "$analysis_outdir"
-
-    analysis_manifest_file="${analysis_outdir}/analysis_manifest.txt"
-    analysis_files_file="${analysis_outdir}/analysis_files.txt"
-
-    echo -e "\n--------------------------------------------"
-    echo -e "--------------------------------------------\n"
-    echo -e "PROCESSING ANALYSIS:\n${analysis_ID}\n"
-    get_server_file_mainfest "$server_info" "$analysis_manifest_file" "$analysis_ID"
-    make_file_list "$analysis_manifest_file" "$analysis_files_file"
-    get_analysis_ID "$analysis_manifest_file"
-    get_run_ID "$analysis_manifest_file"
-    download_server_files "$server_info_file" "$outdir" "$analysis_files_file"
-    # update_dirfiles_permissions "$analysis_outdir"
-
-}
-
 function update_dirfiles_permissions {
     # remove global read write from all downloaded files; o-rw
     local outdir="$1"
