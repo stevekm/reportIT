@@ -15,19 +15,33 @@ A preliminary sparse plain-text report will be generated from the summary table 
 
 # Usage
 
-Program usage will change as development progresses. Current usage is:
+There are two methods of running the pipeline: 'interactively' (run all scripts in the current terminal session; recommended to use `screen`) or via submission to an HPC cluster with `qsub`. Each listed step should be run sequentially.
+
+Please note that usage will change as development progresses. In these examples, `Auto_user_SNX-XXX-XXXX-XXX` is an analysis ID from the IonTorrent system. Unless otherwise stated, all commands accept a space-separated list of one or more ID's. 
 
 ```bash
-# example analysis ID = 'Auto_user_SNX-XXX-XXXX-XXX'
-
 # get list of recent analysis runs
 code/get_server_run_list.sh
 
+
+# To run pipeline on HPC cluster
+# first download analysis files (requires interactive user login)
+code/get_server_files.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
+# annotate the downloaded sample files
+code/qsub_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
+# create IGV snapshots and reports for a PAIRED analysis (requires exactly TWO analysis ID's)
+code/qsub_paired_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
+
+
+# To run pipeline interactively:
 # download, annotate, and summarize the analysis data
 code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
 # IGV snapshots and reporting
-# for normal analyses
+# for non-paired independent analyses
 code/IGV_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
 # for a PAIRED analysis
