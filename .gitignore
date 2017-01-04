@@ -27,3 +27,5 @@ tmp
 db/*.tsv
 foo.sqlite
 Auto_user_*
+*.Rdata
+*.gz
