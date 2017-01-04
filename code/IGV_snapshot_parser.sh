@@ -88,6 +88,7 @@ for i in $analysis_ID_list; do
     analysis_samples="$(find "$analysis_outdir" -type d -path "*coverageAnalysis_out*" -name "*IonXpress_*")"
 
     for i in $analysis_samples; do
+        ( # run each iteration in a subshell, so 'exit' kills just the subshell, not the whole loop
         echo "$i"
         sample_barcode="$(basename "$i")"
         echo -e "\nSample barcode is:\n$sample_barcode"
@@ -123,6 +124,10 @@ for i in $analysis_ID_list; do
         error_on_zerolength "$sample_summary_file" "TRUE" "Checking to make sure sample file was found..."
         echo -e "\nSample summary table file is:\n$sample_summary_file\n"
 
+        # MAKE SURE ITS GOT AT LEAST ONE ENTRY
+        echo -e "\nMaking sure entries exist in the summary table..."
+        check_num_file_lines "$sample_summary_file" "2"
+
         # CREATE IGV BATCH SCRIPT
         # only run if at least 2 lines in the summary table file..
         # with or without control!
@@ -156,8 +161,7 @@ for i in $analysis_ID_list; do
             echo -e "Minimum lines needed:\n$min_number_lines"
             echo -e "Skipping IGV snapshot step..."
         fi
-
-
+    )
     done
 
 done
