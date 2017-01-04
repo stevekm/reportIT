@@ -60,7 +60,7 @@ x_serv = args.x_serv
 
 if __name__ == "__main__":
     # ~~~~ RUN BATCH SCRIPT ~~~~~~ #
-    print "Running script:\n", sys.argv[0]
+    print "Now running script:\n", sys.argv[0]
     print "\nbatchscript_file is :\n", batchscript_file
     print "\nigv_jar_bin is :\n", igv_jar_bin
     print "\nigv_mem is :\n", igv_mem

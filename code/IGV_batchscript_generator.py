@@ -114,6 +114,7 @@ NC_bam = args.NC_bam
 IGV_batch_file = os.path.join(IGV_snapshot_dir,"IGV_script.bat")
 mkdir_p(IGV_snapshot_dir)
 
+print "Now running script:\n", sys.argv[0]
 print "\nSumamry table file is:\n", summary_table_file
 print "\nBam file is:\n", bam_file
 print "\nIGV_snapshot_dir is:\n", IGV_snapshot_dir

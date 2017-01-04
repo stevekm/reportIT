@@ -136,14 +136,18 @@ for i in $analysis_ID_list; do
         num_lines="$(cat "$sample_summary_file" | wc -l)"
         min_number_lines="2"
         if (( $num_lines > $min_number_lines )); then 
-            echo -e "Running IGV batcscript generator script..."
-            [ -z "${IGV_control_param:-}" ] && echo -e "Including control BAM parameters:\n${IGV_control_param}"
+            echo -e "Running IGV batchscript generator script..."
+            set -x
+            # IGV_control_param is exported global variable from `find_NC_control_sample` function
+            [ ! -z "${IGV_control_param:-}" ] && echo -e "Including control BAM parameters:\n${IGV_control_param}"
             $IGV_batchscript_generator_script "$sample_summary_file" "$sample_bamfile" "$sample_IGV_dir" ${IGV_control_param:-}
+            set +x
 
             # find the new batch script.. IGV_script.bat
             echo -e "Searching for IGV batchs script..."
             sample_IGV_batchscript="$(find_sample_file "$i" "coverageAnalysis_out" "$sample_barcode" "IGV_script.bat" | head -1)"
-            error_on_zerolength "$sample_IGV_batchscript" "TRUE" "Checking to make sure IGV batch script was found..."
+            check_dirfile_exists "$sample_IGV_batchscript" "f" "Checking to make sure IGV batch script was found..."
+            # error_on_zerolength "$sample_IGV_batchscript" "TRUE" "Checking to make sure IGV batch script was found..."
             if [ ! -z $sample_IGV_batchscript ]; then
                 echo -e "IGV batch script is:\n$sample_IGV_batchscript\n"
 

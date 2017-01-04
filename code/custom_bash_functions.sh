@@ -54,18 +54,18 @@ function check_dirfile_exists {
     error_on_zerolength "$dirfile" "TRUE" "$test_message"
 
     # check if dir exists
-    if [ $dirfile_type == "d" ]; then
-        [ ! -d $dirfile ] && echo -e "ERROR: Item is not a dir:\n$dirfile\nDoes it exist?\nExiting..." && exit
+    if [ "$dirfile_type" == "d" ]; then
+        [ ! -d "$dirfile" ] && echo -e "ERROR: Item is not a dir:\n$dirfile\nDoes it exist?\nExiting..." && exit
     fi
 
     # check if dir exists
-    if [ $dirfile_type == "f" ]; then
-        [ ! -f $dirfile ] && echo -e "ERROR: Item is not a file:\n$dirfile\nDoes it exist?\nExiting..." && exit
+    if [ "$dirfile_type" == "f" ]; then
+        [ ! -f "$dirfile" ] && echo -e "ERROR: Item is not a file:\n$dirfile\nDoes it exist?\nExiting..." && exit
     fi
 
     # check if symlink exists
-    if [ $dirfile_type == "l" ]; then
-        [ ! -L $dirfile ] && echo -e "ERROR: Item is not a symlink:\n$dirfile\nDoes it exist?\nExiting..." && exit
+    if [ "$dirfile_type" == "l" ]; then
+        [ ! -L "$dirfile" ] && echo -e "ERROR: Item is not a symlink:\n$dirfile\nDoes it exist?\nExiting..." && exit
     fi
 }
 
@@ -99,12 +99,12 @@ function error_on_zerolength {
     echo -e "$test_message"
 
     # check if zero length string
-    if [ $test_type == "TRUE" ]; then
+    if [ "$test_type" == "TRUE" ]; then
         [ -z "$test_string" ] && echo -e "ERROR: String is length zero\nExiting..." && exit
     fi
 
     # check if non-zero length string
-    if [ $test_type == "FALSE" ]; then
+    if [ "$test_type" == "FALSE" ]; then
         [ ! -z "$test_string" ] && echo -e "ERROR: String is not length zero\nExiting..." && exit
     fi
 
@@ -165,7 +165,7 @@ function find_NC_control_sample {
     echo -e "\nnc_run_ID is:\n$nc_run_ID"
     echo -e "\nnc_analysis_ID is:\n$nc_analysis_ID"
     echo -e "\nnc_analysis_outdir is:\n$nc_analysis_outdir"
-    if [ ! -z $nc_ID ] && [ ! -z $nc_barcode ] && [ -d $nc_analysis_outdir ]; then
+    if [ ! -z "$nc_ID" ] && [ ! -z "$nc_barcode" ] && [ -d "$nc_analysis_outdir" ]; then
         # find the control BAM file
         echo -e "Finding the control bam...\n"
         nc_bamfile="$(find_sample_file "$nc_analysis_outdir" "coverageAnalysis_out" "$nc_barcode" ".bam" | head -1)"
@@ -251,8 +251,8 @@ function get_server_file_mainfest {
         #
 EOF
 
-    [ -f $analysis_manifest_file ] && echo -e "\nFile manifest written to:\n$analysis_manifest_file\n"
-    [ ! -f $analysis_manifest_file ] && echo -e "ERROR: File not created:\n$analysis_manifest_file" && exit
+    [ -f "$analysis_manifest_file" ] && echo -e "\nFile manifest written to:\n$analysis_manifest_file\n"
+    [ ! -f "$analysis_manifest_file" ] && echo -e "ERROR: File not created:\n$analysis_manifest_file" && exit
 
 }
 
@@ -261,8 +261,8 @@ function make_file_list {
     local analysis_manifest_file="$1"
     local analysis_files_file="$2"
     grep -Ev '^#' "$analysis_manifest_file" > "$analysis_files_file" 
-    [ -f $analysis_files_file ] && echo -e "File list written to:\n$analysis_files_file\n"
-    [ ! -f $analysis_files_file ] && echo -e "ERROR: File list not created:\n$analysis_files_file\n"
+    [ -f "$analysis_files_file" ] && echo -e "File list written to:\n$analysis_files_file\n"
+    [ ! -f "$analysis_files_file" ] && echo -e "ERROR: File list not created:\n$analysis_files_file\n"
 }
 
 function get_run_ID {
