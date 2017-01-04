@@ -27,8 +27,8 @@ echo -e "Analysis 2 is:\n$analysis_2\n"
 # setup outdirs and logdirs for qsub
 analysis1_outdir="${outdir}/${analysis_1}"
 analysis2_outdir="${outdir}/${analysis_2}"
-analysis1_logdir="${analysis1_outdir}/logs"
-analysis2_logdir="${analysis2_outdir}/logs"
+analysis1_logdir="${analysis1_outdir}/paired_logs"
+analysis2_logdir="${analysis2_outdir}/paired_logs"
 
 echo -e "analysis1_outdir is:\n$analysis1_outdir\n"
 echo -e "analysis2_outdir is:\n$analysis2_outdir\n"
