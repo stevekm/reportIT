@@ -47,13 +47,18 @@ function echo_script_name {
 function check_dirfile_exists {
     local dirfile="$1"
     local dirfile_type="$2" # d or f
+    local default_message="Checking to make sure an item was passed to check_dirfile_exists function..."
+    local test_message="${3:-$default_message}"
+
+    # watch out for ''
+    error_on_zerolength "$dirfile" "TRUE" "$test_message"
 
     # check if dir exists
     if [ $dirfile_type == "d" ]; then
         [ ! -d $dirfile ] && echo -e "ERROR: Item is not a dir:\n$dirfile\nDoes it exist?\nExiting..." && exit
     fi
 
-        # check if dir exists
+    # check if dir exists
     if [ $dirfile_type == "f" ]; then
         [ ! -f $dirfile ] && echo -e "ERROR: Item is not a file:\n$dirfile\nDoes it exist?\nExiting..." && exit
     fi
