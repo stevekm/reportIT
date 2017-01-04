@@ -70,7 +70,7 @@ for i in $analysis_ID_list; do
 
 
     # find the analysis barcode file
-    echo -e "Finding the analysis barcode file..."
+    echo -e "Searching for the analysis barcode file..."
     analysis_barcode_file="$(find "$analysis_outdir"  -path "*variantCaller_out*" -name "sample_barcode_IDs.tsv" | head -1)"
     error_on_zerolength "$analysis_barcode_file" "TRUE" "Checking to make sure analysis barcode file was found..."
     check_dirfile_exists "$analysis_barcode_file" "f"
@@ -84,19 +84,20 @@ for i in $analysis_ID_list; do
     # sumamry table
     # ? control BAM
     echo -e "\n-----------------------------------\n"
-    echo -e "Finding samples in analysis dir..."
+    echo -e "Searching for samples in analysis dir..."
     analysis_samples="$(find "$analysis_outdir" -type d -path "*coverageAnalysis_out*" -name "*IonXpress_*")"
 
     for i in $analysis_samples; do
         ( # run each iteration in a subshell, so 'exit' kills just the subshell, not the whole loop
         echo "$i"
         sample_barcode="$(basename "$i")"
+        echo -e "\n-----------------------------------\n"
         echo -e "\nSample barcode is:\n$sample_barcode"
 
         # find sample ID
-        echo -e "Finding sample ID..."
+        echo -e "Searching for sample ID..."
         sample_ID="$(grep "$sample_barcode" "$analysis_barcode_file" | cut -f1)"
-        error_on_zerolength "$sample_barcode" "TRUE" "Checking to make sure sample ID was found..."
+        error_on_zerolength "$sample_ID" "TRUE" "Checking to make sure sample ID was found..."
         echo -e "Sample ID is:\n$sample_ID\n"
 
         # check to make sure its not a control sample..
@@ -106,7 +107,7 @@ for i in $analysis_ID_list; do
         fi
 
         # FIND BAM FILE
-        echo -e "\nFinding BAM file in sample dir..."
+        echo -e "\nSearching for BAM file in sample dir..."
         sample_bamfile="$(find_sample_file "$i" "coverageAnalysis_out" "$sample_barcode" ".bam" | head -1)"
         error_on_zerolength "$sample_bamfile" "TRUE" "Checking to make sure sample BAM file was found..."
         echo -e "sample_bamfile is:\n$sample_bamfile"
@@ -119,7 +120,7 @@ for i in $analysis_ID_list; do
         check_dirfile_exists "$sample_IGV_dir" "d"
 
         # FIND SUMMARY TABLE
-        echo -e "\nFinding sample summary table file..."
+        echo -e "\nSearching for sample summary table file..."
         sample_summary_file="$(find_sample_file "$analysis_outdir" "variantCaller_out" "$sample_barcode" "_summary.tsv" | head -1)"
         error_on_zerolength "$sample_summary_file" "TRUE" "Checking to make sure sample file was found..."
         echo -e "\nSample summary table file is:\n$sample_summary_file\n"
@@ -133,14 +134,14 @@ for i in $analysis_ID_list; do
         # with or without control!
         echo -e "Checking number of lines in summary table file..."
         num_lines="$(cat "$sample_summary_file" | wc -l)"
-        min_number_lines="1"
+        min_number_lines="2"
         if (( $num_lines > $min_number_lines )); then 
             echo -e "Running IGV batcscript generator script..."
             [ -z "${IGV_control_param:-}" ] && echo -e "Including control BAM parameters:\n${IGV_control_param}"
             $IGV_batchscript_generator_script "$sample_summary_file" "$sample_bamfile" "$sample_IGV_dir" ${IGV_control_param:-}
 
             # find the new batch script.. IGV_script.bat
-            echo -e "Finding IGV batchs script..."
+            echo -e "Searching for IGV batchs script..."
             sample_IGV_batchscript="$(find_sample_file "$i" "coverageAnalysis_out" "$sample_barcode" "IGV_script.bat" | head -1)"
             error_on_zerolength "$sample_IGV_batchscript" "TRUE" "Checking to make sure IGV batch script was found..."
             if [ ! -z $sample_IGV_batchscript ]; then

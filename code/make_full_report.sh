@@ -144,11 +144,20 @@ for i in $analysis_ID_list; do
         sample_report_file="${sample_report_dir}/${analysis_ID}_${sample_barcode}_report.Rmd"
         /bin/cp -v "$full_report_template" "$sample_report_file"
 
+        # compile the report for the sample
+        # only if IGV dir was found, link was made, etc.
         if [ ! -z $sample_IGV_report_dir ] && [ ! -z $sample_summary_report_file ] && [ ! -z $sample_comments_report_file ] && [ -f $sample_report_file ]; then
-            # compile the report for the sample
             module load pandoc/1.13.1
             $compile_report_script "$sample_report_file"
         fi
+
+        # hardlink the report back to the parent dir
+        set -x
+        sample_report_output="${sample_report_file%%.Rmd}.html"
+        if [ -f "$sample_report_output" ]; then
+            ln -f "$sample_report_output" "${analysis_report_parentdir}/"
+        fi
+        set +x
         )
     done
 done
