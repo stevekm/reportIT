@@ -1,4 +1,4 @@
-# ION Variant Reporter 
+# reportIT: An IonTorrent Variant Reporting Pipeline
 
 This program will annotate, aggregate, and summarize clinical variant information from the IonTorrent suite
 
