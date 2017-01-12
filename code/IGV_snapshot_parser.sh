@@ -1,20 +1,20 @@
 #!/bin/bash
 
-## USAGE: IGV_snapshot_parser.sh <analysis ID> <analysis ID> <analysis ID> ...  
+## USAGE: IGV_snapshot_parser.sh <analysis ID> <analysis ID> <analysis ID> ...
 
 ## DESCRIPTION: This script will generate and run IGV snapshot batchscripts
-## for all supplied analyses. First, the script will search for a 
+## for all supplied analyses. First, the script will search for a
 ## 'combined_sample_barcode_IDs.tsv' file; if found, the NC control will be parsed out
 ## and used as the control BAM for the IGV screenshots
-## Otherwise, the script will parse out the BAM files per sample and run the 
+## Otherwise, the script will parse out the BAM files per sample and run the
 ## IGV screenshot Python script on each one
 ## This script operates on all supplied analyses
 
 
-#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
 
-#~~~~~ PARSE ARGS ~~~~~~# 
+#~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal"
 echo_script_name
 
@@ -37,7 +37,7 @@ for i in $analysis_ID_list; do
 
 
 
-    #~~~~~ CHECK FOR COMBINED ANALYSIS ~~~~~~# 
+    #~~~~~ CHECK FOR COMBINED ANALYSIS ~~~~~~#
     # if a 'combined_sample_barcode_IDs.tsv' file exists in the dir,
     # parse it to find the 'NC' or 'NC HAPMAP' sample and its BAM file
     # to use as controls
@@ -46,6 +46,7 @@ for i in $analysis_ID_list; do
     echo -e "Checking for combined analysis dir..."
 
     # get the first found combined barcode file
+    set -x
     combined_barcode_file="$(find "$analysis_outdir" -type f -name "combined_sample_barcode_IDs.tsv" | head -1)"
 
     # test to see if one was found
@@ -53,20 +54,21 @@ for i in $analysis_ID_list; do
     # check_dirfile_exists "$combined_barcode_file" "f"
 
     # if one was found, get the NC sample from it:
-    if [ ! -z $combined_barcode_file ]; then 
+    if [ ! -z $combined_barcode_file ]; then
         echo -e "Combined analysis dir found..."
         echo -e "Combine analysis barcodes file is:\n$combined_barcode_file"
         echo -e "Getting NC control sample from combined barcode file..."
         find_NC_control_sample "$combined_barcode_file" "$control_sample_regex_file" "$outdir"
 
-    elif [ -z $combined_barcode_file ]; then  
-        # find the single analysis barcode file instead.. 
+    elif [ -z $combined_barcode_file ]; then
+        # find the single analysis barcode file instead..
         echo -e "No combined analysis found, searching for single analysis sample barcode file..."
         barcode_file="$(find "$analysis_outdir" -type f -name "sample_barcode_IDs.tsv" | head -1)"
         error_on_zerolength "$barcode_file" "TRUE" "Checking to make sure barcode file was found..."
         echo -e "Getting NC sample from barcode file:\n$barcode_file"
         find_NC_control_sample "$barcode_file" "$control_sample_regex_file" "$outdir"
     fi
+    set +x
 
 
     # find the analysis barcode file
@@ -76,7 +78,7 @@ for i in $analysis_ID_list; do
     check_dirfile_exists "$analysis_barcode_file" "f"
     echo -e "Analysis barcode file is:\n$analysis_barcode_file\n"
 
-    #~~~~~ FIND ANALYIS SAMPLES ~~~~~~# 
+    #~~~~~ FIND ANALYIS SAMPLES ~~~~~~#
     # find all samples in the analysis dir
     # then find for each sample:
     # BAM file
@@ -89,6 +91,8 @@ for i in $analysis_ID_list; do
 
     for i in $analysis_samples; do
         ( # run each iteration in a subshell, so 'exit' kills just the subshell, not the whole loop
+        echo -e "\n-----------------------------------\n"
+        echo "Now processing sample:"
         echo "$i"
         sample_barcode="$(basename "$i")"
         echo -e "\n-----------------------------------\n"
@@ -135,7 +139,7 @@ for i in $analysis_ID_list; do
         echo -e "Checking number of lines in summary table file..."
         num_lines="$(cat "$sample_summary_file" | wc -l)"
         min_number_lines="1"
-        if (( $num_lines > $min_number_lines )); then 
+        if (( $num_lines > $min_number_lines )); then
             echo -e "Running IGV batchscript generator script..."
             set -x
             # IGV_control_param is exported global variable from `find_NC_control_sample` function
@@ -158,10 +162,10 @@ for i in $analysis_ID_list; do
 
                 # run IGV snapshotter
                 echo -e "Running IGV snapshot batch script..."
-                $IGV_run_batchscript_script "$sample_IGV_batchscript" 
+                $IGV_run_batchscript_script "$sample_IGV_batchscript"
             fi
-            
-        elif (( ! $num_lines > $min_number_lines )); then 
+
+        elif (( ! $num_lines > $min_number_lines )); then
             echo -e "Summary table has only:\n$num_lines\nnumber of lines."
             echo -e "Minimum lines needed:\n$min_number_lines"
             echo -e "Skipping IGV snapshot step..."

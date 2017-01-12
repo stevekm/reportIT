@@ -4,10 +4,14 @@
 ## USAGE: code/make_full_report.sh <analysis_ID> <analysis_ID> ...
 ## Description: This script will set up the reports directories in an analysis dir and compile the reports for each sample
 
-#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
+# load the correct versions of R and pandoc from system modules
+# make sure rmarkdown package is installed in R !
 
-#~~~~~ PARSE ARGS ~~~~~~# 
+# pandoc_params="module unload r && module load r/3.3.0 && module load pandoc/1.13.1"
+
+#~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal"
 echo_script_name
 
@@ -34,7 +38,7 @@ for i in $analysis_ID_list; do
 
 
 
-    #~~~~~ FIND ANALYIS SAMPLES ~~~~~~# 
+    #~~~~~ FIND ANALYIS SAMPLES ~~~~~~#
     # find all samples in the analysis dir
     echo -e "Searching for samples in analysis dir..."
     analysis_samples="$(find "$analysis_outdir" -type d -path "*variantCaller_out*" -name "*IonXpress_*")"
@@ -48,6 +52,7 @@ for i in $analysis_ID_list; do
     for i in $analysis_samples; do
         ( # run each iteration in a subshell, so 'exit' kills just the subshell, not the whole loop
         echo -e "\n-----------------------------------\n"
+        # set environment for pandoc
         # need to get the following:
         # summary_table_file
         # IGV_snapshot_dir
@@ -72,6 +77,7 @@ for i in $analysis_ID_list; do
 
 
         # find sample IGV dir
+        set -x
         echo -e "\nSearching for IGV snapshot dir..."
         sample_IGV_dir="$(find "$analysis_outdir" -type d -path "*coverageAnalysis_out*" -path "*$sample_barcode*" -name "*IGV_snapshots*")"
         check_dirfile_exists "$sample_IGV_dir" "d" "Checking to make sure IGV dir was found..."
@@ -86,11 +92,23 @@ for i in $analysis_ID_list; do
             sample_IGV_dir_fullpath="$(readlink -f "$sample_IGV_dir")"
             sample_IGV_report_dir="$(readlink -f $sample_report_dir)/IGV_snapshots"
             echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
-            # (cd $sample_report_dir && ln -fs "$sample_IGV_dir_fullpath")
-            ln -fs "$sample_IGV_dir_fullpath" "$sample_IGV_report_dir"
+
+            echo -e "IGV dir contents:"
+            ls -l "$sample_IGV_dir_fullpath"
+
+            # make symlnk to the dir from the reports dir
+            echo -e "Making symlink to IGV snapshot dir"
+            echo "report dir contents:"
+            ls -l "$sample_report_dir"
+            (cd "$sample_report_dir" && ln -fs "$sample_IGV_dir_fullpath" "$(basename "$sample_IGV_dir_fullpath")" )
+            # ln -fs "$sample_IGV_dir_fullpath" "$sample_IGV_report_dir"
+            echo "report dir after making symlink:"
+            ls -l "$sample_report_dir"
+
         else
             echo -e "ERROR: IGV snapshot dir not linked; does it exist?"
         fi
+        set +x
 
         # get sample ID from barcode file
         echo -e "\nSearching barcodes file for sample ID..."
@@ -133,7 +151,7 @@ for i in $analysis_ID_list; do
             echo -e "Full path to sample_IGV_dir_fullpath is:\n$sample_IGV_dir_fullpath"
             ln -fs "$sample_comments_file_fullpath" "$sample_comments_report_file"
         fi
-        
+
         # write the ID informations to files for the report
         echo -e "Writing sample ID information for the report..."
         echo "$sample_ID" > "${sample_report_dir_fullpath}/sample_ID.txt"
@@ -141,15 +159,29 @@ for i in $analysis_ID_list; do
         echo "$analysis_ID" > "${sample_report_dir_fullpath}/analysis_ID.txt"
 
         # copy over the report template
+        echo -e "Copying report template to sample report directory..."
         sample_report_file="${sample_report_dir}/${analysis_ID}_${sample_barcode}_report.Rmd"
+        echo -e "Report template file is:\n$full_report_template\n"
+        check_dirfile_exists "$full_report_template" "f" "Checking to make sure report template file was found..."
         /bin/cp -v "$full_report_template" "$sample_report_file"
+        check_dirfile_exists "$sample_report_file" "f" "Checking to make sure sample report file was copied over..."
 
         # compile the report for the sample
         # only if IGV dir was found, link was made, etc.
-        if [ ! -z $sample_IGV_report_dir ] && [ ! -z $sample_summary_report_file ] && [ ! -z $sample_comments_report_file ] && [ -f $sample_report_file ]; then
+        set -x
+        echo -e "Compiling sample report..."
+        if [ ! -z "$sample_IGV_report_dir" ] && [ ! -z "$sample_summary_report_file" ] && [ ! -z "$sample_comments_report_file" ] && [ -f "$sample_report_file" ]; then
+            module unload r
+            module load r/3.3.0
             module load pandoc/1.13.1
+            which R
+            module list
+            R --version
+            /usr/bin/env Rscript - <<< "sessionInfo()"
+            /usr/bin/env Rscript - <<< "rmarkdown::pandoc_version()"
             $compile_report_script "$sample_report_file"
         fi
+        set +x
 
         # hardlink the report back to the parent dir
         set -x
@@ -161,8 +193,3 @@ for i in $analysis_ID_list; do
         )
     done
 done
-
-
-
-
-
