@@ -32,6 +32,9 @@ code/get_server_files.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 # annotate the downloaded sample files
 code/qsub_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
+# create IGV snapshots and reports for one or more individual analyses
+code/qsub_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
 # create IGV snapshots and reports for a PAIRED analysis (requires exactly TWO analysis ID's)
 code/qsub_paired_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
