@@ -134,7 +134,7 @@ for i in $analysis_ID_list; do
         # with or without control!
         echo -e "Checking number of lines in summary table file..."
         num_lines="$(cat "$sample_summary_file" | wc -l)"
-        min_number_lines="2"
+        min_number_lines="1"
         if (( $num_lines > $min_number_lines )); then 
             echo -e "Running IGV batchscript generator script..."
             set -x
