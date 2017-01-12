@@ -12,8 +12,11 @@ codedir="code"
 # path to report templates directory
 report_template_dir="report"
 
-# file for full report template
+# file for per sample full report template
 full_report_template="${report_template_dir}/full_report.Rmd"
+
+# file for the overall analysis full report
+overview_report_template="${report_template_dir}/overview_report.Rmd"
 
 # file containing list of actionable genes
 actionable_genes_file="data/actionable_genes.txt"

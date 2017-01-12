@@ -6,10 +6,7 @@
 
 #~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
-# load the correct versions of R and pandoc from system modules
-# make sure rmarkdown package is installed in R !
 
-# pandoc_params="module unload r && module load r/3.3.0 && module load pandoc/1.13.1"
 
 #~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal"
@@ -171,14 +168,14 @@ for i in $analysis_ID_list; do
         set -x
         echo -e "Compiling sample report..."
         if [ ! -z "$sample_IGV_report_dir" ] && [ ! -z "$sample_summary_report_file" ] && [ ! -z "$sample_comments_report_file" ] && [ -f "$sample_report_file" ]; then
-            module unload r
-            module load r/3.3.0
-            module load pandoc/1.13.1
-            which R
-            module list
-            R --version
-            /usr/bin/env Rscript - <<< "sessionInfo()"
-            /usr/bin/env Rscript - <<< "rmarkdown::pandoc_version()"
+            # module unload r
+            # module load r/3.3.0
+            # module load pandoc/1.13.1
+            # which R
+            # module list
+            # R --version
+            # /usr/bin/env Rscript - <<< "sessionInfo()"
+            # /usr/bin/env Rscript - <<< "rmarkdown::pandoc_version()"
             $compile_report_script "$sample_report_file"
         fi
         set +x
