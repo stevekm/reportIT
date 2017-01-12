@@ -1,6 +1,7 @@
-# ION Variant Reporter 
+# reportIT
+### IonTorrent Variant Reporting Pipeline
 
-This program will annotate, aggregate, and summarize clinical variant information from the IonTorrent suite
+This program will annotate, aggregate, and summarize clinical variant information from the [IonTorrent suite](https://www.thermofisher.com/us/en/home/life-science/sequencing/next-generation-sequencing/ion-torrent-next-generation-sequencing-workflow/ion-torrent-next-generation-sequencing-data-analysis-workflow/ion-torrent-suite-software.html)
 
 # Overview
 
