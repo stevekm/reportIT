@@ -93,26 +93,27 @@ print(kable(sample_barcodes_df[c("Sample.Name", "Barcode")], caption = "Samples 
 The following mutations are detected:
 
 ```{r, echo = FALSE, results='asis', eval=TRUE}
-# for(i in seq_along())
-# colnames(summary_df)
+summary_cols <- c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")
+
 non_sc_summary_df <- subset(summary_df, subset = (Sample.Name != "SC"))
 non_sc_summary_df <- reindex_rownames(non_sc_summary_df)
-
-sc_summary_df <- subset(summary_df, subset = (Sample.Name == "SC"))
-sc_summary_df <- reindex_rownames(sc_summary_df)
-
-summary_cols <- c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")
 
 # print(xtable(non_sc_summary_df[c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")]),type='html', comment=FALSE, include.rownames=FALSE)
 print(kable(non_sc_summary_df[summary_cols]))
 ```
 
-## SC Sample
+
 
 The following variants were detected in the SC control sample:
 ```{r, echo = FALSE, results='asis', eval=TRUE}
 # print(xtable(sc_summary_df[c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")]),type='html', comment=FALSE, include.rownames=FALSE)
-print(kable(sc_summary_df[summary_cols]))
+if(nrow(subset(summary_df, subset = (Sample.Name == "SC"))) > 0){
+    sc_summary_df <- subset(summary_df, subset = (Sample.Name == "SC"))
+    sc_summary_df <- reindex_rownames(sc_summary_df)
+    mycat('\n\n## SC Sample\n\n')
+    print(kable(sc_summary_df[summary_cols]))
+    
+}
 ```
 
 # IGV Snapshots 

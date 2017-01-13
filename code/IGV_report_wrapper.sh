@@ -6,16 +6,16 @@
 
 
 
-#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
 
-#~~~~~ PARSE ARGS ~~~~~~# 
+#~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "greater_than" "0" "$#"
 echo_script_name
 
 analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at the first arg
 
-#~~~~~ RUN PIPELINE ~~~~~~# 
+#~~~~~ RUN PIPELINE ~~~~~~#
 for i in $analysis_ID_list; do
     analysis_ID="$i"
 
@@ -28,7 +28,9 @@ for i in $analysis_ID_list; do
     # make clinical comment files for analyses
     ${codedir}/make_report_comments_wrapper.sh "$analysis_ID"
 
+    # make report for the whole analysis
+    ${codedir}/make_analysis_overview_report.sh "$analysis_ID"
+
     # make reports for each sample in the analyses
     ${codedir}/make_full_report.sh "$analysis_ID"
 done
-
