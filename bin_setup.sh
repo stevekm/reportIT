@@ -30,6 +30,9 @@ if [ ! -f vcflib/bin/vcf2tsv ]; then
 fi
 
 
+# pandoc
+if [ ! -f pandoc-1.13.1.zip ]; then wget https://s3.amazonaws.com/rstudio-buildtools/pandoc-1.13.1.zip; fi
+
 # IGV
 # http://software.broadinstitute.org/software/igv/download
 # if [ ! -f IGV_2.3.88.zip ]; then wget http://data.broadinstitute.org/igv/projects/downloads/IGV_2.3.88.zip ; fi

@@ -2,11 +2,11 @@
 # python 2.7
 
 '''
-USAGE: code/IGV_batchscript_generator.py ...
+USAGE: code/IGV_batchscript_generator.py "sample_summary_table_file" "sample_bamfile" "sample_IGV_dir" <args>
 DESCRITPION: Generate IGV batch script for creating snapshots of BAMs PER SAMPLE
 based on the sample's summary table of variants
 
-REFERENCE: 
+REFERENCE:
 http://software.broadinstitute.org/software/igv/book/export/html/189
 http://software.broadinstitute.org/software/igv/batch
 
@@ -30,6 +30,7 @@ import pandas as pd
 import subprocess as sp
 import collections
 import argparse
+import pipeline_functions as pl
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
@@ -43,12 +44,12 @@ def write_IGV_script(IGV_batch_file, IGV_snapshot_dir, bam_file, build_version, 
     # locations : a list of the chromosome locations in the format ['chr9:21971111-21971111', 'chr9:21971111-21971111', ... etc. ]
     initialize_file("new", IGV_batch_file)
     append_string("snapshotDirectory " + IGV_snapshot_dir, IGV_batch_file)
-    append_string("load " + bam_file, IGV_batch_file) 
+    append_string("load " + bam_file, IGV_batch_file)
     if Control_bam_file is not None and type(Control_bam_file) is str:
         append_string("load " + Control_bam_file, IGV_batch_file)
     append_string("genome " + build_version, IGV_batch_file)
     append_string("maxPanelHeight " + image_height, IGV_batch_file)
-    for location in locations: 
+    for location in locations:
         append_string("goto " + location, IGV_batch_file)
         append_string("snapshot " + parse_chrom_loc(location) + ".png", IGV_batch_file) # snapshot <filename.png>
     append_string("exit", IGV_batch_file)
@@ -102,7 +103,7 @@ parser.add_argument("-cb", default = None, type = str, dest = 'NC_bam', metavar 
 
 args = parser.parse_args()
 
-summary_table_file = args.summary_table_file 
+summary_table_file = args.summary_table_file
 bam_file = args.bam_file
 IGV_snapshot_dir = args.IGV_snapshot_dir
 build_version = args.build_version
@@ -136,10 +137,11 @@ print locations
 if __name__ == "__main__":
     # ~~~~ GENERATE BATCH SCRIPT ~~~~~~ #
     # start the IGV script output
-    write_IGV_script(IGV_batch_file = IGV_batch_file, 
-        IGV_snapshot_dir = IGV_snapshot_dir, 
-        bam_file = bam_file, 
-        build_version = build_version, 
-        image_height = image_height, 
-        locations = locations, 
+    # pl.my_debugger(globals().copy())
+    write_IGV_script(IGV_batch_file = IGV_batch_file,
+        IGV_snapshot_dir = IGV_snapshot_dir,
+        bam_file = bam_file,
+        build_version = build_version,
+        image_height = image_height,
+        locations = locations,
         Control_bam_file = NC_bam)

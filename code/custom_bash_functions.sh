@@ -79,7 +79,7 @@ function link_relative_dirpaths {
 
     path1_source_fullpath="$(readlink -f "$path1_source")"
     error_on_zerolength "$path1_source_fullpath" "TRUE" "Checking that path1_source fullpath was found..."
-    
+
     (
         # change to path2 parent dir
         cd "$(dirname "$path2_dest")"
@@ -150,15 +150,15 @@ function find_NC_control_sample {
 
     echo -e "Searching for NC control sample in file:\n$barcode_file"
     # set -x
-    nc_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f1)"
-    nc_barcode="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f2)"
-    nc_run_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f3)"
-    nc_analysis_ID="$(grep -E -f "$control_sampleID_file" "$combined_barcode_file" | cut -f4)"
+    local nc_ID="$(grep -E -f "$control_sampleID_file" "$barcode_file" | cut -f1)"
+    local nc_barcode="$(grep -E -f "$control_sampleID_file" "$barcode_file" | cut -f2)"
+    local nc_run_ID="$(grep -E -f "$control_sampleID_file" "$barcode_file" | cut -f3)"
+    local nc_analysis_ID="$(grep -E -f "$control_sampleID_file" "$barcode_file" | cut -f4)"
     # set +x
 
     # dir for the control sample
-    nc_analysis_outdir="${outdir}/${nc_analysis_ID}"
-    check_dirfile_exists "$nc_analysis_outdir" "d"
+    local nc_analysis_outdir="${outdir}/${nc_analysis_ID}"
+    local check_dirfile_exists "$nc_analysis_outdir" "d"
 
     echo -e "\nnc_ID is:\n$nc_ID"
     echo -e "\nnc_barcode is :\n$nc_barcode"
@@ -168,7 +168,7 @@ function find_NC_control_sample {
     if [ ! -z "$nc_ID" ] && [ ! -z "$nc_barcode" ] && [ -d "$nc_analysis_outdir" ]; then
         # find the control BAM file
         echo -e "Finding the control bam...\n"
-        nc_bamfile="$(find_sample_file "$nc_analysis_outdir" "coverageAnalysis_out" "$nc_barcode" ".bam" | head -1)"
+        local nc_bamfile="$(find_sample_file "$nc_analysis_outdir" "coverageAnalysis_out" "$nc_barcode" ".bam" | head -1)"
         error_on_zerolength "$nc_bamfile" "TRUE" "Checking to make sure control sample BAM file was found..."
         echo -e "nc_bamfile is :$nc_bamfile"
 
@@ -179,7 +179,7 @@ function find_NC_control_sample {
 
 function find_open_X_server {
     for serv_num in $(seq 1 1000); do
-        if ! (xdpyinfo -display :${serv_num})&>/dev/null; then 
+        if ! (xdpyinfo -display :${serv_num})&>/dev/null; then
             echo "$serv_num" && break
         fi
     done
@@ -190,23 +190,23 @@ function find_open_X_server {
 
 function make_outdir {
     # make sure outdir arg provided, and make it
-    local outdir="$1" 
-    if [[ -z "$outdir" ]]; then 
-        echo "No outdir supplied" 
+    local outdir="$1"
+    if [[ -z "$outdir" ]]; then
+        echo "No outdir supplied"
         grep '^##' $0
         exit
-    else 
+    else
         mkdir -p "${outdir}"
     fi
 }
 
 function get_server_file_mainfest {
     # log into the server and find the files
-    # write out all the files and information needed 
+    # write out all the files and information needed
     local server_info="$1"
     local analysis_manifest_file="$2"
     local analysis_ID="$3"
-    
+
     echo -e "\n--------------------------------------------\n"
     echo -e "GENERATING FILE LIST FOR ANALYSIS"
     echo -e "\nPLEASE LOG INTO SERVER TO GET ANALYSIS FILE LIST\n"
@@ -238,16 +238,16 @@ function get_server_file_mainfest {
         #
         # the VCFs for the samples
         sample_vcfs="\$(find \$variant_dir -type f -name "TSVC_variants.vcf" | sed -n 's|^/results/analysis/output/Home/||p')"
-        echo -e "# Sample VCFs:\n\$sample_vcfs" 
+        echo -e "# Sample VCFs:\n\$sample_vcfs"
         #
         # the BAMs for the samples # these are all symlinks !
         sample_bams="\$(find \$coverage_dir -name "Ion*" -name "*.bam" | sed -n 's|^/results/analysis/output/Home/||p')"
-        echo -e "# Sample BAMs:\n\$sample_bams" 
+        echo -e "# Sample BAMs:\n\$sample_bams"
         #
         # the BAIs for the samples
         sample_bais="\$(find \$coverage_dir -name "Ion*" -name "*.bai" | sed -n 's|^/results/analysis/output/Home/||p')"
-        echo -e "# Sample BAIs:\n\$sample_bais" 
-        # 
+        echo -e "# Sample BAIs:\n\$sample_bais"
+        #
         #
 EOF
 
@@ -260,7 +260,7 @@ function make_file_list {
     # parse the file manifest into a list of files for rsync
     local analysis_manifest_file="$1"
     local analysis_files_file="$2"
-    grep -Ev '^#' "$analysis_manifest_file" > "$analysis_files_file" 
+    grep -Ev '^#' "$analysis_manifest_file" > "$analysis_files_file"
     [ -f "$analysis_files_file" ] && echo -e "File list written to:\n$analysis_files_file\n"
     [ ! -f "$analysis_files_file" ] && echo -e "ERROR: File list not created:\n$analysis_files_file\n"
 }
@@ -296,6 +296,3 @@ function update_dirfiles_permissions {
     local outdir="$1"
     find "$outdir" -type f -exec chmod o-rw {} \;
 }
-
-
-

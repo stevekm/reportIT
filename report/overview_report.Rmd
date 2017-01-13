@@ -1,0 +1,156 @@
+---
+title: "Gene Panel Analysis Report"
+author: "Stephen Kelly"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document: 
+    keep_md: yes
+    number_sections: true
+    toc: true
+    toc_float: true
+params:
+  summary_table_file: summary_table.tsv
+  IGV_snapshot_dir: IGV_snapshots
+  analysis_ID: NA
+  sample_ID: NA
+  barcode_ID: NA
+---
+
+```{r setup, include=FALSE}
+# {.tabset} # .tabset-fade .tabset-pills
+knitr::opts_chunk$set(echo = FALSE)
+
+library("xtable")
+library("knitr")
+
+# function for formatting text in the report
+mycat <- function(text){
+    cat(gsub(pattern = "\n", replacement = "  \n", x = text))
+}
+
+# function for reading info from a text file
+file_scan <- function(my_file){
+  file_contents <- scan(my_file, what="", sep="\n")
+  return(file_contents)
+}
+
+# function to return file contents or NA if file doesn't exit
+get_file_content <- function(my_file){
+  file_contents <- "NA"
+  if (file.exists(my_file)) {
+    if (! identical(file_scan(my_file), character(0))) {
+      file_contents <- file_scan(my_file)
+    }
+  }
+  return(file_contents)
+}
+
+# reindex the row names
+reindex_rownames <- function(df){
+    rownames(df) <- seq(nrow(df))
+    return(df)
+}
+
+```
+
+
+```{r, echo = FALSE, include = FALSE, eval=TRUE}
+# get the items for the report
+summary_table_file <- params$summary_table_file
+# summary_table_file <- "test_data/IonXpress_008_summary.tsv"
+
+IGV_snapshot_dir <- params$IGV_snapshot_dir
+# IGV_snapshot_dir <- "test_data/IonXpress_006/IGV_snapshots"
+
+# save current session
+# save.image(file="overview_report_import.Rdata",compress = TRUE)
+```
+
+```{r, echo = FALSE, include = FALSE, eval=TRUE}
+# load report tables
+summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t') # , check.names = FALSE
+
+```
+
+# Analysis Information
+
+```{r, results='asis'}
+analysis_ID <- get_file_content("analysis_ID.txt")
+
+sample_barcodes_file <- "sample_barcode_IDs.tsv"
+sample_barcodes_df <- read.delim(sample_barcodes_file, header = TRUE, sep = '\t') # , check.names = FALSE
+
+mycat(paste0("Analyis ID: ", analysis_ID, "\n\n"))
+
+print(kable(sample_barcodes_df[c("Sample.Name", "Barcode")], caption = "Samples included in the analysis."))
+
+```
+
+# Variant Table {.tabset .tabset-pills}
+
+## Non-SC Samples
+
+The following mutations are detected:
+
+```{r, echo = FALSE, results='asis', eval=TRUE}
+summary_cols <- c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")
+
+non_sc_summary_df <- subset(summary_df, subset = (Sample.Name != "SC"))
+non_sc_summary_df <- reindex_rownames(non_sc_summary_df)
+
+# print(xtable(non_sc_summary_df[c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")]),type='html', comment=FALSE, include.rownames=FALSE)
+print(kable(non_sc_summary_df[summary_cols]))
+```
+
+
+
+The following variants were detected in the SC control sample:
+```{r, echo = FALSE, results='asis', eval=TRUE}
+# print(xtable(sc_summary_df[c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")]),type='html', comment=FALSE, include.rownames=FALSE)
+if(nrow(subset(summary_df, subset = (Sample.Name == "SC"))) > 0){
+    sc_summary_df <- subset(summary_df, subset = (Sample.Name == "SC"))
+    sc_summary_df <- reindex_rownames(sc_summary_df)
+    mycat('\n\n## SC Sample\n\n')
+    print(kable(sc_summary_df[summary_cols]))
+    
+}
+```
+
+# IGV Snapshots 
+
+```{r, results='asis'}
+# {.tabset .tabset-pills} 
+## Hide 
+## Show {.tabset .tabset-pills}
+IGV_snapshots <- dir(path = IGV_snapshot_dir, pattern = "*.png", full.names = TRUE)
+
+for(i in IGV_snapshots){
+    IGV_snapshot_filepath <- i
+    variant_ID <- gsub(x = basename(IGV_snapshot_filepath), pattern = ".png", replacement = "")
+    mycat(paste0("## ", basename(IGV_snapshot_filepath), "\n\n"))
+    mycat("Variant ID:\n\n")
+    mycat(paste0(cat(unlist(strsplit(x = variant_ID, split = '_'))), "\n\n"))
+    mycat(paste0("![](", IGV_snapshot_filepath, ") \n\n"))
+}
+```
+
+
+# System Information {.tabset .tabset-pills} 
+
+## Hide 
+
+## Show
+
+```{r}
+# system info
+system("uname -srv", intern = TRUE)
+
+# dir
+system('pwd',intern=T)
+
+# date time
+system("date", intern = TRUE)
+
+# R system info, packages, etc
+sessionInfo()
+```
