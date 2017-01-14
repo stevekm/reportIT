@@ -9,10 +9,10 @@
 # username@server
 
 
-#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
 
-#~~~~~ PARSE ARGS ~~~~~~# 
+#~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "equal" "0" "$#"
 echo_script_name
 
@@ -32,5 +32,5 @@ echo -e "Now attempting server login..."
 # get the latest runs
 echo -e "\nPLEASE LOG INTO SERVER TO GET RUN ANALYSIS LIST\n"
 ssh $server_info << EOF
-    ls -1tr /results/analysis/output/Home | tail -30
+    ls -1tr /results/analysis/output/Home
 EOF
