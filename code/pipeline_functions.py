@@ -11,3 +11,19 @@ def my_debugger(vars):
     vars.update(locals())
     shell = code.InteractiveConsole(vars)
     shell.interact()
+
+def mkdir_p(path, return_path=False):
+    # make a directory, and all parent dir's in the path
+    import sys
+    import os
+    import errno
+
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+    if return_path:
+        return path
