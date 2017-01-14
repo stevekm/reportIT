@@ -20,7 +20,6 @@ params:
 # {.tabset} # .tabset-fade .tabset-pills
 knitr::opts_chunk$set(echo = FALSE)
 
-library("xtable")
 library("knitr")
 
 # function for formatting text in the report
@@ -45,7 +44,7 @@ get_file_content <- function(my_file){
   return(file_contents)
 }
 
-# reindex the row names
+# reindex the row names after subsetting
 reindex_rownames <- function(df){
     rownames(df) <- seq(nrow(df))
     return(df)
@@ -57,19 +56,13 @@ reindex_rownames <- function(df){
 ```{r, echo = FALSE, include = FALSE, eval=TRUE}
 # get the items for the report
 summary_table_file <- params$summary_table_file
-# summary_table_file <- "test_data/IonXpress_008_summary.tsv"
-
 IGV_snapshot_dir <- params$IGV_snapshot_dir
-# IGV_snapshot_dir <- "test_data/IonXpress_006/IGV_snapshots"
-
-# save current session
-# save.image(file="overview_report_import.Rdata",compress = TRUE)
 ```
 
 ```{r, echo = FALSE, include = FALSE, eval=TRUE}
 # load report tables
-summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t') # , check.names = FALSE
-
+summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t') 
+summary_df[["Frequency"]] <- round(summary_df[["Frequency"]], 3)
 ```
 
 # Analysis Information
@@ -80,7 +73,7 @@ analysis_ID <- get_file_content("analysis_ID.txt")
 sample_barcodes_file <- "sample_barcode_IDs.tsv"
 sample_barcodes_df <- read.delim(sample_barcodes_file, header = TRUE, sep = '\t') # , check.names = FALSE
 
-mycat(paste0("Analyis ID: ", analysis_ID, "\n\n"))
+mycat(paste0("Analyis ID: **", analysis_ID, "** \n\n"))
 
 print(kable(sample_barcodes_df[c("Sample.Name", "Barcode")], caption = "Samples included in the analysis."))
 
@@ -90,48 +83,76 @@ print(kable(sample_barcodes_df[c("Sample.Name", "Barcode")], caption = "Samples 
 
 ## Non-SC Samples
 
-The following mutations are detected:
+The following variants are detected:
 
 ```{r, echo = FALSE, results='asis', eval=TRUE}
-summary_cols <- c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")
+summary_cols <- c("Gene", "Coding", "Amino.Acid.Change","Frequency", "Review", "Sample.Name", "Barcode")
 
 non_sc_summary_df <- subset(summary_df, subset = (Sample.Name != "SC"))
 non_sc_summary_df <- reindex_rownames(non_sc_summary_df)
 
-# print(xtable(non_sc_summary_df[c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")]),type='html', comment=FALSE, include.rownames=FALSE)
 print(kable(non_sc_summary_df[summary_cols]))
 ```
 
 
 
-The following variants were detected in the SC control sample:
+
 ```{r, echo = FALSE, results='asis', eval=TRUE}
-# print(xtable(sc_summary_df[c("Gene", "Coding", "Amino.Acid.Change", "Review", "Sample.Name", "Barcode")]),type='html', comment=FALSE, include.rownames=FALSE)
 if(nrow(subset(summary_df, subset = (Sample.Name == "SC"))) > 0){
     sc_summary_df <- subset(summary_df, subset = (Sample.Name == "SC"))
     sc_summary_df <- reindex_rownames(sc_summary_df)
     mycat('\n\n## SC Sample\n\n')
+    mycat('\n\nThe following variants were detected in the SC control sample:\n\n')
     print(kable(sc_summary_df[summary_cols]))
     
 }
 ```
 
-# IGV Snapshots 
+
 
 ```{r, results='asis'}
-# {.tabset .tabset-pills} 
-## Hide 
-## Show {.tabset .tabset-pills}
+# get paths to the snapshots
 IGV_snapshots <- dir(path = IGV_snapshot_dir, pattern = "*.png", full.names = TRUE)
 
-for(i in IGV_snapshots){
-    IGV_snapshot_filepath <- i
-    variant_ID <- gsub(x = basename(IGV_snapshot_filepath), pattern = ".png", replacement = "")
-    mycat(paste0("## ", basename(IGV_snapshot_filepath), "\n\n"))
-    mycat("Variant ID:\n\n")
-    mycat(paste0(cat(unlist(strsplit(x = variant_ID, split = '_'))), "\n\n"))
-    mycat(paste0("![](", IGV_snapshot_filepath, ") \n\n"))
+if(length(IGV_snapshots) > 0){
+    mycat('\n\n# IGV Snapshots \n\n')
+    # add filenames as item names
+    IGV_snapshots <- setNames(object = IGV_snapshots, nm = basename(IGV_snapshots))
+    
+    # print each to a new section, parse the name for the section name
+    for(i in seq_along(IGV_snapshots)){
+        # parse section items
+        snapshot_filepath <- IGV_snapshots[i]
+        snapshot_name <- names(IGV_snapshots[i])
+        snapshot_elements <- unlist(strsplit(x = snapshot_name, split = '.', fixed = TRUE))
+        
+        snapshot_elements <- setNames(object = snapshot_elements, 
+                                      nm = c("Analysis_ID", "Barcode", "Gene", "Chrom", "Pos", "Coding_c", "Coding_ID", "Extension"))
+        
+        coding_ID <- paste(snapshot_elements[["Coding_c"]],
+                           snapshot_elements[["Coding_ID"]], sep = '.')
+        
+        section_heading <- paste(snapshot_elements[["Gene"]], coding_ID,
+                                 snapshot_elements[["Barcode"]] ,sep = ' ')
+        
+        variant_ID <- gsub(x = snapshot_name, pattern = ".png", replacement = "")
+        
+        # get the entry for this variant from the original df
+        variant_df <- subset(non_sc_summary_df, 
+                             subset=(Barcode == snapshot_elements[["Barcode"]] & 
+                                         Gene == snapshot_elements[["Gene"]] & 
+                                         Position == snapshot_elements[["Pos"]] &
+                                         Chrom == snapshot_elements[["Chrom"]]))
+        
+        # start printing the section
+        mycat(paste0("## ", section_heading, "\n\n"))
+        mycat("Variant ID:\n\n")
+        mycat(paste0('`', variant_ID,'`\n\n'))
+        print(kable(variant_df[summary_cols], row.names = FALSE))
+        mycat(paste0("\n\n![](", snapshot_filepath, ") \n\n"))
+    }
 }
+
 ```
 
 
@@ -153,4 +174,7 @@ system("date", intern = TRUE)
 
 # R system info, packages, etc
 sessionInfo()
+
+# save current session
+save.image(file="overview_report_data.Rdata",compress = TRUE)
 ```
