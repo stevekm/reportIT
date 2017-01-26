@@ -4,10 +4,10 @@
 
 ## DESCRIPTION: This script will submit a qsub job to run the IGV snapshot and paired analysis
 
-#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
 
-#~~~~~ PARSE ARGS ~~~~~~# 
+#~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "equal" "2" "$#"
 echo_script_name
 
@@ -17,9 +17,10 @@ analysis_2="$2"
 IGV_wrapper_script="${codedir}/IGV_report_wrapper-paired.sh"
 
 job_threads="8"
-job_mem="20G"
+job_mem="10G"
 job_name="IGV_wrapper"
-job_options="-j y" # merge stderr and stdout
+# job_options="-j y -l mem_free=$job_mem -l h_vmem=$job_mem -l mem_token=$job_mem" # merge stderr and stdout
+job_options="-j y " # merge stderr and stdout
 
 echo -e "Analysis 1 is:\n$analysis_1\n"
 echo -e "Analysis 2 is:\n$analysis_2\n"
@@ -45,9 +46,4 @@ check_dirfile_exists "$analysis2_logdir" "l" "Making sure analysis2_logdir was c
 
 # run!
 echo -e "Submitting job..."
-qsub -wd $PWD -o :${analysis1_logdir}/ -e :${analysis1_logdir}/ -pe threaded "$job_threads" -l mem_free="$job_mem" -l h_vmem="$job_mem" -l mem_token="$job_mem" -N "$job_name" $job_options "$IGV_wrapper_script" "$analysis_1" "$analysis_2"
-
-
-
-
-
+qsub -wd $PWD -o :${analysis1_logdir}/ -e :${analysis1_logdir}/ -pe threaded "$job_threads" -N "$job_name" $job_options "$IGV_wrapper_script" "$analysis_1" "$analysis_2"

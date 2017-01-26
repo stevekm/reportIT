@@ -1,14 +1,14 @@
 #!/bin/bash
 
-## USAGE: qsub_annotate_wrapper.sh <analysis ID> <analysis ID> <analysis ID> ...  
+## USAGE: qsub_annotate_wrapper.sh <analysis ID> <analysis ID> <analysis ID> ...
 
 ## DESCRIPTION: This script will submit a qsub job to run the annotation wrapper
 
 
-#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
 
-#~~~~~ PARSE ARGS ~~~~~~# 
+#~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "greater_than" "0" "$#"
 echo_script_name
 
@@ -17,7 +17,7 @@ analysis_ID="${@:1}" # accept a space separated list of ID's
 annotate_wrapper_script="${codedir}/annotate_wrapper.sh"
 
 job_threads="8"
-job_mem="20G"
+job_mem="5G"
 job_name="annotate_wrapper"
 job_options="-j y" # merge stderr and stdout
 
