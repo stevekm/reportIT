@@ -17,24 +17,37 @@ function mail_analysis_report {
     local attachment_file="$2"
     check_dirfile_exists "$attachment_file" "f" "Checking to make sure attachment file exists..."
 
+    local file_fullpath="$(readlink -f "$attachment_file")"
+    local file_basename="$(basename "$attachment_file")"
+    local file_owner="$(ls -ld "$attachment_file" | awk '{print $3}')"
+    local file_date="$(ls -l --time-style=long-iso "$attachment_file" | awk '{print $6 " " $7}')"
+
     # custom mail settings
     source "mail_settings.sh"
 
     local SUBJECT_LINE="IonTorrent Analysis: ${ID} Overview Report"
 
-    echo -e "\nSending email to:\n$recipient_list\n"
+    echo -e "\nEmail recipient list:\n$recipient_list\n"
     echo -e "\nAttachment file is:\n$attachment_file\n"
     echo -e "\nEmail subject line is:\n$SUBJECT_LINE\n"
 
-    # mutt -s "subject" $( printf -- '-a %q ' *.csv ) ...
     mutt -s "$SUBJECT_LINE" -a "$attachment_file" -- "$recipient_list" <<E0F
-Igor tell me if you get this email!!!
-
 IonTorrent Analysis overview report for ${ID} is attached.
 
-~${signature_name}
+File name:
+$file_basename
 
-- This message was sent automatically by the reportIT IonTorrent analysis reporting pipeline -
+Report date:
+$file_date
+
+Report created by:
+$file_owner
+
+System location:
+$file_fullpath
+
+$message_footer
+
 E0F
 
 }
@@ -52,6 +65,7 @@ analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at th
 
 #~~~~~ RUN PIPELINE ~~~~~~#
 for ID in $analysis_ID_list; do
+    (
     echo -e "\n-----------------------------------\n"
     echo -e "Analyis is:\n$ID\n"
 
@@ -70,4 +84,5 @@ for ID in $analysis_ID_list; do
 
     # email the file!
     mail_analysis_report "$ID" "$analysis_report_file"
+    )
 done
