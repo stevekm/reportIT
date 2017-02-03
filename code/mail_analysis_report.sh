@@ -17,8 +17,12 @@ function mail_analysis_report {
     local attachment_file="$2"
     check_dirfile_exists "$attachment_file" "f" "Checking to make sure attachment file exists..."
 
+    local barcodes_file="$3"
+    local summary_file="$4"
+
     local file_fullpath="$(readlink -f "$attachment_file")"
     local file_basename="$(basename "$attachment_file")"
+    local summary_file_basename="$(basename "$summary_file")"
     local file_owner="$(ls -ld "$attachment_file" | awk '{print $3}')"
     local file_date="$(ls -l --time-style=long-iso "$attachment_file" | awk '{print $6 " " $7}')"
 
@@ -31,11 +35,14 @@ function mail_analysis_report {
     echo -e "\nAttachment file is:\n$attachment_file\n"
     echo -e "\nEmail subject line is:\n$SUBJECT_LINE\n"
 
-    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -- "$recipient_list" <<E0F
-IonTorrent Analysis overview report for ${ID} is attached.
+    # cat - <<E0F
+    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -a "$summary_file" -- "$recipient_list" <<E0F
 
-File name:
-$file_basename
+IonTorrent Analysis overview report is attached: $file_basename
+IonTorrent Analysis variant summary table is attached: $summary_file_basename
+
+Analysis ID:
+${ID}
 
 Report date:
 $file_date
@@ -45,6 +52,8 @@ $file_owner
 
 System location:
 $file_fullpath
+
+$(cat $barcodes_file)
 
 $message_footer
 
@@ -82,7 +91,17 @@ for ID in $analysis_ID_list; do
     check_dirfile_exists "$analysis_report_file" "f" "Making sure the analysis report was found..."
     echo -e "\nAnalysis report file is:\n$analysis_report_file\n"
 
+    # find the analysis barcodes file
+    echo -e "Searching for analysis barcodes file..."
+    analysis_barcodes_file="$(find "$analysis_outdir" -path "*variantCaller*" -name "sample_barcode_IDs.tsv" | head -1)"
+    check_dirfile_exists "$analysis_barcodes_file" "f" "Making sure the analysis barcode file exists..."
+
+    # find the analysis summary sheet
+    echo -e "Now searching for the analysis summary file..."
+    analysis_summary_file="$(find "$analysis_outdir" -name "*${ID}*" -name "*_summary.tsv")"
+    check_dirfile_exists "$analysis_summary_file" "f" "Making sure the analysis summary file exists..."
+
     # email the file!
-    mail_analysis_report "$ID" "$analysis_report_file"
+    mail_analysis_report "$ID" "$analysis_report_file" "$analysis_barcodes_file" "$analysis_summary_file"
     )
 done
