@@ -14,6 +14,26 @@
 #~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
 
+
+function run_all_IGV_batchscripts {
+    # run each bathscript in the list
+    local batchscript_file_list="$1"
+    for batchscript_file in $batchscript_file_list; do
+        check_dirfile_exists "$batchscript_file" "f" "Checking to make sure IGV batch script was found..."
+        echo -e "\nNow running IGV batchscript:\n$batchscript_file\n"
+
+        # find an open X server
+        echo -e "Searching for an open X server to run IGV..."
+        local x_serv="$(find_open_X_server)"
+        echo -e "X server is:\n$x_serv\n"
+
+        # run IGV snapshotter
+        echo -e "Running IGV snapshot batch script..."
+        $IGV_run_batchscript_script "$batchscript_file"
+    done
+
+}
+
 #~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "greater_than" "0" "$#" # "less_than", "greater_than", "equal"
 echo_script_name
@@ -147,24 +167,28 @@ for i in $analysis_ID_list; do
             $IGV_batchscript_generator_script "$sample_summary_file" "$sample_bamfile" "$sample_IGV_dir" ${IGV_control_param:-}
             set +x
 
+            # find all the IGV batch scripts
+            echo -e "\n\nNew testing this part, searching for all IGV batch scripts\n\n"
+            sample_IGV_batchscripts="$(find "$i" -path "*coverageAnalysis_out*" -path "*$sample_barcode*" -name "IGV*" -name "*.bat")"
+            [ ! -z "$sample_IGV_batchscripts" ] && run_all_IGV_batchscripts "$sample_IGV_batchscripts"
+
             # find the new batch script.. IGV_script.bat
-            echo -e "Searching for IGV batchs script..."
-            sample_IGV_batchscript="$(find_sample_file "$i" "coverageAnalysis_out" "$sample_barcode" "IGV_script.bat" | head -1)"
-            check_dirfile_exists "$sample_IGV_batchscript" "f" "Checking to make sure IGV batch script was found..."
+            # echo -e "Searching for IGV batchs script..."
+            # sample_IGV_batchscript="$(find_sample_file "$i" "coverageAnalysis_out" "$sample_barcode" "IGV_script.bat" | head -1)"
+            # check_dirfile_exists "$sample_IGV_batchscript" "f" "Checking to make sure IGV batch script was found..."
             # error_on_zerolength "$sample_IGV_batchscript" "TRUE" "Checking to make sure IGV batch script was found..."
-            if [ ! -z $sample_IGV_batchscript ]; then
-                echo -e "IGV batch script is:\n$sample_IGV_batchscript\n"
-
-                # find an open X server
-                echo -e "Searching for an open X server to run IGV..."
-                x_serv="$(find_open_X_server)"
-                echo -e "X server is:\n$x_serv\n"
-
-                # run IGV snapshotter
-                echo -e "Running IGV snapshot batch script..."
-                $IGV_run_batchscript_script "$sample_IGV_batchscript"
-            fi
-
+            # if [ ! -z $sample_IGV_batchscript ]; then
+            #     echo -e "IGV batch script is:\n$sample_IGV_batchscript\n"
+            #
+            #     # find an open X server
+            #     echo -e "Searching for an open X server to run IGV..."
+            #     x_serv="$(find_open_X_server)"
+            #     echo -e "X server is:\n$x_serv\n"
+            #
+            #     # run IGV snapshotter
+            #     echo -e "Running IGV snapshot batch script..."
+            #     $IGV_run_batchscript_script "$sample_IGV_batchscript"
+            # fi
         elif (( ! $num_lines > $min_number_lines )); then
             echo -e "Summary table has only:\n$num_lines\nnumber of lines."
             echo -e "Minimum lines needed:\n$min_number_lines"

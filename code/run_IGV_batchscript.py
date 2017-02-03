@@ -14,17 +14,19 @@ import os
 import re
 import errno
 import glob
-import subprocess as sp
+# import subprocess as sp
 import argparse
 from datetime import datetime
+import pipeline_functions as pl
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def subprocess_cmd(command):
-    # run a terminal command with stdout piping enabled
-    process = sp.Popen(command,stdout=sp.PIPE, shell=True)
-    proc_stdout = process.communicate()[0].strip()
-    print proc_stdout
+# def subprocess_cmd(command):
+#     import subprocess as sp
+#     # run a terminal command with stdout piping enabled
+#     process = sp.Popen(command,stdout=sp.PIPE, shell=True)
+#     proc_stdout = process.communicate()[0].strip()
+#     print proc_stdout
 
 def run_IGV_script(igv_script, igv_jar, memMB, x_serv_num):
     # run the IGV script
@@ -33,7 +35,7 @@ def run_IGV_script(igv_script, igv_jar, memMB, x_serv_num):
     print "\nSelected X server is:\t", x_serv_num
     print "\nStarting IGV\nCurrent time is:\t", startTime
     print "\nIGV command is:\n", igv_command
-    subprocess_cmd(igv_command)
+    pl.subprocess_cmd(igv_command)
     print "\n\nTime to process completion:\t", datetime.now() - startTime
 
 
@@ -65,9 +67,3 @@ if __name__ == "__main__":
     print "\nigv_jar_bin is :\n", igv_jar_bin
     print "\nigv_mem is :\n", igv_mem
     run_IGV_script(igv_script = batchscript_file, igv_jar = igv_jar_bin, memMB = igv_mem, x_serv_num = x_serv)
-
-
-
-
-
-

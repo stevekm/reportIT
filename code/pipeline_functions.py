@@ -27,3 +27,21 @@ def mkdir_p(path, return_path=False):
             raise
     if return_path:
         return path
+
+def initialize_file(string, output_file):
+    # write string to file
+    # !! THIS WILL OVERWRITE CONTENTS !!
+    with open(output_file, "w") as myfile:
+        myfile.write(string + '\n')
+
+def append_string(string, output_file):
+    # append string to file
+    with open(output_file, "a") as myfile:
+        myfile.write(string + '\n')
+
+def subprocess_cmd(command):
+    # run a terminal command with stdout piping enabled
+    import subprocess as sp
+    process = sp.Popen(command,stdout=sp.PIPE, shell=True)
+    proc_stdout = process.communicate()[0].strip()
+    print proc_stdout
