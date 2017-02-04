@@ -108,14 +108,16 @@ if(nrow(subset(summary_df, subset = (Sample.Name == "SC"))) > 0){
 }
 ```
 
-
+# IGV Snapshots
 
 ```{r, results='asis'}
 # get paths to the snapshots
-IGV_snapshots <- dir(path = IGV_snapshot_dir, pattern = "*.png", full.names = TRUE)
+IGV_snapshots <- grep(pattern = 'long.png', x = dir(path = IGV_snapshot_dir, pattern = "*.png", full.names = TRUE), value = TRUE, invert = TRUE)
+
+# paths to the 'long' snapshots
+IGV_long_snapshots <- dir(path = IGV_snapshot_dir, pattern = "*long.png", full.names = TRUE)
 
 if(length(IGV_snapshots) > 0){
-    mycat('\n\n# IGV Snapshots \n\n')
     # add filenames as item names
     IGV_snapshots <- setNames(object = IGV_snapshots, nm = basename(IGV_snapshots))
     
@@ -144,12 +146,36 @@ if(length(IGV_snapshots) > 0){
                                          Position == snapshot_elements[["Pos"]] &
                                          Chrom == snapshot_elements[["Chrom"]]))
         
-        # start printing the section
-        mycat(paste0("## ", section_heading, "\n\n"))
-        mycat("Variant ID:\n\n")
-        mycat(paste0('`', variant_ID,'`\n\n'))
-        print(kable(variant_df[summary_cols], row.names = FALSE))
-        mycat(paste0("\n\n![](", snapshot_filepath, ") \n\n"))
+        
+        
+        # check for a 'long' snapshot
+        search_pattern <- gsub(pattern = '.png', replacement = '', x = names(snapshot_filepath))
+        long_snapshot_file <- grep(pattern = search_pattern, x = IGV_long_snapshots, value = TRUE)
+        
+        if( ! identical(long_snapshot_file, character(0))) {
+            # start printing the section
+            mycat(paste0("## ", section_heading, " {.tabset .tabset-pills} \n\n"))
+            mycat("### Short View \n\n")
+            mycat("Variant ID:\n\n")
+            mycat(paste0('`', variant_ID,'`\n\n'))
+            print(kable(variant_df[summary_cols], row.names = FALSE))
+            mycat(paste0("\n\n![](", snapshot_filepath, ") \n\n"))
+            
+            mycat("### Long View \n\n")
+            mycat("Variant ID:\n\n")
+            mycat(paste0('`', variant_ID,'`\n\n'))
+            print(kable(variant_df[summary_cols], row.names = FALSE))
+            mycat(paste0("\n\n![](", long_snapshot_file, ") \n\n"))
+            
+        } else{
+            mycat(paste0("## ", section_heading, " {.tabset .tabset-pills} \n\n"))
+            mycat("Variant ID:\n\n")
+            mycat(paste0('`', variant_ID,'`\n\n'))
+            print(kable(variant_df[summary_cols], row.names = FALSE))
+            mycat(paste0("\n\n![](", snapshot_filepath, ") \n\n"))
+        }
+        
+        
     }
 }
 
