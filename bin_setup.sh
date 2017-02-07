@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# this script will set up the binary dependencies for the reportIT pipeline
+
 # download bcftools
 # http://www.htslib.org/download/
 if [ ! -f bcftools-1.3.1.tar.bz2 ]; then wget https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2 ; fi

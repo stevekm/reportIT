@@ -30,3 +30,4 @@ Auto_user_*
 *.Rdata
 *.gz
 *.pyc
+*DS_Store*
