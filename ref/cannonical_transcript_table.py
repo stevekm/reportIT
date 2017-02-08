@@ -38,9 +38,9 @@ def create_crossreference_tables(crossref_file, canon_file, outdir, replace_valu
     output_path = os.path.join(outdir, "canonical_transcript_list.txt")
     with open(output_path, "a") as myfile:
         for item in canon_ref_list:
+            # replace bad ID's if they've been passed in the dict
             if replace_values_dict != None:
-                # if item in replace_values_dict.keys():
-                if any(item == lst[i] for key in replace_values_dict.keys()):
+                if item in replace_values_dict.keys():
                     item = replace_values_dict[item]
             myfile.write("%s\n" % item)
 
