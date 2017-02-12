@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # python 2.7
 
+
+# this script will set up the reference dir, 'ref', for the reportIT pipeline
+# no arguments needed unless you want to pass custom parameters.
+#
+#
 # need to get the UCSC Known Canonical Transcripts
 # UCSC transcripts with unique ID's (also available for hg38) (UCSC_id) from here:
 # http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/knownCanonical.txt.gz
