@@ -28,18 +28,19 @@ check_dirfile_exists output "l" "Checking to make sure output symlink was create
 
 
 # script to make the bin dir
-bin_setup_script="bin_setup.sh"
+bin_setup_script="$(readlink -f bin_setup.sh)"
 # make the bin dir
 echo "Attempting to create bin dir..."
 mkdir -p ../bin && ln -fs ../bin
 check_dirfile_exists ../bin "d" "Checking to make sure bin dir was created..."
 check_dirfile_exists bin "l" "Checking to make sure bin symlink was created..."
+bin_dir="$(readlink -f ../bin)"
 
 # download and compile bins
 echo -e "Setting up binaries in the bin dir..."
 (
-cd bin
-../bin_setup.sh
+cd "$bin_dir"
+$bin_setup_script
 )
 
 # set up the reference data
