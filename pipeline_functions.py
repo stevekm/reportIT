@@ -142,3 +142,91 @@ def dict_from_tabular(inputfile, sep = ','):
     for key, value in reader:
         lines_dict[key] = value
     return lines_dict
+
+
+def list_file_lines(file_path):
+    # return the list of entries in a file, one per line
+    # not blank lines, no trailing \n
+    with open(file_path, 'r') as f:
+        entries = [line.strip() for line in f if line.strip()]
+    return entries
+
+def split_df_col2cols(dataframe, split_col, split_char, new_colnames, delete_old = False):
+    import pandas as pd
+    # # Splits a column into multiple columns
+    # dataframe : pandas dataframe to be processed
+    # split_col : chr string of the column name to be split
+    # split_char : chr to split the col on
+    # new_colnames : list of new name for the columns
+    # delete_old : logical True / False, remove original column?
+    # ~~~~~~~~~~~~~~~~ #
+    # save the split column as a separate object
+    new_cols = dataframe[split_col].str.split(split_char).apply(pd.Series, 1)
+    '''
+    # PROBLEM: after split, there might be fewer columns!
+    # add extra empty columns to fill..
+    for i in range(len(new_cols.columns)):
+        print new_cols.columns[i]
+        print new_colnames[i]
+        new_cols.rename(columns = {new_cols.columns[i]:new_colnames[i]}, inplace = True)
+    new_colnames_df = pd.DataFrame(columns=new_colnames)
+    # pd.concat([df,pd.DataFrame(columns=list('BCD'))])
+    pd.concat([new_colnames_df, new_cols])
+    ....
+    ...
+    '''
+    # rename the cols
+    new_cols.columns = new_colnames
+    # remove the original column from the df
+    if delete_old is True:
+        del dataframe[split_col]
+    # merge with df
+    new_df = dataframe.join(new_cols)
+    return new_df
+
+def conjunction(*conditions):
+    # apply multiple filtering conditions to a dataframe
+    import numpy as np
+    import functools
+    return functools.reduce(np.logical_and, conditions)
+
+def table_multi_filter(dataframe, filter_criteria):
+    import pandas as pd
+    # filter a dataframe based on multiple criteria
+    # 'filter_criteria' = {'include': {'column_name': ['value1', 'value2']}, ... }
+    conditions_dfs = [] # empty list to hold conditional df's
+    for key, value in filter_criteria['include'].items():
+        for item in value:
+            includes_df = dataframe[key] == item
+            conditions_dfs.append(includes_df)
+
+    for key, value in filter_criteria['exclude'].items():
+        for item in value:
+            excludes_df = dataframe[key] != item
+            conditions_dfs.append(excludes_df)
+
+    for key, value in filter_criteria['less_than'].items():
+        less_thans_df = dataframe[key] < value
+        conditions_dfs.append(less_thans_df)
+
+    for key, value in filter_criteria['greater_than'].items():
+        greater_thans_df = dataframe[key] > value
+        conditions_dfs.append(greater_thans_df)
+
+    for key, value in filter_criteria['less_or_null'].items():
+        less_null_df = ( (dataframe[key] < value) | pd.isnull(dataframe[key]) )
+        conditions_dfs.append(less_null_df)
+
+    dataframe = dataframe[conjunction(*conditions_dfs)]
+    return dataframe
+
+def write_json(object, output_file):
+    import json
+    with open(output_file,"w") as f:
+        json.dump(object, f, indent=4)
+
+def load_json(input_file):
+    import json
+    with open(input_file,"r") as f:
+        my_item = json.load(f)
+    return my_item
