@@ -26,41 +26,6 @@ import numpy as np # numpy==1.11.0
 import pipeline_functions as pl
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def split_df_col2rows(dataframe, split_col, split_char, new_colname):
-    # # Splits a column into multiple rows
-    # dataframe : pandas dataframe to be processed
-    # split_col : chr string of the column name to be split
-    # split_char : chr to split the col on
-    # new_colname : new name for the
-    # ~~~~~~~~~~~~~~~~ #
-    import pandas as pd
-    import numpy as np
-    # pl.my_debugger(locals().copy())
-
-    # make sure that the split_col is an 'object' type so we can split it
-    if split_col in dataframe.select_dtypes([np.object]).columns:
-        # save the split column as a separate object
-        tmp_col = dataframe[split_col].str.split(split_char).apply(pd.Series, 1).stack()
-        # drop the last index level
-        tmp_col.index = tmp_col.index.droplevel(-1)
-        # set the new col name
-        tmp_col.name = new_colname
-        # remove the original column from the df
-        del dataframe[split_col]
-        # join them into a new df
-        dataframe = dataframe.join(tmp_col)
-    else:
-        print """
-        WARNING: Trying to split column {} in dataframe, where column is not dtype 'object'
-        Column dtype is: {}
-        Column will not be split but column name {} will be changed to: {}
-        """.format(split_col, dataframe[split_col].dtype, split_col, new_colname)
-        # just change the column name and keep moving
-        dataframe.rename(columns={split_col: new_colname}, inplace=True)
-    # if reset_indexes is True:
-    #     new_df = new_df.reset_index(drop=True)
-    return dataframe
-
 def test_canonical_transcripts(df, canon_trancr_list):
     # check to make sure that only canonical transcript ID's are in the df
     for transcript in  df['Transcript'].tolist():
@@ -139,9 +104,9 @@ query_df = query_df.rename(columns = {'Chrom':'Chrom', 'Position':'Position', 'R
 # merge
 merge_df = pd.merge(annotation_df, query_df, on=['Chrom', 'Position', 'Ref', 'Variant']) # , how = 'left'
 
-# pl.my_debugger(globals().copy())
 # split the AAChange rows in the table
-merge_df = split_df_col2rows(dataframe = merge_df, split_col = 'AAChange.refGene', split_char = ',', new_colname = 'AAChange')
+merge_df = pl.split_df_col2rows(dataframe = merge_df, split_col = 'AAChange.refGene', split_char = ',', new_colname = 'AAChange')
+
 
 # split the new columns into separate columns
 merge_df = pl.split_df_col2cols(dataframe = merge_df, split_col = 'AAChange', split_char = ':', new_colnames = ['Gene.AA', 'Transcript', 'Exon', 'Coding', 'Amino Acid Change'], delete_old = True)
@@ -199,7 +164,13 @@ merge_df.loc[merge_df["Gene"].isin(actionable_genes), 'Review'] = "KS"
 full_df = merge_df
 
 # filter varaints based on quality criteria; filter rows
-merge_df = pl.table_multi_filter(merge_df, filter_criteria)
+# only filter if there's at least 1 row..
+if len(merge_df) > 0:
+    merge_df = pl.table_multi_filter(merge_df, filter_criteria)
+else:
+    print """
+WARNING: Table lenght {} is less than 1; table has no rows, and will not be filtered.
+    """.format(len(merge_df))
 
 # make the summary table
 # filter out fields that aren't needed for reporting; filter columns

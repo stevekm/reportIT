@@ -151,8 +151,42 @@ def list_file_lines(file_path):
         entries = [line.strip() for line in f if line.strip()]
     return entries
 
-def split_df_col2cols(dataframe, split_col, split_char, new_colnames, delete_old = False):
+def split_df_col2rows(dataframe, split_col, split_char, new_colname):
+    # # Splits a column into multiple rows
+    # dataframe : pandas dataframe to be processed
+    # split_col : chr string of the column name to be split
+    # split_char : chr to split the col on
+    # new_colname : new name for the
+    # ~~~~~~~~~~~~~~~~ #
     import pandas as pd
+    import numpy as np
+
+    # make sure that the split_col is an 'object' type so we can split it
+    if split_col in dataframe.select_dtypes([np.object]).columns:
+        # save the split column as a separate object
+        tmp_col = dataframe[split_col].str.split(split_char).apply(pd.Series, 1).stack()
+        # drop the last index level
+        tmp_col.index = tmp_col.index.droplevel(-1)
+        # set the new col name
+        tmp_col.name = new_colname
+        # remove the original column from the df
+        del dataframe[split_col]
+        # join them into a new df
+        dataframe = dataframe.join(tmp_col)
+    else:
+        print """
+WARNING: Trying to split column {} in dataframe, where column is not dtype 'object'
+Column dtype is: {}
+Column will not be split but column name {} will be changed to: {}
+        """.format(split_col, dataframe[split_col].dtype, split_col, new_colname)
+        # just change the column name and keep moving
+        dataframe.rename(columns={split_col: new_colname}, inplace=True)
+    # rest the indexes
+    dataframe = dataframe.reset_index(drop=True)
+    return dataframe
+
+
+def split_df_col2cols(dataframe, split_col, split_char, new_colnames, delete_old = False):
     # # Splits a column into multiple columns
     # dataframe : pandas dataframe to be processed
     # split_col : chr string of the column name to be split
@@ -160,21 +194,17 @@ def split_df_col2cols(dataframe, split_col, split_char, new_colnames, delete_old
     # new_colnames : list of new name for the columns
     # delete_old : logical True / False, remove original column?
     # ~~~~~~~~~~~~~~~~ #
+    import pandas as pd
+    import numpy as np
+    # pl.my_debugger(globals().copy())
+    # my_debugger(locals().copy())
     # save the split column as a separate object
-    new_cols = dataframe[split_col].str.split(split_char).apply(pd.Series, 1)
-    '''
-    # PROBLEM: after split, there might be fewer columns!
-    # add extra empty columns to fill..
-    for i in range(len(new_cols.columns)):
-        print new_cols.columns[i]
-        print new_colnames[i]
-        new_cols.rename(columns = {new_cols.columns[i]:new_colnames[i]}, inplace = True)
-    new_colnames_df = pd.DataFrame(columns=new_colnames)
-    # pd.concat([df,pd.DataFrame(columns=list('BCD'))])
-    pd.concat([new_colnames_df, new_cols])
-    ....
-    ...
-    '''
+    new_cols = dataframe[split_col].astype(np.object_).str.split(split_char).apply(pd.Series, 1)
+    # if all values were NaN, no split occured, only one col exists still
+    if len(new_cols.columns) < len(new_colnames):
+        # create the missing cols, fill with NaN
+        for i in range(len(new_cols.columns), len(new_colnames)):
+            new_cols[new_colnames[i]] = np.nan
     # rename the cols
     new_cols.columns = new_colnames
     # remove the original column from the df
@@ -191,9 +221,10 @@ def conjunction(*conditions):
     return functools.reduce(np.logical_and, conditions)
 
 def table_multi_filter(dataframe, filter_criteria):
-    import pandas as pd
     # filter a dataframe based on multiple criteria
     # 'filter_criteria' = {'include': {'column_name': ['value1', 'value2']}, ... }
+    import pandas as pd
+    # my_debugger(locals().copy())
     conditions_dfs = [] # empty list to hold conditional df's
     for key, value in filter_criteria['include'].items():
         for item in value:
