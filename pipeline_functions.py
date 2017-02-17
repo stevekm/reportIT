@@ -5,7 +5,7 @@
 def my_debugger(vars):
     # starts interactive Python terminal at location in script
     # call with pl.my_debugger(globals().copy()) anywhere in your script
-    # or call my_debugger(locals().copy()) from anywhere within this package
+    # or call my_debugger(locals().copy()) from anywhere within this package or another function
     import readline # optional, will allow Up/Down/History in the console
     import code
     # vars = globals().copy() # in python "global" variables are actually module-level
@@ -142,3 +142,122 @@ def dict_from_tabular(inputfile, sep = ','):
     for key, value in reader:
         lines_dict[key] = value
     return lines_dict
+
+
+def list_file_lines(file_path):
+    # return the list of entries in a file, one per line
+    # not blank lines, no trailing \n
+    with open(file_path, 'r') as f:
+        entries = [line.strip() for line in f if line.strip()]
+    return entries
+
+def split_df_col2rows(dataframe, split_col, split_char, new_colname):
+    # # Splits a column into multiple rows
+    # dataframe : pandas dataframe to be processed
+    # split_col : chr string of the column name to be split
+    # split_char : chr to split the col on
+    # new_colname : new name for the
+    # ~~~~~~~~~~~~~~~~ #
+    import pandas as pd
+    import numpy as np
+
+    # make sure that the split_col is an 'object' type so we can split it
+    if split_col in dataframe.select_dtypes([np.object]).columns:
+        # save the split column as a separate object
+        tmp_col = dataframe[split_col].str.split(split_char).apply(pd.Series, 1).stack()
+        # drop the last index level
+        tmp_col.index = tmp_col.index.droplevel(-1)
+        # set the new col name
+        tmp_col.name = new_colname
+        # remove the original column from the df
+        del dataframe[split_col]
+        # join them into a new df
+        dataframe = dataframe.join(tmp_col)
+    else:
+        print """
+WARNING: Trying to split column {} in dataframe, where column is not dtype 'object'
+Column dtype is: {}
+Column will not be split but column name {} will be changed to: {}
+        """.format(split_col, dataframe[split_col].dtype, split_col, new_colname)
+        # just change the column name and keep moving
+        dataframe.rename(columns={split_col: new_colname}, inplace=True)
+    # rest the indexes
+    dataframe = dataframe.reset_index(drop=True)
+    return dataframe
+
+
+def split_df_col2cols(dataframe, split_col, split_char, new_colnames, delete_old = False):
+    # # Splits a column into multiple columns
+    # dataframe : pandas dataframe to be processed
+    # split_col : chr string of the column name to be split
+    # split_char : chr to split the col on
+    # new_colnames : list of new name for the columns
+    # delete_old : logical True / False, remove original column?
+    # ~~~~~~~~~~~~~~~~ #
+    import pandas as pd
+    import numpy as np
+    # pl.my_debugger(globals().copy())
+    # my_debugger(locals().copy())
+    # save the split column as a separate object
+    new_cols = dataframe[split_col].astype(np.object_).str.split(split_char).apply(pd.Series, 1)
+    # if all values were NaN, no split occured, only one col exists still
+    if len(new_cols.columns) < len(new_colnames):
+        # create the missing cols, fill with NaN
+        for i in range(len(new_cols.columns), len(new_colnames)):
+            new_cols[new_colnames[i]] = np.nan
+    # rename the cols
+    new_cols.columns = new_colnames
+    # remove the original column from the df
+    if delete_old is True:
+        del dataframe[split_col]
+    # merge with df
+    new_df = dataframe.join(new_cols)
+    return new_df
+
+def conjunction(*conditions):
+    # apply multiple filtering conditions to a dataframe
+    import numpy as np
+    import functools
+    return functools.reduce(np.logical_and, conditions)
+
+def table_multi_filter(dataframe, filter_criteria):
+    # filter a dataframe based on multiple criteria
+    # 'filter_criteria' = {'include': {'column_name': ['value1', 'value2']}, ... }
+    import pandas as pd
+    # my_debugger(locals().copy())
+    conditions_dfs = [] # empty list to hold conditional df's
+    for key, value in filter_criteria['include'].items():
+        for item in value:
+            includes_df = dataframe[key] == item
+            conditions_dfs.append(includes_df)
+
+    for key, value in filter_criteria['exclude'].items():
+        for item in value:
+            excludes_df = dataframe[key] != item
+            conditions_dfs.append(excludes_df)
+
+    for key, value in filter_criteria['less_than'].items():
+        less_thans_df = dataframe[key] < value
+        conditions_dfs.append(less_thans_df)
+
+    for key, value in filter_criteria['greater_than'].items():
+        greater_thans_df = dataframe[key] > value
+        conditions_dfs.append(greater_thans_df)
+
+    for key, value in filter_criteria['less_or_null'].items():
+        less_null_df = ( (dataframe[key] < value) | pd.isnull(dataframe[key]) )
+        conditions_dfs.append(less_null_df)
+
+    dataframe = dataframe[conjunction(*conditions_dfs)]
+    return dataframe
+
+def write_json(object, output_file):
+    import json
+    with open(output_file,"w") as f:
+        json.dump(object, f, indent=4)
+
+def load_json(input_file):
+    import json
+    with open(input_file,"r") as f:
+        my_item = json.load(f)
+    return my_item
