@@ -26,48 +26,40 @@ import numpy as np # numpy==1.11.0
 import pipeline_functions as pl
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
-def split_df_col2rows(dataframe, split_col, split_char, new_colname, delete_old = False, reset_indexes = True):
+def split_df_col2rows(dataframe, split_col, split_char, new_colname):
     # # Splits a column into multiple rows
     # dataframe : pandas dataframe to be processed
     # split_col : chr string of the column name to be split
     # split_char : chr to split the col on
     # new_colname : new name for the
-    # delete_old : logical True / False, remove original column?
     # ~~~~~~~~~~~~~~~~ #
-    # save the split column as a separate object
+    import pandas as pd
+    import numpy as np
     # pl.my_debugger(locals().copy())
-    tmp_col = dataframe[split_col].str.split(split_char).apply(pd.Series, 1).stack()
-    # drop the last index level
-    tmp_col.index = tmp_col.index.droplevel(-1)
-    # set the new col name
-    tmp_col.name = new_colname
-    # remove the original column from the df
-    if delete_old is True:
+
+    # make sure that the split_col is an 'object' type so we can split it
+    if split_col in dataframe.select_dtypes([np.object]).columns:
+        # save the split column as a separate object
+        tmp_col = dataframe[split_col].str.split(split_char).apply(pd.Series, 1).stack()
+        # drop the last index level
+        tmp_col.index = tmp_col.index.droplevel(-1)
+        # set the new col name
+        tmp_col.name = new_colname
+        # remove the original column from the df
         del dataframe[split_col]
-    # join them into a new df
-    new_df = dataframe.join(tmp_col)
-    if reset_indexes is True:
-        new_df = new_df.reset_index(drop=True)
-    return new_df
-
-
-#
-def custom_table_filter(dataframe,
-    gene_func_include = ['Func.refGene', 'exonic'],
-    exonic_func_remove = ['ExonicFunc.refGene', 'synonymous SNV'],
-    maf_cutoff_upper = ['1000g2015aug_all', 0.01],
-    strand_bias_cutoff_upper = ['Strand Bias', 0.8],
-    frequency_cutoff_lower = ['Frequency', .05],
-    coverage_cutoff_lower = ['Coverage', 250]):
-    # apply filters to the df
-    filtered_df = dataframe.loc[ ( dataframe[gene_func_include[0]] == gene_func_include[1] )
-    & ( dataframe[exonic_func_remove[0]] != exonic_func_remove[1] )
-    & ( ( dataframe[maf_cutoff_upper[0]] < maf_cutoff_upper[1] ) | pd.isnull(dataframe[maf_cutoff_upper[0]]) )
-    & ( dataframe[strand_bias_cutoff_upper[0]] < strand_bias_cutoff_upper[1])
-    & ( dataframe[frequency_cutoff_lower[0]] > frequency_cutoff_lower[1])
-    & ( dataframe[coverage_cutoff_lower[0]] > coverage_cutoff_lower[1])
-    ]
-    return filtered_df
+        # join them into a new df
+        dataframe = dataframe.join(tmp_col)
+    else:
+        print """
+        WARNING: Trying to split column {} in dataframe, where column is not dtype 'object'
+        Column dtype is: {}
+        Column will not be split but column name {} will be changed to: {}
+        """.format(split_col, dataframe[split_col].dtype, split_col, new_colname)
+        # just change the column name and keep moving
+        dataframe.rename(columns={split_col: new_colname}, inplace=True)
+    # if reset_indexes is True:
+    #     new_df = new_df.reset_index(drop=True)
+    return dataframe
 
 def test_canonical_transcripts(df, canon_trancr_list):
     # check to make sure that only canonical transcript ID's are in the df
@@ -90,6 +82,7 @@ def test_filtered_genes(df, unique_genes_list):
             sys.exit()
 
 def find_vcf_timestamp(vcf_file):
+    # find line in VCF file that looks like this:
     ##fileUTCtime=2016-09-23T16:46:51
     with open(vcf_file) as f:
         for line in f:
@@ -147,9 +140,8 @@ query_df = query_df.rename(columns = {'Chrom':'Chrom', 'Position':'Position', 'R
 merge_df = pd.merge(annotation_df, query_df, on=['Chrom', 'Position', 'Ref', 'Variant']) # , how = 'left'
 
 # pl.my_debugger(globals().copy())
-
 # split the AAChange rows in the table
-merge_df = split_df_col2rows(dataframe = merge_df, split_col = 'AAChange.refGene', split_char = ',', new_colname = 'AAChange', delete_old = True)
+merge_df = split_df_col2rows(dataframe = merge_df, split_col = 'AAChange.refGene', split_char = ',', new_colname = 'AAChange')
 
 # split the new columns into separate columns
 merge_df = pl.split_df_col2cols(dataframe = merge_df, split_col = 'AAChange', split_char = ':', new_colnames = ['Gene.AA', 'Transcript', 'Exon', 'Coding', 'Amino Acid Change'], delete_old = True)
@@ -195,7 +187,6 @@ merge_df['Date'] = vcf_timestamp
 # keep only the panel genes; default Unknown Significance
 merge_df = merge_df[merge_df["Gene"].isin(panel_genes)]
 
-
 # add review; Known Signficance, Unknown Significance ; panel genes
 # default is Unknown Signficiance
 merge_df['Review'] = 'US'
@@ -208,10 +199,7 @@ merge_df.loc[merge_df["Gene"].isin(actionable_genes), 'Review'] = "KS"
 full_df = merge_df
 
 # filter varaints based on quality criteria; filter rows
-# merge_df = custom_table_filter(merge_df)
 merge_df = pl.table_multi_filter(merge_df, filter_criteria)
-
-
 
 # make the summary table
 # filter out fields that aren't needed for reporting; filter columns

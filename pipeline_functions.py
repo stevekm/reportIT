@@ -5,7 +5,7 @@
 def my_debugger(vars):
     # starts interactive Python terminal at location in script
     # call with pl.my_debugger(globals().copy()) anywhere in your script
-    # or call my_debugger(locals().copy()) from anywhere within this package
+    # or call my_debugger(locals().copy()) from anywhere within this package or another function
     import readline # optional, will allow Up/Down/History in the console
     import code
     # vars = globals().copy() # in python "global" variables are actually module-level

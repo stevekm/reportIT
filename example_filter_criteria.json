@@ -1,0 +1,20 @@
+{
+    "greater_than": {
+        "Frequency": 0.05, 
+        "Coverage": 250
+    }, 
+    "exclude": {
+        "ExonicFunc.refGene": [
+            "synonymous SNV"
+        ]
+    }, 
+    "less_than": {
+        "1000g2015aug_all": 0.01, 
+        "Strand Bias": 0.8
+    }, 
+    "include": {
+        "Func.refGene": [
+            "exonic"
+        ]
+    }
+}
