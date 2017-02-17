@@ -226,7 +226,7 @@ function get_server_file_mainfest {
         echo "# Coverage dir: \$coverage_dir"
         #
         run_xls="\$(find \$variant_dir -maxdepth 1 -name "*.xls" ! -name "*.cov.xls" | sed -n 's|^/results/analysis/output/Home/||p')"
-        echo -e "# Run XLS:\n\$run_xls"
+        printf "# Run XLS:\n%s\n" "\$run_xls"
         #
         # run XLS name = run ID
         run_ID="\$(basename \$run_xls)"
@@ -238,15 +238,15 @@ function get_server_file_mainfest {
         #
         # the VCFs for the samples
         sample_vcfs="\$(find \$variant_dir -type f -name "TSVC_variants.vcf" | sed -n 's|^/results/analysis/output/Home/||p')"
-        echo -e "# Sample VCFs:\n\$sample_vcfs"
+        printf "# Sample VCFs:\n%s\n" "\$sample_vcfs"
         #
         # the BAMs for the samples # these are all symlinks !
         sample_bams="\$(find \$coverage_dir -name "Ion*" -name "*.bam" | sed -n 's|^/results/analysis/output/Home/||p')"
-        echo -e "# Sample BAMs:\n\$sample_bams"
+        printf "# Sample BAMs:\n%s\n" "\$sample_bams"
         #
         # the BAIs for the samples
         sample_bais="\$(find \$coverage_dir -name "Ion*" -name "*.bai" | sed -n 's|^/results/analysis/output/Home/||p')"
-        echo -e "# Sample BAIs:\n\$sample_bais"
+        printf "# Sample BAIs:\n%s\n" "\$sample_bais"
         #
         #
 EOF
