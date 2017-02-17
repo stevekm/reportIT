@@ -20,10 +20,16 @@ There are two methods of running the pipeline: 'interactively' (run all scripts 
 
 Please note that usage will change as development progresses. In these examples, `Auto_user_SNX-XXX-XXXX-XXX` is an analysis ID from the IonTorrent system. Unless otherwise stated, all commands accept a space-separated list of one or more ID's. 
 
+## Check on the list of available runs
+
 ```bash
 # get list of recent analysis runs
 code/get_server_run_list.sh
+```
 
+## HPC job submission with `qsub`
+
+```bash
 
 # To run pipeline on HPC cluster
 # first download analysis files (requires interactive user login)
@@ -38,9 +44,14 @@ code/qsub_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XX
 # create IGV snapshots and reports for a PAIRED analysis (requires exactly TWO analysis ID's)
 code/qsub_paired_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
+# send the results summary via email
+code/mail_analysis_report.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
+```
 
-# To run pipeline interactively:
+## Interactive mode, running in current session & printing to console
+
+```bash
 # download, annotate, and summarize the analysis data
 code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
@@ -51,7 +62,11 @@ code/IGV_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 # for a PAIRED analysis
 code/IGV_report_wrapper-paired.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
 
+# send the results summary via email
+code/mail_analysis_report.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
+
 ```
+
 # Files & Directories
 
 ## Program Directory
