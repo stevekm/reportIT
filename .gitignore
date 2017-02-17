@@ -31,3 +31,4 @@ Auto_user_*
 *.gz
 *.pyc
 *DS_Store*
+report/*.md
