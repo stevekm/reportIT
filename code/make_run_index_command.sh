@@ -7,7 +7,8 @@ make_barcodes_list () {
 local sheet_path="$1"
 analysis_ID="$(echo "$sheet_path" | sed -e 's|/results/analysis/output/Home/||g' -e 's|^\(.*\)/plug.*$|\1|g')"
 sheet_path="$(readlink -f "$sheet_path")"
-tail -n +2 "$sheet_path" | cut -f46-48 | sort -u | sed -e "s|$|\t${analysis_ID}|g"
+analysis_date="$(stat -c %y "$sheet_path" | cut -d ' ' -f1)"
+tail -n +2 "$sheet_path" | cut -f46-48 | sort -u | sed -e "s|$|\t${analysis_ID}|g" -e "s|$|\t${analysis_date}|g"
 }
 
 print_analysis_index () {
