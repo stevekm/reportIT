@@ -29,6 +29,37 @@ def mkdir_p(path, return_path=False):
     if return_path:
         return path
 
+def file_exists(myfile, kill = False):
+    import os
+    import sys
+    if not os.path.isfile(myfile):
+        print "ERROR: File '{}' does not exist!".format(myfile)
+        if kill == True:
+            print "Exiting..."
+            sys.exit()
+
+def check_list_len_greaterthan(mylist, min_size, my_message = False):
+    '''
+    Return 'False' if the list is not long enough
+    '''
+    message = "ERROR: List is less than length {}".format(str(min_size))
+    if my_message != False: message = my_message
+    if not len(mylist) > min_size:
+        print message
+        return False
+
+def kill_on_false(mybool, my_message = False):
+    '''
+    Exit the script if a value of 'False' is passed
+    '''
+    import sys
+    message = "ERROR: Something returned 'False' when it shouldn't have. Exiting..."
+    if mybool == False:
+        if my_message != False: message = my_message
+        print message
+        sys.exit()
+
+
 def initialize_file(string, output_file):
     # write string to file
     # !! THIS WILL OVERWRITE CONTENTS !!
