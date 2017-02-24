@@ -2,8 +2,8 @@
 title: "Gene Panel Analysis Report"
 author: "Stephen Kelly"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
-output: 
-  html_document: 
+output:
+  html_document:
     keep_md: yes
     number_sections: true
     toc: true
@@ -61,7 +61,7 @@ IGV_snapshot_dir <- params$IGV_snapshot_dir
 
 ```{r, echo = FALSE, include = FALSE, eval=TRUE}
 # load report tables
-summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t') 
+summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
 summary_df[["Frequency"]] <- round(summary_df[["Frequency"]], 3)
 ```
 
@@ -104,7 +104,7 @@ if(nrow(subset(summary_df, subset = (Sample.Name == "SC"))) > 0){
     mycat('\n\n## SC Sample\n\n')
     mycat('\n\nThe following variants were detected in the SC control sample:\n\n')
     print(kable(sc_summary_df[summary_cols]))
-    
+
 }
 ```
 
@@ -120,38 +120,38 @@ IGV_long_snapshots <- dir(path = IGV_snapshot_dir, pattern = "*long.png", full.n
 if(length(IGV_snapshots) > 0){
     # add filenames as item names
     IGV_snapshots <- setNames(object = IGV_snapshots, nm = basename(IGV_snapshots))
-    
+
     # print each to a new section, parse the name for the section name
     for(i in seq_along(IGV_snapshots)){
         # parse section items
         snapshot_filepath <- IGV_snapshots[i]
         snapshot_name <- names(IGV_snapshots[i])
         snapshot_elements <- unlist(strsplit(x = snapshot_name, split = '.', fixed = TRUE))
-        
-        snapshot_elements <- setNames(object = snapshot_elements, 
+
+        snapshot_elements <- setNames(object = snapshot_elements,
                                       nm = c("Analysis_ID", "Barcode", "Gene", "Chrom", "Pos", "Coding_c", "Coding_ID", "Extension"))
-        
+
         coding_ID <- paste(snapshot_elements[["Coding_c"]],
                            snapshot_elements[["Coding_ID"]], sep = '.')
-        
+
         section_heading <- paste(snapshot_elements[["Gene"]], coding_ID,
                                  snapshot_elements[["Barcode"]] ,sep = ' ')
-        
+
         variant_ID <- gsub(x = snapshot_name, pattern = ".png", replacement = "")
-        
+
         # get the entry for this variant from the original df
-        variant_df <- subset(non_sc_summary_df, 
-                             subset=(Barcode == snapshot_elements[["Barcode"]] & 
-                                         Gene == snapshot_elements[["Gene"]] & 
+        variant_df <- subset(non_sc_summary_df,
+                             subset=(Barcode == snapshot_elements[["Barcode"]] &
+                                         Gene == snapshot_elements[["Gene"]] &
                                          Position == snapshot_elements[["Pos"]] &
                                          Chrom == snapshot_elements[["Chrom"]]))
-        
-        
-        
+
+
+
         # check for a 'long' snapshot
         search_pattern <- gsub(pattern = '.png', replacement = '', x = names(snapshot_filepath))
         long_snapshot_file <- grep(pattern = search_pattern, x = IGV_long_snapshots, value = TRUE)
-        
+
         if( ! identical(long_snapshot_file, character(0))) {
             # start printing the section
             mycat(paste0("## ", section_heading, " {.tabset .tabset-pills} \n\n"))
@@ -160,13 +160,13 @@ if(length(IGV_snapshots) > 0){
             mycat(paste0('`', variant_ID,'`\n\n'))
             print(kable(variant_df[summary_cols], row.names = FALSE))
             mycat(paste0("\n\n![](", snapshot_filepath, ") \n\n"))
-            
+
             mycat("### Long View \n\n")
             mycat("Variant ID:\n\n")
             mycat(paste0('`', variant_ID,'`\n\n'))
             print(kable(variant_df[summary_cols], row.names = FALSE))
             mycat(paste0("\n\n![](", long_snapshot_file, ") \n\n"))
-            
+
         } else{
             mycat(paste0("## ", section_heading, " {.tabset .tabset-pills} \n\n"))
             mycat("Variant ID:\n\n")
@@ -174,17 +174,17 @@ if(length(IGV_snapshots) > 0){
             print(kable(variant_df[summary_cols], row.names = FALSE))
             mycat(paste0("\n\n![](", snapshot_filepath, ") \n\n"))
         }
-        
-        
+
+
     }
 }
 
 ```
 
 
-# System Information {.tabset .tabset-pills} 
+# System Information {.tabset .tabset-pills}
 
-## Hide 
+## Hide
 
 ## Show
 
@@ -194,6 +194,10 @@ system("uname -srv", intern = TRUE)
 
 # dir
 system('pwd',intern=T)
+
+# repo info
+system('git remote -v')
+system('printf "%s\t%s" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)"')
 
 # date time
 system("date", intern = TRUE)
