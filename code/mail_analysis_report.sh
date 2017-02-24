@@ -19,6 +19,7 @@ function mail_analysis_report {
 
     local barcodes_file="$3"
     local summary_file="$4"
+    local zipfile="$5"
 
     local file_fullpath="$(readlink -f "$attachment_file")"
     local file_basename="$(basename "$attachment_file")"
@@ -35,8 +36,7 @@ function mail_analysis_report {
     echo -e "\nAttachment file is:\n$attachment_file\n"
     echo -e "\nEmail subject line is:\n$SUBJECT_LINE\n"
 
-    # cat - <<E0F
-    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -a "$summary_file" -- "$recipient_list" <<E0F
+    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -a "$summary_file" -a "$zipfile" -- "$recipient_list" <<E0F
 
 IonTorrent Analysis overview report is attached: $file_basename
 IonTorrent Analysis variant summary table is attached: $summary_file_basename
@@ -101,7 +101,17 @@ for ID in $analysis_ID_list; do
     analysis_summary_file="$(find "$analysis_outdir" -name "*${ID}*" -name "*_summary.tsv")"
     check_dirfile_exists "$analysis_summary_file" "f" "Making sure the analysis summary file exists..."
 
+    # find the analysis overview IGV snapshot dir
+    # output/Auto_user_SN2-248-IT17-08-1_306_335/reports/analysis_overview_report/IGV_snapshots/
+    echo "Now searching for the IGV snapshot dir..."
+    analysis_IGV_dir="$(find "$analysis_outdir" -type d -path "*reports/analysis_overview_report*" -name "IGV_snapshots")"
+    check_dirfile_exists "$analysis_IGV_dir" "d" "Making sure the IGV snapshot dir exists..."
+    zipfile="${analysis_IGV_dir}.zip"
+    zip -r "$zipfile" "$analysis_IGV_dir"
+    check_dirfile_exists "$zipfile" "f" "Making sure the IGV snapshot zip was created..."
+
+
     # email the file!
-    mail_analysis_report "$ID" "$analysis_report_file" "$analysis_barcodes_file" "$analysis_summary_file"
+    mail_analysis_report "$ID" "$analysis_report_file" "$analysis_barcodes_file" "$analysis_summary_file" "$zipfile"
     )
 done
