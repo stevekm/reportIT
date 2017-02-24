@@ -85,11 +85,16 @@ def get_samplesheet_paired_unpaired_lists(samplesheet_file):
                 single_analysis_list.append(line.split()[0])
     return (paired_analysis_list, single_analysis_list)
 
-def download_analysis_files(samplesheet_file):
+def download_analysis_files(samplesheet_file, use_qsub = False):
     '''
     Runs the download script on all the analyses in the sample sheet
     '''
-    download_script = "code/get_server_files.sh"
+    if use_qsub == True:
+        download_script = "code/qsub_download_wrapper.sh"
+    elif use_qsub == False:
+        download_script = "code/get_server_files.sh"
+    else:
+        print "ERROR: object 'use_qsub' must be 'True' or 'False'"
     # get the list of analysis ID's
     analysis_list = get_samplesheet_list(samplesheet_file)
     # build the command to run
@@ -159,7 +164,7 @@ print_lines(samplesheet_file)
 # d
 if download == True:
     print("Downloading files...")
-    download_analysis_files(samplesheet_file)
+    download_analysis_files(samplesheet_file, use_qsub)
 
 # a
 if annotate == True:
