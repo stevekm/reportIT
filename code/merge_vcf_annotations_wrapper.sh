@@ -3,17 +3,17 @@
 
 ## USAGE: merge_vcf_annotations_wrapper.sh /path/to/analysis_dir <analysis_ID>
 
-## Description: This script will find parse an annotated analysis dir, 
-## find all files needed to make the merged summary tables per sample, 
+## Description: This script will find parse an annotated analysis dir,
+## find all files needed to make the merged summary tables per sample,
 ## and pass them to the merge_vcf_annotations.py script for merging
 ## This script will output summary tables, and filtered annotation tables
 ## This script operates on a single analysis dir
 
 
-#~~~~~ CUSTOM ENVIRONMENT ~~~~~~# 
+#~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
 source "global_settings.sh"
 
-#~~~~~ PARSE ARGS ~~~~~~# 
+#~~~~~ PARSE ARGS ~~~~~~#
 num_args_should_be "equal" "2" "$#" # "less_than", "greater_than", "equal"
 echo_script_name
 
@@ -40,7 +40,7 @@ echo -e "Barcode file is:\n$barcodes_file"
 # ~~~~~~ Find Sample dirs ~~~~~~ #
 echo -e "Finding sample directories for the analysis..."
 # under run dir, parent subdir is variantCaller_out.*
-# sample dirs labeled IonXpress_001, IonXpress_002, ... 
+# sample dirs labeled IonXpress_001, IonXpress_002, ...
 sample_dirs="$(find "$input_dir" -type d -path "*variantCaller_out*" -name "IonXpress_*")"
 
 # ~~~~~~ Find Sample files ~~~~~~ #
@@ -53,9 +53,9 @@ for i in $sample_dirs; do
     samplei="$i"
     echo -e "---------------------------------------"
     echo -e "\nMaking summary tables for:\n$samplei\n"
-    query_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*_query.tsv")"
+    query_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*${query_ext}")"
     # echo $query_file
-    annot_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*.hg19_multianno.txt")"
+    annot_file="$(find "$samplei" -type f -name "IonXpress_*" -name "*${annovar_output_ext}")"
     # echo $annot_file
     vcf_file="$(find "$samplei" -type f -name "TSVC_variants.vcf")"
     # echo $vcf_file
@@ -64,4 +64,3 @@ for i in $sample_dirs; do
     set +x
     echo -e "---------------------------------------"
 done
-

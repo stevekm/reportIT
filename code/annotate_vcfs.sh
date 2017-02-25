@@ -18,29 +18,6 @@ echo -e "Input directory is:\n$input_dir\n"
 
 
 
-
-# ~~~~~~~~~~~~ # file extensions & naming # ~~~~~~~~~~~~ #
-# source VCF file: TSVC_variants.vcf
-source_vcf_basename="TSVC_variants.vcf"
-
-# split VCF extensions
-split_vcf_ext=".split"
-
-# ANNOVAR converted avinput
-avinput_ext=".avinput"
-
-# ANNOVAR annotated output; automatically added by ANNOVAR
-annovar_output_ext=".${build_version}_multianno.txt" # .hg19_multianno.txt
-
-# rebuilt VCF file from ANNOVAR avinput
-rebuilt_ext=".rebuilt"
-
-# VCF field query tables
-query_ext="_query.tsv"
-
-# VCF converted to TSV
-tsv_ext=".tsv"
-
 # ~~~~~~~~~~~~ # find VCF files # ~~~~~~~~~~~~ #
 echo -e "Searching for VCF files in directory:\n$input_dir"
 vcf_files="$(find "$input_dir" -type f -name "$source_vcf_basename")"
@@ -97,9 +74,9 @@ for i in $split_vcf_files; do
     # the new VCF file
     rebuilt_vcf_file="${avinput_file}${rebuilt_ext}"
     # copy the header from the original VCF
-    grep '^#' "$vcf_input" > "$rebuilt_vcf_file"
+    # grep '^#' "$vcf_input" > "$rebuilt_vcf_file"
     # add the extra fields from the avinput file
-    cut -f6- "$avinput_file" >> "$rebuilt_vcf_file"
+    # cut -f6- "$avinput_file" >> "$rebuilt_vcf_file"
 done
 
 

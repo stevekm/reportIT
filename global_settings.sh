@@ -63,6 +63,22 @@ annovar_protocol="-protocol refGene,cosmic68,clinvar_20150629,1000g2015aug_all -
 # bcftools-1.3.1
 bcftools_bin="$(readlink -f bin/bcftools)"
 vcf2tsv_bin="$(readlink -f bin/vcf2tsv)"
+# ~~~~~~~~~~~~ # file extensions & naming # ~~~~~~~~~~~~ #
+# source VCF file: TSVC_variants.vcf
+source_vcf_basename="TSVC_variants.vcf"
+# split VCF extensions
+split_vcf_ext=".split"
+# ANNOVAR converted avinput
+avinput_ext=".avinput"
+# ANNOVAR annotated output; automatically added by ANNOVAR
+annovar_output_ext=".${build_version}_multianno.txt" # .hg19_multianno.txt
+# rebuilt VCF file from ANNOVAR avinput
+rebuilt_ext=".rebuilt"
+# VCF field query tables
+query_ext="_query.tsv"
+# VCF converted to TSV
+tsv_ext=".tsv"
+
 
 # ~~~~~~ REPORTING PARAMETERS ~~~~~~ #
 # if the 'module' system is installed, try to load the correct versions
