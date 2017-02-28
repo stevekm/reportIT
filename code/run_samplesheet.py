@@ -95,6 +95,9 @@ def download_analysis_files(samplesheet_file, use_qsub = False):
         download_script = "code/get_server_files.sh"
     else:
         print "ERROR: object 'use_qsub' must be 'True' or 'False'"
+    ### !! don't use the qsub wrapper yet because something is wrong with it
+    download_script = "code/get_server_files.sh"
+    ###
     # get the list of analysis ID's
     analysis_list = get_samplesheet_list(samplesheet_file)
     # build the command to run
