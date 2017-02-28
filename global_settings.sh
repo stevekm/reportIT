@@ -63,6 +63,7 @@ annovar_protocol="-protocol refGene,cosmic68,clinvar_20150629,1000g2015aug_all -
 # bcftools-1.3.1
 bcftools_bin="$(readlink -f bin/bcftools)"
 vcf2tsv_bin="$(readlink -f bin/vcf2tsv)"
+
 # ~~~~~~~~~~~~ # file extensions & naming # ~~~~~~~~~~~~ #
 # source VCF file: TSVC_variants.vcf
 source_vcf_basename="TSVC_variants.vcf"
@@ -79,7 +80,18 @@ query_ext="_query.tsv"
 # VCF converted to TSV
 tsv_ext=".tsv"
 
+## NOTE: These are hardcoded in merge_vcf_annotations.py
+# variant summary table
+summary_table_ext="_summary.tsv"
+# variant table without summary criteria (not actually filtered why is it called that??)
+filtered_table_ext="_filtered.tsv"
+# full table with all variants and all fields
+full_table_ext="_full_table.tsv"
 
+# summary table with version control information
+summary_version_ext="_summary_version.tsv"
+
+# current_date="$(date +%Y-%m-%d:%H:%M:%S)"
 # ~~~~~~ REPORTING PARAMETERS ~~~~~~ #
 # if the 'module' system is installed, try to load the correct versions
 if (module)&>/dev/null ; then
