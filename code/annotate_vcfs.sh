@@ -77,6 +77,9 @@ for i in $split_vcf_files; do
     # grep '^#' "$vcf_input" > "$rebuilt_vcf_file"
     # add the extra fields from the avinput file
     # cut -f6- "$avinput_file" >> "$rebuilt_vcf_file"
+    # set -x
+    ${codedir}/rebuild_vcf.py "$vcf_input" "$avinput_file" "$rebuilt_vcf_file"
+    # set +x
 done
 
 

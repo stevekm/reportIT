@@ -15,12 +15,13 @@ import errno
 import pipeline_functions as pl
 
 # ~~~~ GET SCRIPT ARGS ~~~~~~ #
-vcf_file = sys.argv[1]
-avinput_file = sys.argv[2]
+vcf_file = sys.argv[1] # need the header
+avinput_file = sys.argv[2] # need the contents
 
 # output file
-rebuilt_output_file = os.path.splitext(avinput_file)[0] + ".rebuilt"
-print rebuilt_output_file
+# rebuilt_output_file = os.path.splitext(avinput_file)[0] + ".rebuilt"
+rebuilt_output_file = sys.argv[3]
+# print rebuilt_output_file
 
 # with open(vcf_file) as f:
 #     for line in f:
