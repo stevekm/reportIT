@@ -16,56 +16,95 @@ A preliminary sparse plain-text report will be generated from the summary table 
 
 # Usage
 
-There are two methods of running the pipeline: 'interactively' (run all scripts in the current terminal session; recommended to use `screen`) or via submission to an HPC cluster with `qsub`. Each listed step should be run sequentially.
+## Check For Available Runs
 
-Please note that usage will change as development progresses. In these examples, `Auto_user_SNX-XXX-XXXX-XXX` is an analysis ID from the IonTorrent system. Unless otherwise stated, all commands accept a space-separated list of one or more ID's. 
-
-## Check on the list of available runs
+Before you can run the pipeline, you need to know which runs are available on your IonTorrent server. Use the following script for this:
 
 ```bash
-# get list of recent analysis runs
 code/get_server_run_list.sh
 ```
 
-## HPC job submission with `qsub`
+This requires that your `data/server_info.txt` file is set correctly, as described below.
+
+## Run the Pipeline
+
+The simplest way to run the reportIT pipeline is to use the `run_samplesheet.py` script, and specify which actions you would like to take on the analysis ID's specified in your sample sheet. 
+
+### Download Files
+
+First, you should download all files needed for the analyses:
 
 ```bash
-
-# To run pipeline on HPC cluster
-# first download analysis files (requires interactive user login)
-code/get_server_files.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# annotate the downloaded sample files
-code/qsub_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# create IGV snapshots and reports for one or more individual analyses
-code/qsub_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# create IGV snapshots and reports for a PAIRED analysis (requires exactly TWO analysis ID's)
-code/qsub_paired_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# send the results summary via email
-code/mail_analysis_report.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -d
 ```
+### Annotate Variants
 
-## Interactive mode, running in current session & printing to console
+Then, you should annotate the variants in the VCF files downloaded, and create summary tables:
 
 ```bash
-# download, annotate, and summarize the analysis data
-code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# IGV snapshots and reporting
-# for non-paired independent analyses
-code/IGV_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# for a PAIRED analysis
-code/IGV_report_wrapper-paired.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# send the results summary via email
-code/mail_analysis_report.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -a
 ```
+### Visualize Coverages & Generate Reports
+
+Finally, you can create IGV snapshots of the BAM files, and generate reports:
+
+- for unpaired analyses
+
+```bash
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -r
+```
+
+- for paired analyses (runs unpaired analyses as well)
+
+```bash
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -p
+```
+
+### Using HPC Cluster
+
+The annotation and reporting steps for all analyses can be run in parrallel by submitting the jobs to run on a computer cluster using `qsub`. To enable this feature, simply pass the `-q` argument with the previous commands:
+
+```bash
+# annotate with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -aq
+
+# report with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -pq
+```
+This method has been configured to work with the phoenix compute cluster at NYULMC, and might need to be reconfigured to work on other HPC systems. 
+
+### Usage Notes
+
+Rough estimates for pipeline completeion time are ~5-10 minutes to download all files and annotate variants, and ~5-15 minutes to create all IGV snapshots and generate reports. In total this comes to roughly 10 - 30 minutes per analysis, depending on the number of variants present. 
+
+Running the pipeline without the `-q` argument will run all pipeline steps for all analyses in the current session; if you plan to do this, you should probably run the pipeline in `screen` in order to allow it to run in the background indepedent of your terminal connection. Note that running with `qsub` is currently disabled for the file download step, so all file downloads will always run in the current session. If you have a lot of analyses, this might take a while. 
+
+Multiple pipeline actions can be chained together. For example:
+
+```bash
+# download all files, then annotate with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
+```
+
+```bash
+# download all files, then annotate and create reports (no qsub)
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -dap
+```
+
+Reporting steps depend on the completion of annotation steps, so if you plan to use the `-q` argument to submit jobs to `qsub`, you need to run the annotation, wait for the jobs to complete, then run the reports. Your workflow would look like this:
+
+
+```bash
+# download all files, then annotate with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
+
+# ... wait for jobs to finish ...
+
+# run the reports
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -pq
+```
+
 
 # Files & Directories
 
