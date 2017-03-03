@@ -1,4 +1,4 @@
-This folder cotains the reference genome information. Currently, only hg19 is configured. 
+This folder contains the reference genome information. Currently, only hg19 is configured. 
 
 The `cannonical_transcript_table.py` script will download the required files from UCSC, and set up the 'cannonical transcripts' file needed for the pipeline. 
 
