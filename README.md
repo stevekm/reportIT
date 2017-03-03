@@ -24,7 +24,9 @@ Before you can run the pipeline, you need to know which runs are available on yo
 code/get_server_run_list.sh
 ```
 
-This requires that your `data/server_info.txt` file is set correctly, as described below.
+This requires that your `data/server_info.txt` file is set correctly, as described below. 
+
+The selected runs should be entered into a samplesheet file, as described in the `samplesheets` directory, and used for running the pipeline. 
 
 ## Run the Pipeline
 
