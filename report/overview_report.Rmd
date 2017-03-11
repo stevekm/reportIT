@@ -1,7 +1,4 @@
 ---
-title: "Gene Panel Analysis Report"
-author: "Stephen Kelly"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
     keep_md: yes
@@ -15,68 +12,164 @@ params:
   sample_ID: NA
   barcode_ID: NA
 ---
-
+<!-- Setup the R code to be used in R Markdown generation throughout the report -->
 ```{r setup, include=FALSE}
 # {.tabset} # .tabset-fade .tabset-pills
 knitr::opts_chunk$set(echo = FALSE)
 
 library("knitr")
 
-# function for formatting text in the report
 mycat <- function(text){
+    # function for formatting text in the report
     cat(gsub(pattern = "\n", replacement = "  \n", x = text))
 }
 
-# function for reading info from a text file
 file_scan <- function(my_file){
-  file_contents <- scan(my_file, what="", sep="\n")
-  return(file_contents)
+    # function for reading info from a text file
+    file_contents <- scan(my_file, what="", sep="\n")
+    return(file_contents)
 }
 
-# function to return file contents or NA if file doesn't exit
 get_file_content <- function(my_file){
-  file_contents <- "NA"
-  if (file.exists(my_file)) {
-    if (! identical(file_scan(my_file), character(0))) {
-      file_contents <- file_scan(my_file)
+    # function to return file contents or NA if file doesn't exit
+    file_contents <- "NA"
+    if (file.exists(my_file)) {
+        if (! identical(file_scan(my_file), character(0))) {
+            file_contents <- file_scan(my_file)
+        }
     }
-  }
-  return(file_contents)
+    return(file_contents)
 }
 
-# reindex the row names after subsetting
 reindex_rownames <- function(df){
+    # reindex the row names after subsetting
     rownames(df) <- seq(nrow(df))
     return(df)
 }
 
+print_barcodes_table <- function(df, cols_to_print, caption){
+    print(kable(df[cols_to_print], caption = caption, row.names = TRUE))
+}
+
+print_variant_table <- function(df, cols_to_print){
+    # print the variant table into the report
+    if(nrow(df) > 0) print(kable(df[cols_to_print], row.names = TRUE))
+}
+
+print_SC_variant_table <- function(df, cols_to_print){
+    # special conditions for the SC variant table printing
+    if(nrow(df) > 0){
+        mycat('\n\n## SC Sample\n\n')
+        mycat('\n\nThe following variants were detected in the SC control sample:\n\n')
+        print_variant_table(df, cols_to_print)
+    }
+}
+
 ```
 
 
-```{r, echo = FALSE, include = FALSE, eval=TRUE}
+```{r get_report_params, echo = FALSE, include = FALSE, eval=TRUE}
 # get the items for the report
 summary_table_file <- params$summary_table_file
 IGV_snapshot_dir <- params$IGV_snapshot_dir
+
+analysis_ID <- get_file_content("analysis_ID.txt")
 ```
 
-```{r, echo = FALSE, include = FALSE, eval=TRUE}
-# load report tables
-summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
-summary_df[["Frequency"]] <- round(summary_df[["Frequency"]], 3)
+```{r load_barcodes_tables, echo = FALSE, include = FALSE, eval=TRUE}
+# columns to include in the report output
+sample_barcode_cols <- c("Sample.Name", "Barcode")
+sample_barcodes_file <- "sample_barcode_IDs.tsv"
+sample_barcodes_df <- read.delim(sample_barcodes_file, header = TRUE, sep = '\t') # , check.names = FALSE
+# order by barcode
+sample_barcodes_df <- sample_barcodes_df[order(sample_barcodes_df[["Barcode"]]), ]
+sample_barcodes_df <- reindex_rownames(sample_barcodes_df)
+
+run_ID <- unique(as.character(sample_barcodes_df[["Run.Name"]]))
 ```
+
+```{r load_variant_tables, echo = FALSE, include = FALSE, eval=TRUE}
+# colnames to print in the variant summary tables
+summary_cols <- c("Gene", "Coding", "Amino.Acid.Change","Frequency", "Review", "Sample.Name", "Barcode")
+
+# ID's of the SC control samples; filter these from the primary table
+SC_control_sampleIDs <- c("SC", "Sc")
+
+# load variant summary table from file
+summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
+# round off the Frequency value
+summary_df[["Frequency"]] <- round(summary_df[["Frequency"]], 3)
+
+# separate the SC and non-SC samples
+non_sc_summary_df <- summary_df[ which(! summary_df[["Sample.Name"]] %in% SC_control_sampleIDs), ]
+non_sc_summary_df <- reindex_rownames(non_sc_summary_df)
+
+sc_summary_df <- summary_df[ which(summary_df[["Sample.Name"]] %in% SC_control_sampleIDs), ]
+sc_summary_df <- reindex_rownames(sc_summary_df)
+```
+<!-- Start printing the report contents -->
+<!-- Custom report header -->
+<div class="fluid-row" id="header">
+<h1 class="title toc-ignore">Gene Panel Analysis Report</h1>
+<h4 class="author" style="display: inline; float: left;"><em>Stephen Kelly</em></h4>
+<h4 class="date" style=" inline; float: right;"><em>`r format(Sys.time(), '%B %d, %Y')`</em></h4>
+</div>
+<br>
+<hr class="section-rule">
+
+<!-- Custom report CSS styling -->
+<style>
+/* custom line between sections */
+.section-rule {
+color: lightgray;
+}
+
+/* color the active TOC element purple */
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    background-color: indigo;
+}
+
+/*
+#header h1 {
+    color: purple; 
+    border-bottom: 1px solid purple;
+    padding-bottom: 15px;
+}
+*/
+
+/* color the active pill buttons purple with white text */
+
+.nav-pills > li.active > a, .nav-pills > li.active > a:focus {
+color: white;
+background-color: indigo;
+}
+/* color the inactive pill button text purple */
+
+.nav-pills > li.active > a:hover {
+background-color: indigo;
+color:white;
+}
+
+.nav>li>a {
+color: indigo;
+background-color: lightgray;
+}
+
+</style>
+
 
 # Analysis Information
 
-```{r, results='asis'}
-analysis_ID <- get_file_content("analysis_ID.txt")
+Analysis ID:
 
-sample_barcodes_file <- "sample_barcode_IDs.tsv"
-sample_barcodes_df <- read.delim(sample_barcodes_file, header = TRUE, sep = '\t') # , check.names = FALSE
+<strong>`r analysis_ID`</strong>
 
-mycat(paste0("Analyis ID: **", analysis_ID, "** \n\n"))
+Run ID:
 
-print(kable(sample_barcodes_df[c("Sample.Name", "Barcode")], caption = "Samples included in the analysis."))
+<strong>`r run_ID`</strong>
 
+```{r print_sample_barcodes_table, results='asis'}
+print_barcodes_table(sample_barcodes_df, sample_barcode_cols, "Samples included in the analysis.")
 ```
 
 # Variant Table {.tabset .tabset-pills}
@@ -85,27 +178,12 @@ print(kable(sample_barcodes_df[c("Sample.Name", "Barcode")], caption = "Samples 
 
 The following variants are detected:
 
-```{r, echo = FALSE, results='asis', eval=TRUE}
-summary_cols <- c("Gene", "Coding", "Amino.Acid.Change","Frequency", "Review", "Sample.Name", "Barcode")
-
-non_sc_summary_df <- subset(summary_df, subset = (Sample.Name != "SC"))
-non_sc_summary_df <- reindex_rownames(non_sc_summary_df)
-
-print(kable(non_sc_summary_df[summary_cols]))
+```{r print_non_SC_variant_table, echo = FALSE, results='asis', eval=TRUE}
+print_variant_table(non_sc_summary_df, summary_cols)
 ```
 
-
-
-
-```{r, echo = FALSE, results='asis', eval=TRUE}
-if(nrow(subset(summary_df, subset = (Sample.Name == "SC"))) > 0){
-    sc_summary_df <- subset(summary_df, subset = (Sample.Name == "SC"))
-    sc_summary_df <- reindex_rownames(sc_summary_df)
-    mycat('\n\n## SC Sample\n\n')
-    mycat('\n\nThe following variants were detected in the SC control sample:\n\n')
-    print(kable(sc_summary_df[summary_cols]))
-
-}
+```{r print_SC_variant_table, echo = FALSE, results='asis', eval=TRUE}
+print_SC_variant_table(sc_summary_df, summary_cols)
 ```
 
 # IGV Snapshots
