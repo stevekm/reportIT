@@ -106,7 +106,15 @@ $ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
 # run the reports
 $ code/run_samplesheet.py samplesheets/samplesheet.tsv -pq
 ```
+# Analysis Report Example
 
+An HTML formatted analysis overview report displays the significant variants found across all samples in the run. 'SC' control samples are shown in a separate table (hidden by default).
+
+<img width="810" alt="screen shot 2017-03-17 at 4 21 43 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061536/2f11cd3e-0b2e-11e7-9684-4cb9f4d2e0a6.png">
+
+IGV snapshots shown for all significant variants. For low frequency variants, a "long view" snapshot is included to ensure mutations can be seen amongst reads. If available, 'NC' control sample is included on the lower track. 
+
+<img width="800" alt="screen shot 2017-03-17 at 4 22 28 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061635/9111af4a-0b2e-11e7-9870-8485ccf38ec2.png">
 
 # Files & Directories
 

@@ -43,7 +43,7 @@ get_file_content <- function(my_file){
 
 reindex_rownames <- function(df){
     # reindex the row names after subsetting
-    rownames(df) <- seq(nrow(df))
+    if(nrow(df) > 0) rownames(df) <- seq(nrow(df))
     return(df)
 }
 
