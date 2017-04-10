@@ -21,6 +21,14 @@ An HTML formatted analysis overview report will be generated to show a summary o
 
 - Deposition of pipeline output in a central database
 
+# Installation
+
+First, run the `dir_setup.sh` script; 
+```bash
+./dir_setup.sh
+```
+
+This should set up the `bin` and `ref` directories, along with creating and symlinking the external `input`, `output`, and `data` directories. You should verify these symlinks and directories, and then populate the `data` directory with files required for the pipeline (see the 'Data directory' section, below). You should also set up automatic ssh for your IonTorrent server as described [here](https://gist.github.com/stevekm/93de1539d8008d220c9a1c4d19110b3e).
 
 # Usage
 
