@@ -11,7 +11,15 @@ All VCF files will be annotated and processed with ANNOVAR and bcftools, and a s
 
 Sequencing reads will be visualized by loading the BAM file for each test sample, paired with the corresponding control sample for the run, into IGV for automated snapshots to manually review & determine variant qualities. 
 
-A preliminary sparse plain-text report will be generated from the summary table of variants, and a rich full report will be generated from the IGV snapshots, summary table, and other visualizations. Both reports will include clinical significance and interpretations supplied by the Weill Cornell [Precision Medicine Knowledgebase](https://pmkb.weill.cornell.edu/). 
+An HTML formatted analysis overview report will be generated to show a summary of significant cancer variants found amongst all samples in the IonTorrent run, with IGV snapshots for each variant. 
+
+## In Progress
+
+- Per-sample reports showing variant summary table and clinical interpretation of variants supplied by the Weill Cornell [Precision Medicine Knowledgebase](https://pmkb.weill.cornell.edu/). 
+
+- Analysis review feedback system to mark sequencing artifacts 
+
+- Deposition of pipeline output in a central database
 
 
 # Usage
