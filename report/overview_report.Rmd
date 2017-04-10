@@ -99,6 +99,8 @@ SC_control_sampleIDs <- c("SC", "Sc")
 summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')
 # round off the Frequency value
 summary_df[["Frequency"]] <- round(summary_df[["Frequency"]], 3)
+# sort by Barcode label
+summary_df <- summary_df[with(summary_df, order(Barcode)), ]
 
 # separate the SC and non-SC samples
 non_sc_summary_df <- summary_df[ which(! summary_df[["Sample.Name"]] %in% SC_control_sampleIDs), ]
@@ -106,6 +108,7 @@ non_sc_summary_df <- reindex_rownames(non_sc_summary_df)
 
 sc_summary_df <- summary_df[ which(summary_df[["Sample.Name"]] %in% SC_control_sampleIDs), ]
 sc_summary_df <- reindex_rownames(sc_summary_df)
+save.image(file="load_report_data.Rdata",compress = TRUE)
 ```
 <!-- Start printing the report contents -->
 <!-- Custom report header -->
