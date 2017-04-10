@@ -28,11 +28,29 @@ import pipeline_functions as pl
 #     proc_stdout = process.communicate()[0].strip()
 #     print proc_stdout
 
+def get_open_X_server():
+    '''
+    Search for an open Xvfb port to render into
+    '''
+    x_serv_command= '''
+for serv_num in $(seq 1 1000); do
+    if ! (xdpyinfo -display :${serv_num})&>/dev/null; then
+        echo "$serv_num" && break
+    fi
+done
+'''
+    import subprocess as sp
+    # run the command, capture the output
+    process = sp.Popen(x_serv_command,stdout=sp.PIPE, shell=True)
+    x_serv_port = int(process.communicate()[0].strip())
+    return(x_serv_port)
+
 def run_IGV_script(igv_script, igv_jar, memMB, x_serv_num):
     # run the IGV script
+    x_serv_num = get_open_X_server()
     igv_command = "(Xvfb :{} &) && DISPLAY=:{} java -Xmx{}m -jar {} -b {} && killall Xvfb".format(x_serv_num, x_serv_num, memMB, igv_jar, igv_script)
     startTime = datetime.now()
-    print "\nSelected X server is:\t", x_serv_num
+    print('\nOpen Xvfb port found on:\n{}\n'.format(x_serv_num))
     print "\nStarting IGV\nCurrent time is:\t", startTime
     print "\nIGV command is:\n", igv_command
     pl.subprocess_cmd(igv_command)
@@ -56,7 +74,7 @@ args = parser.parse_args()
 batchscript_file = args.batchscript_file
 igv_jar_bin = args.igv_jar_bin
 igv_mem = args.igv_mem
-x_serv = args.x_serv
+x_serv = args.x_serv # this gets ignored
 
 
 

@@ -66,7 +66,7 @@ for i in $analysis_ID_list; do
     echo -e "Checking for combined analysis dir..."
 
     # get the first found combined barcode file
-    set -x
+    # set -x
     combined_barcode_file="$(find "$analysis_outdir" -type f -name "combined_sample_barcode_IDs.tsv" | head -1)"
 
     # test to see if one was found
@@ -88,7 +88,7 @@ for i in $analysis_ID_list; do
         echo -e "Getting NC sample from barcode file:\n$barcode_file"
         find_NC_control_sample "$barcode_file" "$control_sample_regex_file" "$outdir"
     fi
-    set +x
+    # set +x
 
 
     # find the analysis barcode file
@@ -161,11 +161,11 @@ for i in $analysis_ID_list; do
         min_number_lines="1"
         if (( $num_lines > $min_number_lines )); then
             echo -e "Running IGV batchscript generator script..."
-            set -x
+            # set -x
             # IGV_control_param is exported global variable from `find_NC_control_sample` function
             [ ! -z "${IGV_control_param:-}" ] && echo -e "Including control BAM parameters:\n${IGV_control_param}"
             $IGV_batchscript_generator_script "$sample_summary_file" "$sample_bamfile" "$sample_IGV_dir" ${IGV_control_param:-}
-            set +x
+            # set +x
 
             # find all the IGV batch scripts
             echo -e "\n\nNew testing this part, searching for all IGV batch scripts\n\n"
