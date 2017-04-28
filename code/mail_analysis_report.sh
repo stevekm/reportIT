@@ -26,6 +26,9 @@ function mail_analysis_report {
     local summary_file_basename="$(basename "$summary_file")"
     local file_owner="$(ls -ld "$attachment_file" | awk '{print $3}')"
     local file_date="$(ls -l --time-style=long-iso "$attachment_file" | awk '{print $6 " " $7}')"
+    local git_branch="$(git rev-parse --abbrev-ref HEAD)"
+    local git_commit="$(git rev-parse HEAD)"
+    local sys_hostname="$(hostname)"
 
     # custom mail settings
     source "mail_settings.sh"
@@ -52,6 +55,13 @@ $file_owner
 
 System location:
 $file_fullpath
+
+System:
+$sys_hostname
+
+Pipeline code current git branch and commit version:
+$git_branch
+$git_commit
 
 $(cat $barcodes_file)
 
@@ -98,7 +108,8 @@ for ID in $analysis_ID_list; do
 
     # find the analysis summary sheet
     echo -e "Now searching for the analysis summary file..."
-    analysis_summary_file="$(find "$analysis_outdir" -name "*${ID}*" -name "*_summary.tsv")"
+    # analysis_summary_file="$(find "$analysis_outdir" -name "*${ID}*" -name "*_summary.tsv")"
+    analysis_summary_file="$(find "$analysis_outdir" -name "*${ID}*" -name "*_summary_version.tsv")"
     check_dirfile_exists "$analysis_summary_file" "f" "Making sure the analysis summary file exists..."
 
     # find the analysis overview IGV snapshot dir
