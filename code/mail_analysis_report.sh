@@ -20,6 +20,8 @@ function mail_analysis_report {
     local barcodes_file="$3"
     local summary_file="$4"
     local zipfile="$5"
+    local vcf_zipfile="$6"
+    local tables_zip="$7"
 
     local file_fullpath="$(readlink -f "$attachment_file")"
     local file_basename="$(basename "$attachment_file")"
@@ -39,7 +41,7 @@ function mail_analysis_report {
     echo -e "\nAttachment file is:\n$attachment_file\n"
     echo -e "\nEmail subject line is:\n$SUBJECT_LINE\n"
 
-    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -a "$summary_file" -a "$zipfile" -- "$recipient_list" <<E0F
+    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -a "$summary_file" -a "$zipfile" -a "$vcf_zipfile" -a "$tables_zip" -- "$recipient_list" <<E0F
 
 IonTorrent Analysis overview report is attached: $file_basename
 IonTorrent Analysis variant summary table is attached: $summary_file_basename
@@ -121,8 +123,20 @@ for ID in $analysis_ID_list; do
     zip -r "$zipfile" "$analysis_IGV_dir"
     check_dirfile_exists "$zipfile" "f" "Making sure the IGV snapshot zip was created..."
 
+    # find all VCF files for the run
+    echo "Now searching for the VCF files..."
+    vcf_zipfile="${analysis_outdir}/${ID}_vcf.zip"
+    find "${analysis_outdir}" -type f -name "*.vcf" | xargs zip "$vcf_zipfile"
+    check_dirfile_exists "$vcf_zipfile" "f" "Making sure the VCF zip was created..."
 
-    # email the file!
-    mail_analysis_report "$ID" "$analysis_report_file" "$analysis_barcodes_file" "$analysis_summary_file" "$zipfile"
+    # find all variant tables from the run
+    echo "Now searching for variant tables..."
+    tables_zip="${analysis_outdir}/${ID}_tables.zip"
+    find "${analysis_outdir}" -type f -name "*${ID}*" -name "*.tsv" | xargs zip "$tables_zip"
+    check_dirfile_exists "$tables_zip" "f" "Making sure the variant table zip was created..."
+
+
+    # email the files!
+    mail_analysis_report "$ID" "$analysis_report_file" "$analysis_barcodes_file" "$analysis_summary_file" "$zipfile" "$vcf_zipfile" "$tables_zip"
     )
 done
