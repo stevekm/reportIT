@@ -277,8 +277,8 @@ system("uname -srv", intern = TRUE)
 system('pwd',intern=T)
 
 # repo info
-system('git remote -v')
-system('printf "%s\t%s" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)"')
+system('git remote -v', intern=T)
+system('printf "%s\t%s" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)"', intern=T)
 
 # date time
 system("date", intern = TRUE)
