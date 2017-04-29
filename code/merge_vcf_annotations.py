@@ -165,6 +165,7 @@ full_df = merge_df
 
 # filter varaints based on quality criteria; filter rows
 # only filter if there's at least 1 row..
+# pl.my_debugger(globals().copy())
 if len(merge_df) > 0:
     merge_df = pl.table_multi_filter(merge_df, filter_criteria)
 else:
