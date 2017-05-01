@@ -292,3 +292,11 @@ def load_json(input_file):
     with open(input_file,"r") as f:
         my_item = json.load(f)
     return my_item
+
+def timestamp():
+    '''
+    Return a timestamp string
+    '''
+    import datetime
+    return('{:%Y-%m-%d-%H-%M-%S}'.format(datetime.datetime.now()))
+    
