@@ -299,4 +299,34 @@ def timestamp():
     '''
     import datetime
     return('{:%Y-%m-%d-%H-%M-%S}'.format(datetime.datetime.now()))
-    
+
+def mkdirs(path, return_path=False):
+    '''
+    Make a directory, and all parent dir's in the path
+    '''
+    import sys
+    import os
+    import errno
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+    if return_path:
+        return path
+
+def backup_file(input_file):
+    '''
+    backup a file by moving it to a folder called 'old' and appending a timestamp
+    '''
+    import os
+    if os.path.isfile(input_file):
+        print('File already exists:\n{0}\n\n'.format(input_file))
+        filename, extension = os.path.splitext(input_file)
+        new_filename = '{0}.{1}{2}'.format(filename, timestamp(), extension)
+        new_filename = os.path.join(os.path.dirname(new_filename), "old", os.path.basename(new_filename))
+        mkdirs(os.path.dirname(new_filename))
+        print('Backing up old file:\n{0}\n\nTo new location:\n{1}\n\n'.format(input_file, new_filename))
+        os.rename(input_file, new_filename)
