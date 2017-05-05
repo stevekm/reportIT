@@ -119,7 +119,8 @@ for ID in $analysis_ID_list; do
     echo "Now searching for the IGV snapshot dir..."
     analysis_IGV_dir="$(find "$analysis_outdir" -type d -path "*reports/analysis_overview_report*" -name "IGV_snapshots")"
     check_dirfile_exists "$analysis_IGV_dir" "d" "Making sure the IGV snapshot dir exists..."
-    zipfile="${analysis_IGV_dir}.zip"
+    # zipfile="${analysis_IGV_dir}.zip"
+    zipfile="$(dirname "$analysis_IGV_dir")/${ID}_$(basename "${analysis_IGV_dir}").zip"
     zip -r "$zipfile" "$analysis_IGV_dir"
     check_dirfile_exists "$zipfile" "f" "Making sure the IGV snapshot zip was created..."
 
