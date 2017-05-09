@@ -42,3 +42,4 @@ ref/hg19/knownCanonical.txt
 *API_key.txt
 API_url.txt
 test.txt
+blacklisted_variants/*
