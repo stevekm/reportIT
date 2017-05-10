@@ -9,6 +9,8 @@ outdir="output"
 # path to code dir
 codedir="code"
 
+samplesheet_dir="samplesheets"
+
 # path to report templates directory
 report_template_dir="report"
 
