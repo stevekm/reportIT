@@ -1,4 +1,5 @@
 #!/bin/bash
+umask 007 # permissions for all files; group + user all rw, no outside user access
 
 # This file contains paths and settings to be used by all bash scripts in the pipeline
 # this should be 'source'd
