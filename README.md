@@ -132,6 +132,9 @@ IGV snapshots shown for all significant variants. For low frequency variants, a 
 
 <img width="800" alt="screen shot 2017-03-17 at 4 22 28 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061635/9111af4a-0b2e-11e7-9870-8485ccf38ec2.png">
 
+A full HTML version of the report can be previewed [here](https://cdn.rawgit.com/stevekm/reportIT/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html) or [here](http://htmlpreview.github.io/?https://github.com/stevekm/reportIT/blob/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html).
+
+
 # Files & Directories
 
 Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks.
