@@ -1,5 +1,6 @@
 {
     "greater_than": {
+        "Quality": 100,
         "Frequency": 0.05, 
         "Coverage": 250
     }, 

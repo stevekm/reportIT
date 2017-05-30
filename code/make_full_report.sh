@@ -97,7 +97,7 @@ for i in $analysis_ID_list; do
             echo -e "Making symlink to IGV snapshot dir"
             echo "report dir contents:"
             ls -l "$sample_report_dir"
-            (cd "$sample_report_dir" && ln -fs "$sample_IGV_dir_fullpath" "$(basename "$sample_IGV_dir_fullpath")" )
+            (cd "$sample_report_dir" && ln -fs "$sample_IGV_dir_fullpath" "$(basename "$sample_IGV_dir_fullpath")" ) # NOTE: I think this is making recursive symlinks !! TODO: Fix This !!
             # ln -fs "$sample_IGV_dir_fullpath" "$sample_IGV_report_dir"
             echo "report dir after making symlink:"
             ls -l "$sample_report_dir"

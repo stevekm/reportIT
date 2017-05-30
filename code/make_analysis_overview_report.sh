@@ -73,6 +73,9 @@ for i in $analysis_ID_list; do
     ln -fs "$analysis_barcodes_file"
     )
 
+    # write git info to file for the report
+    printf "\nWriting git information for the report...\n"
+    printf "%s: %s" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)" > "${overview_report_dir}/git_info.txt"
 
     # write the ID informations to files for the report
     echo -e "\nWriting sample ID information for the report...\n"

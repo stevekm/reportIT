@@ -32,3 +32,13 @@ Auto_user_*
 *.pyc
 *DS_Store*
 report/*.md
+.ftpconfig
+samplesheets/
+old/
+clinical_interpretations/IPMKB_tumor_tissue_types.tsv
+clinical_interpretations/IPMKB_tumor_tissue_types_nodupes.tsv
+ref/hg19/kgXref.txt
+ref/hg19/knownCanonical.txt
+*API_key.txt
+API_url.txt
+test.txt

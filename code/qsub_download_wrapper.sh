@@ -1,8 +1,8 @@
 #!/bin/bash
 
-## USAGE: qsub_annotate_wrapper.sh <analysis ID> <analysis ID> <analysis ID> ...
+## USAGE: qsub_download_wrapper.sh <analysis ID> <analysis ID> <analysis ID> ...
 
-## DESCRIPTION: This script will submit a qsub job to run the annotation wrapper
+## DESCRIPTION: This script will submit a qsub job to download all files from analyses
 
 
 #~~~~~ CUSTOM ENVIRONMENT ~~~~~~#
@@ -14,11 +14,11 @@ echo_script_name
 
 analysis_ID="${@:1}" # accept a space separated list of ID's
 
-annotate_wrapper_script="${codedir}/annotate_wrapper.sh"
+download_script="${codedir}/get_server_files.sh"
 
-job_threads="8"
+job_threads="1"
 job_mem="5G"
-job_name="annotate_wrapper"
+job_name="download_analysis"
 # job_options="-j y -l mem_free=$job_mem -l h_vmem=$job_mem -l mem_token=$job_mem" # merge stderr and stdout
 job_options="-j y" # merge stderr and stdout
 
@@ -38,6 +38,5 @@ for ID in $analysis_ID; do
     check_dirfile_exists "$analysis_logdir" "d" "Making sure logdir was created... "
 
     echo -e "Submitting job..."
-    qsub -wd $PWD -o :${analysis_logdir}/ -e :${analysis_logdir}/ -pe threaded "$job_threads" -N "$job_name" $job_options "$annotate_wrapper_script" "$ID"
-    sleep 3
+    qsub -wd $PWD -o :${analysis_logdir}/ -e :${analysis_logdir}/ -pe threaded "$job_threads" -N "$job_name" $job_options "$download_script" "$ID"
 done

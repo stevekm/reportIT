@@ -11,88 +11,133 @@ All VCF files will be annotated and processed with ANNOVAR and bcftools, and a s
 
 Sequencing reads will be visualized by loading the BAM file for each test sample, paired with the corresponding control sample for the run, into IGV for automated snapshots to manually review & determine variant qualities. 
 
-A preliminary sparse plain-text report will be generated from the summary table of variants, and a rich full report will be generated from the IGV snapshots, summary table, and other visualizations. Both reports will include clinical significance and interpretations supplied by the Weill Cornell [Precision Medicine Knowledgebase](https://pmkb.weill.cornell.edu/). 
+An HTML formatted analysis overview report will be generated to show a summary of significant cancer variants found amongst all samples in the IonTorrent run, with IGV snapshots for each variant. 
 
+## In Progress
+
+- Per-sample reports showing variant summary table and clinical interpretation of variants supplied by the Weill Cornell [Precision Medicine Knowledgebase](https://pmkb.weill.cornell.edu/). 
+
+- Analysis review feedback system to mark sequencing artifacts 
+
+- Deposition of pipeline output in a central database
+
+# Installation
+
+First, run the `dir_setup.sh` script; 
+```bash
+./dir_setup.sh
+```
+
+This should set up the `bin` and `ref` directories, along with creating and symlinking the external `input`, `output`, and `data` directories. You should verify these symlinks and directories, and then populate the `data` directory with files required for the pipeline (see the 'Data directory' section, below). You should also set up automatic ssh for your IonTorrent server as described [here](https://gist.github.com/stevekm/93de1539d8008d220c9a1c4d19110b3e).
 
 # Usage
 
-There are two methods of running the pipeline: 'interactively' (run all scripts in the current terminal session; recommended to use `screen`) or via submission to an HPC cluster with `qsub`. Each listed step should be run sequentially.
+## Check For Available Runs
 
-Please note that usage will change as development progresses. In these examples, `Auto_user_SNX-XXX-XXXX-XXX` is an analysis ID from the IonTorrent system. Unless otherwise stated, all commands accept a space-separated list of one or more ID's. 
-
-## Check on the list of available runs
+Before you can run the pipeline, you need to know which runs are available on your IonTorrent server. Use the following script for this:
 
 ```bash
-# get list of recent analysis runs
 code/get_server_run_list.sh
 ```
 
-## HPC job submission with `qsub`
+This requires that your `data/server_info.txt` file is set correctly, as described below. 
+
+The selected runs should be entered into a samplesheet file, as described in the `samplesheets` directory, and used for running the pipeline. 
+
+## Run the Pipeline
+
+The simplest way to run the reportIT pipeline is to use the `run_samplesheet.py` script, and specify which actions you would like to take on the analysis ID's specified in your sample sheet. 
+
+### Download Files
+
+First, you should download all files needed for the analyses:
 
 ```bash
-
-# To run pipeline on HPC cluster
-# first download analysis files (requires interactive user login)
-code/get_server_files.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# annotate the downloaded sample files
-code/qsub_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# create IGV snapshots and reports for one or more individual analyses
-code/qsub_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# create IGV snapshots and reports for a PAIRED analysis (requires exactly TWO analysis ID's)
-code/qsub_paired_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# send the results summary via email
-code/mail_analysis_report.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -d
 ```
+### Annotate Variants
 
-## Interactive mode, running in current session & printing to console
+Then, you should annotate the variants in the VCF files downloaded, and create summary tables:
 
 ```bash
-# download, annotate, and summarize the analysis data
-code/server_download_annotate_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# IGV snapshots and reporting
-# for non-paired independent analyses
-code/IGV_report_wrapper.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# for a PAIRED analysis
-code/IGV_report_wrapper-paired.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
-# send the results summary via email
-code/mail_analysis_report.sh Auto_user_SN2-1XX-XXXX-XXX Auto_user_SN2-2XX-XXXX-XXX
-
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -a
 ```
+### Visualize Coverages & Generate Reports
+
+Finally, you can create IGV snapshots of the BAM files, and generate reports:
+
+- for unpaired analyses
+
+```bash
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -r
+```
+
+- for paired analyses (runs unpaired analyses as well)
+
+```bash
+$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -p
+```
+
+### Using HPC Cluster
+
+The annotation and reporting steps for all analyses can be run in parrallel by submitting the jobs to run on a computer cluster using `qsub`. To enable this feature, simply pass the `-q` argument with the previous commands:
+
+```bash
+# annotate with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -aq
+
+# report with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -pq
+```
+This method has been configured to work with the phoenix compute cluster at NYULMC, and might need to be reconfigured to work on other HPC systems. 
+
+### Usage Notes
+
+Rough estimates for pipeline completeion time are ~5-10 minutes to download all files and annotate variants, and ~5-15 minutes to create all IGV snapshots and generate reports. In total this comes to roughly 10 - 30 minutes per analysis, depending on the number of variants present. 
+
+Running the pipeline without the `-q` argument will run all pipeline steps for all analyses in the current session; if you plan to do this, you should probably run the pipeline in `screen` in order to allow it to run in the background indepedent of your terminal connection. Note that running with `qsub` is currently disabled for the file download step, so all file downloads will always run in the current session. If you have a lot of analyses, this might take a while. 
+
+Multiple pipeline actions can be chained together. For example:
+
+```bash
+# download all files, then annotate with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
+```
+
+```bash
+# download all files, then annotate and create reports (no qsub)
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -dap
+```
+
+Reporting steps depend on the completion of annotation steps, so if you plan to use the `-q` argument to submit jobs to `qsub`, you need to run the annotation, wait for the jobs to complete, then run the reports. Your workflow would look like this:
+
+
+```bash
+# download all files, then annotate with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
+
+# ... wait for jobs to finish ...
+
+# run the reports
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -pq
+```
+# Analysis Report Example
+
+An HTML formatted analysis overview report displays the significant variants found across all samples in the run. 'SC' control samples are shown in a separate table (hidden by default).
+
+<img width="810" alt="screen shot 2017-03-17 at 4 21 43 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061536/2f11cd3e-0b2e-11e7-9684-4cb9f4d2e0a6.png">
+
+IGV snapshots shown for all significant variants. For low frequency variants, a "long view" snapshot is included to ensure mutations can be seen amongst reads. If available, 'NC' control sample is included on the lower track. 
+
+<img width="800" alt="screen shot 2017-03-17 at 4 22 28 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061635/9111af4a-0b2e-11e7-9870-8485ccf38ec2.png">
+
+A full HTML version of the report can be previewed [here](https://cdn.rawgit.com/stevekm/reportIT/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html) or [here](http://htmlpreview.github.io/?https://github.com/stevekm/reportIT/blob/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html).
+
 
 # Files & Directories
 
-## Program Directory
-
-Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks. The current program directory structure is:
-
-```
-variant_reporter$ tree
-.
-|-- README.md
-|-- bin -> ../bin/
-|-- code
-|   |-- IGV_batchscript_generator.py
-|   |-- IGV_test.bat
-|   |-- IonTorrent_summary_table.py
-|   |-- cannonical_transcript_table.py
-|   |-- compile_sparse_report.R
-|   |-- make_all_sparse_reports.sh
-|   `-- move_bams.sh
-|-- data -> ../reporter_files/data
-|-- input -> ../reporter_files/input
-|-- output -> ../reporter_files/output
-`-- report
-    |-- report_comments -> ../data/report_comments/
-    `-- sparse_report.Rmd
-```
+Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks.
 
 ## Data directory
 
@@ -163,128 +208,6 @@ NM_001005484
 NR_039983
 NM_001005277
 ```
-
-## Output Directory
-
-The current data output directory format mirrors the directory format of the analysis results on the IonTorrent server. An example output directory looks like this:
-
-```
-output
-|-- Auto_user_SNX-XXX-XXX-XXX-X_analysis_files.txt
-|-- Auto_user_SNX-XXX-XXX-XXX-X_analysis_manifest.txt
-|-- R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1
-|   `-- Auto_user_SNX-XXX-XXX-XXX-X
-|       `-- plugin_out
-|           |-- coverageAnalysis_out.777
-|           |   |-- IonXpress_001
-|           |   |   |-- IonXpress_001_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |   |   `-- IonXpress_001_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           |   |-- IonXpress_002
-|           |   |   |-- IonXpress_002_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |   |   `-- IonXpress_002_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           |   |-- IonXpress_003
-|           |   |   |-- IonXpress_003_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |   |   `-- IonXpress_003_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           |   |-- IonXpress_004
-|           |   |   |-- IonXpress_004_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |   |   `-- IonXpress_004_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           |   |-- IonXpress_005
-|           |   |   |-- IonXpress_005_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |   |   `-- IonXpress_005_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           |   |-- IonXpress_006
-|           |   |   |-- IonXpress_006_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |   |   `-- IonXpress_006_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           |   |-- IonXpress_007
-|           |   |   |-- IonXpress_007_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |   |   `-- IonXpress_007_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           |   `-- IonXpress_008
-|           |       |-- IonXpress_008_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam
-|           |       `-- IonXpress_008_R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1_Auto_user_SNX-XX-XX-XX-1_243.bam.bai
-|           `-- variantCaller_out.778
-|               |-- IonXpress_001
-|               |   |-- IonXpress_001.avinput
-|               |   |-- IonXpress_001.hg19_multianno.txt
-|               |   |-- IonXpress_001.tsv
-|               |   |-- IonXpress_001_filtered.tsv
-|               |   |-- IonXpress_001_full_table.tsv
-|               |   |-- IonXpress_001_query.tsv
-|               |   |-- IonXpress_001_summary.tsv
-|               |   `-- TSVC_variants.vcf
-|               |-- IonXpress_002
-|               |   |-- IonXpress_002.avinput
-|               |   |-- IonXpress_002.hg19_multianno.txt
-|               |   |-- IonXpress_002.tsv
-|               |   |-- IonXpress_002_filtered.tsv
-|               |   |-- IonXpress_002_full_table.tsv
-|               |   |-- IonXpress_002_query.tsv
-|               |   |-- IonXpress_002_summary.tsv
-|               |   |-- TSVC_variants.vcf
-|               |   |-- TSVC_variants.vcf.gz
-|               |   `-- TSVC_variants.vcf.gz.tbi
-|               |-- IonXpress_003
-|               |   |-- IonXpress_003.avinput
-|               |   |-- IonXpress_003.hg19_multianno.txt
-|               |   |-- IonXpress_003.tsv
-|               |   |-- IonXpress_003_filtered.tsv
-|               |   |-- IonXpress_003_full_table.tsv
-|               |   |-- IonXpress_003_query.tsv
-|               |   |-- IonXpress_003_summary.tsv
-|               |   `-- TSVC_variants.vcf
-|               |-- IonXpress_004
-|               |   |-- IonXpress_004.avinput
-|               |   |-- IonXpress_004.hg19_multianno.txt
-|               |   |-- IonXpress_004.tsv
-|               |   |-- IonXpress_004_filtered.tsv
-|               |   |-- IonXpress_004_full_table.tsv
-|               |   |-- IonXpress_004_query.tsv
-|               |   |-- IonXpress_004_summary.tsv
-|               |   `-- TSVC_variants.vcf
-|               |-- IonXpress_005
-|               |   |-- IonXpress_005.avinput
-|               |   |-- IonXpress_005.hg19_multianno.txt
-|               |   |-- IonXpress_005.tsv
-|               |   |-- IonXpress_005_filtered.tsv
-|               |   |-- IonXpress_005_full_table.tsv
-|               |   |-- IonXpress_005_query.tsv
-|               |   |-- IonXpress_005_summary.tsv
-|               |   `-- TSVC_variants.vcf
-|               |-- IonXpress_006
-|               |   |-- IonXpress_006.avinput
-|               |   |-- IonXpress_006.hg19_multianno.txt
-|               |   |-- IonXpress_006.tsv
-|               |   |-- IonXpress_006_filtered.tsv
-|               |   |-- IonXpress_006_full_table.tsv
-|               |   |-- IonXpress_006_query.tsv
-|               |   |-- IonXpress_006_summary.tsv
-|               |   `-- TSVC_variants.vcf
-|               |-- IonXpress_007
-|               |   |-- IonXpress_007.avinput
-|               |   |-- IonXpress_007.hg19_multianno.txt
-|               |   |-- IonXpress_007.tsv
-|               |   |-- IonXpress_007_filtered.tsv
-|               |   |-- IonXpress_007_full_table.tsv
-|               |   |-- IonXpress_007_query.tsv
-|               |   |-- IonXpress_007_summary.tsv
-|               |   `-- TSVC_variants.vcf
-|               |-- IonXpress_008
-|               |   |-- IonXpress_008.avinput
-|               |   |-- IonXpress_008.hg19_multianno.txt
-|               |   |-- IonXpress_008.tsv
-|               |   |-- IonXpress_008_filtered.tsv
-|               |   |-- IonXpress_008_full_table.tsv
-|               |   |-- IonXpress_008_query.tsv
-|               |   |-- IonXpress_008_summary.tsv
-|               |   `-- TSVC_variants.vcf
-|               |-- R_2016_X-XX-XX-XX_user_SNX-XX-XX-XX-1.xls
-|               `-- sample_barcode_IDs.tsv
-```
-
-
-
-# To Do:
-
-See the 'Issues' page on this GitHub repository for planned features. 
-
 
 # Software Requirements
 

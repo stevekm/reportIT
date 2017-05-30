@@ -33,14 +33,9 @@ report = args.report
 paired_report = args.paired_report
 use_qsub = args.use_qsub
 
-print "Running pipeline with the following parameters:\n"
-print "Samplesheet file: {:>29}".format(samplesheet_file)
-print "Download files: {:>21}".format(str(download))
-print "Annotate files: {:>21}".format(str(annotate))
-print "Run unpaired reports: {:>15}".format(str(report))
-print "Run paired reports: {:>17}".format(str(paired_report))
-print "Submit jobs to HPC cluster: {:>9}".format(str(use_qsub))
 
+
+# ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def print_lines(myfile):
     '''
     Prints every line in the file
@@ -95,6 +90,9 @@ def download_analysis_files(samplesheet_file, use_qsub = False):
         download_script = "code/get_server_files.sh"
     else:
         print "ERROR: object 'use_qsub' must be 'True' or 'False'"
+    ### !! don't use the qsub wrapper yet because something is wrong with it
+    download_script = "code/get_server_files.sh"
+    ###
     # get the list of analysis ID's
     analysis_list = get_samplesheet_list(samplesheet_file)
     # build the command to run
@@ -157,9 +155,22 @@ def paired_report_analyses(samplesheet_file, use_qsub = False):
         pl.subprocess_cmd(paired_command)
 
 
+
+
+# ~~~~ PRINT SCRIPT ARGS ~~~~~~ #
+print "Running pipeline with the following parameters:\n"
+print "Samplesheet file: {:>29}".format(samplesheet_file)
+print "Download files (d): {:>24}".format(str(download))
+print "Annotate files (a): {:>24}".format(str(annotate))
+print "Run unpaired reports (r): {:>18}".format(str(report))
+print "Run paired reports (p): {:>20}".format(str(paired_report))
+print "Submit jobs to HPC cluster (q): {:>12}".format(str(use_qsub))
 print("\nSamplesheet provided:\n")
 print_lines(samplesheet_file)
 
+# ~~~~ RUN ~~~~~~ #
+# make sure we are on the 'production' brach (forked from 'master')
+pl.validate_git_branch(allowed = ['production'])
 
 # d
 if download == True:

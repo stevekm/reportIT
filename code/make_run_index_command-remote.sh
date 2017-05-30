@@ -1,7 +1,7 @@
 #/bin/bash
 
 ## USAGE: make_run_index_command.sh > sample_barcode_run_analysis_index.tsv
-## DESCRIPTION: Run this script on the IonTorrent server to make an index of all samples, barcodes, run IDs, and analysis IDs
+## DESCRIPTION: Run this script on the remote IonTorrent server to make an index of all samples, barcodes, run IDs, and analysis IDs
 
 make_barcodes_list () {
 local sheet_path="$1"

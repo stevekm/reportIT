@@ -1,4 +1,5 @@
 #!/bin/bash
+umask 007 # permissions for all files; group + user all rw, no outside user access
 
 # This file contains paths and settings to be used by all bash scripts in the pipeline
 # this should be 'source'd
@@ -8,6 +9,8 @@ outdir="output"
 
 # path to code dir
 codedir="code"
+
+samplesheet_dir="samplesheets"
 
 # path to report templates directory
 report_template_dir="report"
@@ -64,6 +67,34 @@ annovar_protocol="-protocol refGene,cosmic68,clinvar_20150629,1000g2015aug_all -
 bcftools_bin="$(readlink -f bin/bcftools)"
 vcf2tsv_bin="$(readlink -f bin/vcf2tsv)"
 
+# ~~~~~~~~~~~~ # file extensions & naming # ~~~~~~~~~~~~ #
+# source VCF file: TSVC_variants.vcf
+source_vcf_basename="TSVC_variants.vcf"
+# split VCF extensions
+split_vcf_ext=".split"
+# ANNOVAR converted avinput
+avinput_ext=".avinput"
+# ANNOVAR annotated output; automatically added by ANNOVAR
+annovar_output_ext=".${build_version}_multianno.txt" # .hg19_multianno.txt
+# rebuilt VCF file from ANNOVAR avinput
+rebuilt_ext=".rebuilt"
+# VCF field query tables
+query_ext="_query.tsv"
+# VCF converted to TSV
+tsv_ext=".tsv"
+
+## NOTE: These are hardcoded in merge_vcf_annotations.py
+# variant summary table
+summary_table_ext="_summary.tsv"
+# variant table without summary criteria (not actually filtered why is it called that??)
+filtered_table_ext="_filtered.tsv"
+# full table with all variants and all fields
+full_table_ext="_full_table.tsv"
+
+# summary table with version control information
+summary_version_ext="_summary_version.tsv"
+
+# current_date="$(date +%Y-%m-%d:%H:%M:%S)"
 # ~~~~~~ REPORTING PARAMETERS ~~~~~~ #
 # if the 'module' system is installed, try to load the correct versions
 if (module)&>/dev/null ; then

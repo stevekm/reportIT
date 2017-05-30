@@ -292,3 +292,86 @@ def load_json(input_file):
     with open(input_file,"r") as f:
         my_item = json.load(f)
     return my_item
+
+def timestamp():
+    '''
+    Return a timestamp string
+    '''
+    import datetime
+    return('{:%Y-%m-%d-%H-%M-%S}'.format(datetime.datetime.now()))
+
+def mkdirs(path, return_path=False):
+    '''
+    Make a directory, and all parent dir's in the path
+    '''
+    import sys
+    import os
+    import errno
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+    if return_path:
+        return path
+
+def backup_file(input_file):
+    '''
+    backup a file by moving it to a folder called 'old' and appending a timestamp
+    '''
+    import os
+    if os.path.isfile(input_file):
+        print('File already exists:\n{0}\n\n'.format(input_file))
+        filename, extension = os.path.splitext(input_file)
+        new_filename = '{0}.{1}{2}'.format(filename, timestamp(), extension)
+        new_filename = os.path.join(os.path.dirname(new_filename), "old", os.path.basename(new_filename))
+        mkdirs(os.path.dirname(new_filename))
+        print('Backing up old file:\n{0}\n\nTo new location:\n{1}\n\n'.format(input_file, new_filename))
+        os.rename(input_file, new_filename)
+
+
+def parse_git(attribute):
+    '''
+    Check the current git repo for one of the following items
+    attribute = "hash"
+    attribute = "hash_short"
+    attribute = "branch"
+    '''
+    import sys
+    import subprocess
+    command = None
+    if attribute == "hash":
+        command = ['git', 'rev-parse', 'HEAD']
+    elif attribute == "hash_short":
+        command = ['git', 'rev-parse', '--short', 'HEAD']
+    elif attribute == "branch":
+        command = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
+    if command != None:
+        try:
+            return(subprocess.check_output(command).strip()) # python 2.7+
+        except subprocess.CalledProcessError:
+            print('\nERROR: Git branch is not configured. Exiting script...\n')
+            sys.exit()
+
+def print_iter(iterable):
+    '''
+    basic printing of every item in an iterable object
+    '''
+    for item in iterable: print(item)
+
+def validate_git_branch(allowed = ('master', 'production')):
+    import sys
+    import subprocess
+    try:
+        current_branch = parse_git(attribute = "branch")
+        if current_branch not in allowed:
+            print("ERROR: current git branch is not allowed! Branch is: {0}.".format(current_branch))
+            print("Allowed branches are:")
+            print_iter(allowed)
+            print("Exiting...")
+            sys.exit()
+    except subprocess.CalledProcessError:
+        print('\nERROR: Git branch is not configured. Exiting script...\n')
+        sys.exit()

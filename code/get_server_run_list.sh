@@ -31,6 +31,8 @@ echo -e "Data read from server info file..."
 echo -e "Now attempting server login..."
 # get the latest runs
 echo -e "\nPLEASE LOG INTO SERVER TO GET RUN ANALYSIS LIST\n"
+(
 ssh $server_info << EOF
     ls -1tr /results/analysis/output/Home
 EOF
+) | sort -t '-' -k2n
