@@ -38,6 +38,18 @@ def file_exists(myfile, kill = False):
             print "Exiting..."
             sys.exit()
 
+def dir_exists(mydir, kill = False, return_path=False):
+    import os
+    import sys
+    if not os.path.isdir(mydir):
+        print "ERROR: Directory '{}' does not exist!".format(mydir)
+        if kill == True:
+            print "Exiting..."
+            sys.exit()
+    if return_path == True:
+        return(mydir)
+
+
 def check_list_len_greaterthan(mylist, min_size, my_message = False):
     '''
     Return 'False' if the list is not long enough
@@ -181,6 +193,19 @@ def list_file_lines(file_path):
     with open(file_path, 'r') as f:
         entries = [line.strip() for line in f if line.strip()]
     return entries
+
+def file_min_lines(file_path, min_lines = 1):
+    '''
+    Make sure a file has at least the minimum number of lines
+    '''
+    import sys
+    if len(list_file_lines(file_path = file_path)) < int(min_lines):
+        return(False)
+    elif len(list_file_lines(file_path = file_path)) >= int(min_lines):
+        return(True)
+    else:
+        print("ERROR: something went wrong trying to count lines in file {0}".format(file_path))
+        sys.exit()
 
 def split_df_col2rows(dataframe, split_col, split_char, new_colname):
     # # Splits a column into multiple rows
