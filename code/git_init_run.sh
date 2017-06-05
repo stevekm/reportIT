@@ -48,6 +48,7 @@ for i in $analysis_ID_list; do
 
         git add .
         git status
+        git commit -m "first commit"
     fi
     )
 done

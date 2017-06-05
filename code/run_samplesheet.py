@@ -22,7 +22,7 @@ parser.add_argument("-a", default = False, action='store_true', dest = 'annotate
 parser.add_argument("-r", default = False, action='store_true', dest = 'report',  help="whether the reports should be generated for the analyses")
 parser.add_argument("-p", default = False, action='store_true', dest = 'paired_report',  help="whether paired reports should be generated for the analyses that are paired in the sample sheet; analyses that are unpaired will be run as such as well")
 parser.add_argument("-q", default = False, action='store_true', dest = 'use_qsub',  help="whether pipeline scripts should be submitted with qsub to run on the cluster")
-
+parser.add_argument("--debug", default = False, action='store_true', dest = 'debug_mode',  help="Skip git branch checking when running")
 
 args = parser.parse_args()
 
@@ -32,7 +32,7 @@ annotate = args.annotate
 report = args.report
 paired_report = args.paired_report
 use_qsub = args.use_qsub
-
+debug_mode = args.debug_mode
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
@@ -170,7 +170,8 @@ print_lines(samplesheet_file)
 
 # ~~~~ RUN ~~~~~~ #
 # make sure we are on the 'production' brach (forked from 'master')
-pl.validate_git_branch(allowed = ['production'])
+if debug_mode != True:
+    pl.validate_git_branch(allowed = ['production'])
 
 # d
 if download == True:
