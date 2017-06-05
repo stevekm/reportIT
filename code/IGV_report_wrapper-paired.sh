@@ -22,7 +22,8 @@ ${codedir}/make_paired_analysis.sh "$analysis_1" "$analysis_2"
 ${codedir}/make_analysis_combined_tables.sh "$analysis_1" "$analysis_2"
 
 # generate IGV snapshots for analysess
-${codedir}/IGV_snapshot_parser.sh "$analysis_1" "$analysis_2"
+# ${codedir}/IGV_snapshot_parser.sh "$analysis_1" "$analysis_2"
+python ${codedir}/run_parser.py "$analysis_1" "$analysis_2"
 
 # make clinical comment files for analyses
 ${codedir}/make_report_comments_wrapper.sh "$analysis_1" "$analysis_2"
