@@ -64,6 +64,43 @@ EOF
             remote_run_dirs.append(os.path.basename(item))
     return(remote_run_dirs)
 
+def validate_remote_run_completion(run_ID):
+    '''
+    Check the run on the remote IonTorrent server to determine if the run has finished
+    '''
+    import time
+    run_complete = False
+
+    # print("now validating run: {0}".format(run_ID))
+    # get the address to the remote server
+    server_address = get_server_address()
+    # build a system command to ssh into the remote server and check the current run dirs
+    remote_results_dir = "/results/analysis/output/Home"
+    remote_run_dir = remote_results_dir + "/" + run_ID # IonTorrent server is running Linux
+    remote_run_dir_status_file = remote_run_dir + "/status.txt" # only exists if run has finished! Thanks Yang!
+
+    ssh_command = '''
+ssh {0} << EOF
+python -c 'import os; print(os.path.exists("{1}"))'
+EOF
+'''.format(server_address, remote_run_dir_status_file)
+
+    # get the output
+    ssh_stdout = subprocess_cmd(ssh_command, return_stdout = True)
+    time.sleep(1) # sleep timer so we don't blow up the IT server with requests
+
+    if ssh_stdout == "True":
+        # print("The run is valid and has finished running on the IT server")
+        run_complete = True
+        return(run_complete)
+    elif ssh_stdout == "False":
+        # print("File 'status.txt' does not exist for the run on the IT server, its not a valid run for downloading")
+        return(run_complete)
+    else:
+        # print("Did not recognize the run status output")
+        return(run_complete)
+
+
 def get_local_run_dirs():
     '''
     Check for locally held IonTorrent runs
@@ -106,16 +143,21 @@ def main(download = False, debug_mode = False):
     remote_run_dirs = get_remote_run_dirs()
     local_run_dirs = get_local_run_dirs()
     missing_runs = []
+    validated_missing_runs = []
 
     for item in remote_run_dirs:
         if item not in local_run_dirs:
             missing_runs.append(item)
 
-    if len(missing_runs) > 0:
-        print('Missing runs:')
-        for item in missing_runs:
+    for item in missing_runs:
+        if validate_remote_run_completion(run_ID = item) == True:
+            validated_missing_runs.append(item)
+
+    if len(validated_missing_runs) > 0:
+        print('Missing runs available for download:')
+        for item in validated_missing_runs:
             print(item)
-        samplesheet_file = make_samplesheet_for_missing_runs(missing_runs = missing_runs)
+        samplesheet_file = make_samplesheet_for_missing_runs(missing_runs = validated_missing_runs)
         if download == True:
             download_runs(samplesheet_file = samplesheet_file, debug_mode = debug_mode)
     else:
