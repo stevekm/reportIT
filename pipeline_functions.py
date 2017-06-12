@@ -49,6 +49,16 @@ def dir_exists(mydir, kill = False, return_path=False):
     if return_path == True:
         return(mydir)
 
+def check_list_len_greaterthan_equal(mylist, min_size, my_message = False):
+    '''
+    Return 'False' if the list is not long enough
+    '''
+    message = "ERROR: List is less than length {}".format(str(min_size))
+    if my_message != False: message = my_message
+    if not len(mylist) >= min_size:
+        print message
+        return False
+
 
 def check_list_len_greaterthan(mylist, min_size, my_message = False):
     '''

@@ -20,7 +20,7 @@ parser.add_argument("samplesheet_file", nargs='+', help="path to the summary sam
 parser.add_argument("-d", default = False, action='store_true', dest = 'download',  help="whether the analyses should be downloaded from the IonTorrent server")
 parser.add_argument("-a", default = False, action='store_true', dest = 'annotate', help="whether the analyses should be annotated")
 parser.add_argument("-r", default = False, action='store_true', dest = 'report',  help="whether the reports should be generated for the analyses")
-parser.add_argument("-p", default = False, action='store_true', dest = 'paired_report',  help="whether paired reports should be generated for the analyses that are paired in the sample sheet; analyses that are unpaired will be run as such as well")
+# parser.add_argument("-p", default = False, action='store_true', dest = 'paired_report',  help="whether paired reports should be generated for the analyses that are paired in the sample sheet; analyses that are unpaired will be run as such as well")
 parser.add_argument("-q", default = False, action='store_true', dest = 'use_qsub',  help="whether pipeline scripts should be submitted with qsub to run on the cluster")
 parser.add_argument("--debug", default = False, action='store_true', dest = 'debug_mode',  help="Skip git branch checking when running")
 
@@ -30,7 +30,7 @@ samplesheet_file = args.samplesheet_file[0]
 download = args.download
 annotate = args.annotate
 report = args.report
-paired_report = args.paired_report
+# paired_report = args.paired_report
 use_qsub = args.use_qsub
 debug_mode = args.debug_mode
 
@@ -114,19 +114,19 @@ def annotate_analyses(samplesheet_file, use_qsub = False):
     command = '{} {}'.format(annotate_script, ' '.join(analysis_list))
     pl.subprocess_cmd(command)
 
-def report_analyses(samplesheet_file, use_qsub = False):
-    '''
-    Runs the reporting script on all the analyses in the sample sheet
-    '''
-    if use_qsub == True:
-        report_script = "code/qsub_report_wrapper.sh"
-    elif use_qsub == False:
-        report_script = "code/IGV_report_wrapper.sh"
-    else:
-        print "ERROR: object 'use_qsub' must be 'True' or 'False'"
-    analysis_list = get_samplesheet_list(samplesheet_file)
-    command = '{} {}'.format(report_script, ' '.join(analysis_list))
-    pl.subprocess_cmd(command)
+# def report_analyses(samplesheet_file, use_qsub = False):
+#     '''
+#     Runs the reporting script on all the analyses in the sample sheet
+#     '''
+#     if use_qsub == True:
+#         report_script = "code/qsub_report_wrapper.sh"
+#     elif use_qsub == False:
+#         report_script = "code/IGV_report_wrapper.sh"
+#     else:
+#         print "ERROR: object 'use_qsub' must be 'True' or 'False'"
+#     analysis_list = get_samplesheet_list(samplesheet_file)
+#     command = '{} {}'.format(report_script, ' '.join(analysis_list))
+#     pl.subprocess_cmd(command)
 
 def paired_report_analyses(samplesheet_file, use_qsub = False):
     '''
@@ -162,8 +162,9 @@ print "Running pipeline with the following parameters:\n"
 print "Samplesheet file: {:>29}".format(samplesheet_file)
 print "Download files (d): {:>24}".format(str(download))
 print "Annotate files (a): {:>24}".format(str(annotate))
-print "Run unpaired reports (r): {:>18}".format(str(report))
-print "Run paired reports (p): {:>20}".format(str(paired_report))
+# print "Run unpaired reports (r): {:>18}".format(str(report))
+print "Run reports (r): {:>26}".format(str(report))
+# print "Run paired reports (p): {:>20}".format(str(paired_report))
 print "Submit jobs to HPC cluster (q): {:>12}".format(str(use_qsub))
 print("\nSamplesheet provided:\n")
 print_lines(samplesheet_file)
@@ -185,10 +186,11 @@ if annotate == True:
 
 # r
 if report == True:
-    print("Running the unpaired report scripts...")
-    report_analyses(samplesheet_file, use_qsub)
+    print("Running the report scripts...")
+    # report_analyses(samplesheet_file, use_qsub)
+    paired_report_analyses(samplesheet_file, use_qsub)
 
 # p
-if paired_report == True:
-    print("Running the paired & unpaired report scripts...")
-    paired_report_analyses(samplesheet_file, use_qsub)
+# if paired_report == True:
+#     print("Running the paired & unpaired report scripts...")
+#     paired_report_analyses(samplesheet_file, use_qsub)
