@@ -30,7 +30,7 @@ import global_settings
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 
-def main(analysis_IDs, samplesheet_file, analysis_ID_pair = None):
+def main(analysis_IDs, samplesheet_file, analysis_ID_pair = None, return_path = False):
     '''
     Main control function for the program
     '''
@@ -47,8 +47,11 @@ def main(analysis_IDs, samplesheet_file, analysis_ID_pair = None):
                 myfile.write('\t'.join(analysis_ID_pair) + '\n')
             elif len(analysis_ID_pair) != 2:
                 print('ERROR: Number of paired analysis IDs does not equal 2! They will not be written to the samplesheet!')
-    print('New samplesheet file:')
-    print(samplesheet_file)
+    if return_path == False:
+        print('New samplesheet file:')
+        print(samplesheet_file)
+    elif return_path == True:
+        return(samplesheet_file)
 
 def make_default_samplesheet_filepath(samplesheet_dir, name = pl.timestamp()):
     '''
