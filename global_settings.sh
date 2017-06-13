@@ -1,4 +1,5 @@
 #!/bin/bash
+umask 007 # permissions for all files; group + user all rw, no outside user access
 
 # This file contains paths and settings to be used by all bash scripts in the pipeline
 # this should be 'source'd
@@ -8,6 +9,8 @@ outdir="output"
 
 # path to code dir
 codedir="code"
+
+samplesheet_dir="samplesheets"
 
 # path to report templates directory
 report_template_dir="report"

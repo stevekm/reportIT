@@ -23,7 +23,8 @@ for i in $analysis_ID_list; do
     ${codedir}/make_analysis_combined_tables.sh "$analysis_ID"
 
     # generate IGV snapshots for analysess
-    ${codedir}/IGV_snapshot_parser.sh "$analysis_ID"
+    # ${codedir}/IGV_snapshot_parser.sh "$analysis_ID"
+    python ${codedir}/run_parser.py "$analysis_ID"
 
     # make clinical comment files for analyses
     ${codedir}/make_report_comments_wrapper.sh "$analysis_ID"

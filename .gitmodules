@@ -1,3 +1,6 @@
 [submodule "code/toolbox"]
 	path = code/toolbox
 	url = https://github.com/stevekm/toolbox.git
+[submodule "code/IGV-snapshot-automator"]
+	path = code/IGV-snapshot-automator
+	url = https://github.com/stevekm/IGV-snapshot-automator.git

@@ -296,3 +296,7 @@ function update_dirfiles_permissions {
     local outdir="$1"
     find "$outdir" -type f -exec chmod o-rw {} \;
 }
+
+timestamp () {
+    date +"%Y-%m-%d-%H-%M-%S"
+}

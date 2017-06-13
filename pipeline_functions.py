@@ -38,6 +38,28 @@ def file_exists(myfile, kill = False):
             print "Exiting..."
             sys.exit()
 
+def dir_exists(mydir, kill = False, return_path=False):
+    import os
+    import sys
+    if not os.path.isdir(mydir):
+        print "ERROR: Directory '{}' does not exist!".format(mydir)
+        if kill == True:
+            print "Exiting..."
+            sys.exit()
+    if return_path == True:
+        return(mydir)
+
+def check_list_len_greaterthan_equal(mylist, min_size, my_message = False):
+    '''
+    Return 'False' if the list is not long enough
+    '''
+    message = "ERROR: List is less than length {}".format(str(min_size))
+    if my_message != False: message = my_message
+    if not len(mylist) >= min_size:
+        print message
+        return False
+
+
 def check_list_len_greaterthan(mylist, min_size, my_message = False):
     '''
     Return 'False' if the list is not long enough
@@ -181,6 +203,19 @@ def list_file_lines(file_path):
     with open(file_path, 'r') as f:
         entries = [line.strip() for line in f if line.strip()]
     return entries
+
+def file_min_lines(file_path, min_lines = 1):
+    '''
+    Make sure a file has at least the minimum number of lines
+    '''
+    import sys
+    if len(list_file_lines(file_path = file_path)) < int(min_lines):
+        return(False)
+    elif len(list_file_lines(file_path = file_path)) >= int(min_lines):
+        return(True)
+    else:
+        print("ERROR: something went wrong trying to count lines in file {0}".format(file_path))
+        sys.exit()
 
 def split_df_col2rows(dataframe, split_col, split_char, new_colname):
     # # Splits a column into multiple rows
@@ -330,3 +365,65 @@ def backup_file(input_file):
         mkdirs(os.path.dirname(new_filename))
         print('Backing up old file:\n{0}\n\nTo new location:\n{1}\n\n'.format(input_file, new_filename))
         os.rename(input_file, new_filename)
+
+
+def parse_git(attribute):
+    '''
+    Check the current git repo for one of the following items
+    attribute = "hash"
+    attribute = "hash_short"
+    attribute = "branch"
+    '''
+    import sys
+    import subprocess
+    command = None
+    if attribute == "hash":
+        command = ['git', 'rev-parse', 'HEAD']
+    elif attribute == "hash_short":
+        command = ['git', 'rev-parse', '--short', 'HEAD']
+    elif attribute == "branch":
+        command = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
+    if command != None:
+        try:
+            return(subprocess.check_output(command).strip()) # python 2.7+
+        except subprocess.CalledProcessError:
+            print('\nERROR: Git branch is not configured. Exiting script...\n')
+            sys.exit()
+
+def print_iter(iterable):
+    '''
+    basic printing of every item in an iterable object
+    '''
+    for item in iterable: print(item)
+
+def validate_git_branch(allowed = ('master', 'production')):
+    '''
+    Kill the pipeline if the proper git branch is not currently set
+    '''
+    import sys
+    import subprocess
+    try:
+        current_branch = parse_git(attribute = "branch")
+        if current_branch not in allowed:
+            print("ERROR: current git branch is not allowed! Branch is: {0}.".format(current_branch))
+            print("Allowed branches are:")
+            print_iter(allowed)
+            print("Exiting...")
+            sys.exit()
+    except subprocess.CalledProcessError:
+        print('\nERROR: Git branch is not configured. Exiting script...\n')
+        sys.exit()
+
+def validate_output_dir(allowed):
+    '''
+    Kill the pipeline if the 'output' symlink does not point to the correct place
+    allowed is a tuple or list of allowed output absolute real canonical paths (e.g. not symlinks, readlink -f)
+    '''
+    import os
+    import sys
+    if os.path.realpath("output") not in allowed:
+        print("ERROR: Current output directory path not allowed! Current output path is: {0}".format(os.path.realpath("output")))
+        print("Accepted paths:")
+        print_iter(allowed)
+        print("Exiting...")
+        sys.exit()

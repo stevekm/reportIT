@@ -39,4 +39,5 @@ for ID in $analysis_ID; do
 
     echo -e "Submitting job..."
     qsub -wd $PWD -o :${analysis_logdir}/ -e :${analysis_logdir}/ -pe threaded "$job_threads" -N "$job_name" $job_options "$annotate_wrapper_script" "$ID"
+    sleep 3
 done

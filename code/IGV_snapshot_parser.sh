@@ -42,6 +42,7 @@ echo_script_name
 analysis_ID_list="${@:1}" # accept a space separated list of ID's starting at the first arg
 
 for i in $analysis_ID_list; do
+    (
     analysis_ID="$i"
     echo -e "\nAnalysis ID is:\n$analysis_ID\n"
 
@@ -194,7 +195,7 @@ for i in $analysis_ID_list; do
             echo -e "Minimum lines needed:\n$min_number_lines"
             echo -e "Skipping IGV snapshot step..."
         fi
-    )
+        )
     done
-
+    )
 done
