@@ -14,7 +14,7 @@ Sequencing reads will be visualized by loading the BAM file for each test sample
 An HTML formatted analysis overview report will be generated to show a summary of significant cancer variants found amongst all samples in the IonTorrent run, with IGV snapshots for each variant. 
 
 ## In Progress
-
+Development of the following items is currently planned for the future:
 - Per-sample reports showing variant summary table and clinical interpretation of variants supplied by the Weill Cornell [Precision Medicine Knowledgebase](https://pmkb.weill.cornell.edu/). 
 
 - Analysis review feedback system to mark sequencing artifacts 
@@ -78,7 +78,7 @@ The simplest way to run the reportIT pipeline is to use the `run_samplesheet.py`
 
 - Download: `-d`
 - Annotate: `-a`
-- Report: `r`
+- Report: `-r`
 
 The following modifiers are available:
 - Submit to cluster: `-q`
@@ -156,6 +156,13 @@ $ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
 # run the reports
 $ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
 ```
+
+### Program Validation
+As a safety feature against undesired usage, the `run_samplesheet.py` script includes self-validating features to make sure the following items are set correctly before running the pipeline:
+- check that the proper `git` branch is currently in use
+- check that the proper output directory has been symlinked
+These validations can be skipped by adding the `--debug` argument to the script.
+
 # Analysis Report Example
 
 An HTML formatted analysis overview report displays the significant variants found across all samples in the run. 'SC' control samples are shown in a separate table (hidden by default).
