@@ -397,6 +397,9 @@ def print_iter(iterable):
     for item in iterable: print(item)
 
 def validate_git_branch(allowed = ('master', 'production')):
+    '''
+    Kill the pipeline if the proper git branch is not currently set
+    '''
     import sys
     import subprocess
     try:
@@ -409,4 +412,18 @@ def validate_git_branch(allowed = ('master', 'production')):
             sys.exit()
     except subprocess.CalledProcessError:
         print('\nERROR: Git branch is not configured. Exiting script...\n')
+        sys.exit()
+
+def validate_output_dir(allowed):
+    '''
+    Kill the pipeline if the 'output' symlink does not point to the correct place
+    allowed is a tuple or list of allowed output absolute real canonical paths (e.g. not symlinks, readlink -f)
+    '''
+    import os
+    import sys
+    if os.path.realpath("output") not in allowed:
+        print("ERROR: Current output directory path not allowed! Current output path is: {0}".format(os.path.realpath("output")))
+        print("Accepted paths:")
+        print_iter(allowed)
+        print("Exiting...")
         sys.exit()

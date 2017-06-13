@@ -120,7 +120,7 @@ def main(samplesheet_file, download = False, annotate = False, report = False, u
     '''
     Main control function for the program
     '''
-    
+
     # ~~~~ PRINT SCRIPT ARGS ~~~~~~ #
     print "Running pipeline with the following parameters:\n"
     print "Samplesheet file: {:>29}".format(samplesheet_file)
@@ -137,6 +137,7 @@ def main(samplesheet_file, download = False, annotate = False, report = False, u
     # make sure we are on the 'production' brach (forked from 'master')
     if debug_mode != True:
         pl.validate_git_branch(allowed = ['production'])
+        pl.validate_output_dir(allowed = ['/ifs/data/molecpathlab/IonTorrent_reporter/output'])
 
     # d
     if download == True:
