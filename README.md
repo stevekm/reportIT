@@ -32,28 +32,67 @@ This should set up the `bin` and `ref` directories, along with creating and syml
 
 # Usage
 
-## Check For Available Runs
+## Check For Runs
 
-Before you can run the pipeline, you need to know which runs are available on your IonTorrent server. Use the following script for this:
+Before you can run the pipeline, you need to know which runs are available on your IonTorrent server. The following steps require that your `data/server_info.txt` file is set correctly, as described below. It is also recommended to have ssh key authentication set up for your user account on the IonTorrent server. 
+
+### All Available Runs
+
+The following script will log into your IonTorrent server, and output a list of all run directories found:
 
 ```bash
 code/get_server_run_list.sh
 ```
 
-This requires that your `data/server_info.txt` file is set correctly, as described below. 
+### Missing Runs Only
 
-The selected runs should be entered into a samplesheet file, as described in the `samplesheets` directory, and used for running the pipeline. 
+If you only want to know which runs on the IonTorrent server are not present on your local system, you can use this script:
 
-## Run the Pipeline
+```bash
+code/check_for_new_runs.py
+```
 
-The simplest way to run the reportIT pipeline is to use the `run_samplesheet.py` script, and specify which actions you would like to take on the analysis ID's specified in your sample sheet. 
+By default, it will validate each missing run to make sure that IonTorrent sequencing data has been produced in the remote run directory. It will also automatically create an unpaired samplesheet for the missing runs. If you inlclude the `-d` argument to the script, it will also download the missing runs entered on the sample sheet produced. 
+
+## Make Samplesheet
+
+The best way to run the reportIT pipeline is by using a samplesheet. These are stored in the `samplesheets` directory by default, and an example can be found [here](https://github.com/stevekm/reportIT/blob/3945df853ba6dc679eebc0924f9f8d1f4e5c118e/samplesheets/example-samplesheet.tsv). A samplesheet must be in TSV (tab-separated) format, preferably with one run ID per line. If two runs should be treated as a 'pair', then both run ID's should be on the same line. Note that paired run processing only affects report and IGV snapshot generation, not downloading or annotation.
+
+The best way to create a samplesheet is to use the `make_samplesheet.py` script. This script can take any number of unpaired run ID's, and a single set of paired ID's. 
+
+
+```bash
+code/make_samplesheet.py unpaired_run1 unpaired_run2 -p paired_run3.1 -p paired_run3.2
+```
+A samplesheet produced this way will look like this:
+
+```
+unpaired_run1
+unpaired_run2
+paired_run3.1	paired_run3.2
+```
+
+## Run Pipeline
+
+The simplest way to run the reportIT pipeline is to use the `run_samplesheet.py` script, and specify which actions you would like to take on the analysis ID's specified in your sample sheet. The following actions are available:
+
+- Download: `-d`
+- Annotate: `-a`
+- Report: `r`
+
+The following modifiers are available:
+- Submit to cluster: `-q`
+
+
+Example usage is as follows:
+
 
 ### Download Files
 
-First, you should download all files needed for the analyses:
+If you have not already downloaded the files associated with your IonTorrent runs from the remote server to the local system, you should run that first:
 
 ```bash
-$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -d
+code/run_samplesheet.py samplesheets/example-samplesheet.tsv -d
 ```
 ### Annotate Variants
 
@@ -66,17 +105,11 @@ $ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -a
 
 Finally, you can create IGV snapshots of the BAM files, and generate reports:
 
-- for unpaired analyses
-
 ```bash
-$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -r
+code/run_samplesheet.py samplesheets/example-samplesheet.tsv -r
 ```
 
-- for paired analyses (runs unpaired analyses as well)
-
-```bash
-$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -p
-```
+Note that 'paired' and 'unpaired' analyses are automatically processed separately at this step, based on the samplesheet. 
 
 ### Using HPC Cluster
 
@@ -88,15 +121,11 @@ $ code/run_samplesheet.py samplesheets/samplesheet.tsv -aq
 
 # report with qsub
 $ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -pq
 ```
+
 This method has been configured to work with the phoenix compute cluster at NYULMC, and might need to be reconfigured to work on other HPC systems. 
 
-### Usage Notes
-
-Rough estimates for pipeline completeion time are ~5-10 minutes to download all files and annotate variants, and ~5-15 minutes to create all IGV snapshots and generate reports. In total this comes to roughly 10 - 30 minutes per analysis, depending on the number of variants present. 
-
-Running the pipeline without the `-q` argument will run all pipeline steps for all analyses in the current session; if you plan to do this, you should probably run the pipeline in `screen` in order to allow it to run in the background indepedent of your terminal connection. Note that running with `qsub` is currently disabled for the file download step, so all file downloads will always run in the current session. If you have a lot of analyses, this might take a while. 
+### Multiple Actions
 
 Multiple pipeline actions can be chained together. For example:
 
@@ -107,8 +136,13 @@ $ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
 
 ```bash
 # download all files, then annotate and create reports (no qsub)
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -dap
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -dar
 ```
+### Usage Notes
+
+Rough estimates for pipeline completeion time are ~5-10 minutes to download all files and annotate variants, and ~5-15 minutes to create all IGV snapshots and generate reports. In total this comes to roughly 10 - 30 minutes per analysis, depending on the number of variants present. 
+
+Running the pipeline without the `-q` argument will run all pipeline steps for all analyses in the current session; if you plan to do this, you should probably run the pipeline in `screen` in order to allow it to run in the background indepedent of your terminal connection. Note that running with `qsub` is currently disabled for the file download step, so all file downloads will always run in the current session. If you have a lot of analyses, this might take a while. 
 
 Reporting steps depend on the completion of annotation steps, so if you plan to use the `-q` argument to submit jobs to `qsub`, you need to run the annotation, wait for the jobs to complete, then run the reports. Your workflow would look like this:
 
@@ -120,7 +154,7 @@ $ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
 # ... wait for jobs to finish ...
 
 # run the reports
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -pq
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
 ```
 # Analysis Report Example
 
