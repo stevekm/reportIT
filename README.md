@@ -157,10 +157,14 @@ $ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
 $ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
 ```
 
+NOTE: Future developments may fix this and implement job waiting before reports start
+
 ### Program Validation
 As a safety feature against undesired usage, the `run_samplesheet.py` script includes self-validating features to make sure the following items are set correctly before running the pipeline:
+
 - check that the proper `git` branch is currently in use
 - check that the proper output directory has been symlinked
+
 These validations can be skipped by adding the `--debug` argument to the script.
 
 # Analysis Report Example
