@@ -4,3 +4,6 @@
 [submodule "code/IGV-snapshot-automator"]
 	path = code/IGV-snapshot-automator
 	url = https://github.com/stevekm/IGV-snapshot-automator.git
+[submodule "code/sh"]
+	path = code/sh
+	url = https://github.com/amoffat/sh.git

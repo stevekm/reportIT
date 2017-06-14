@@ -6,8 +6,10 @@ This script will run the reportIT pipeline from a tab-separated samplesheet
 import sys
 import os
 import argparse
-import pipeline_functions as pl
 import csv
+import pipeline_functions as pl
+import pyqsub
+
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
@@ -79,15 +81,19 @@ def annotate_analyses(samplesheet_file, use_qsub = False):
     '''
     Runs the annotation script on all the analyses in the sample sheet
     '''
+    analysis_list = get_samplesheet_list(samplesheet_file)
     if use_qsub == True:
         annotate_script = "code/qsub_annotate_wrapper.sh"
+        command = '{} {}'.format(annotate_script, ' '.join(analysis_list))
+        proc_stdout = pyqsub.subprocess_cmd(command = command, return_stdout = True)
+        return(proc_stdout)
     elif use_qsub == False:
         annotate_script = "code/annotate_wrapper.sh"
+        command = '{} {}'.format(annotate_script, ' '.join(analysis_list))
+        pl.subprocess_cmd(command)
     else:
         print "ERROR: object 'use_qsub' must be 'True' or 'False'"
-    analysis_list = get_samplesheet_list(samplesheet_file)
-    command = '{} {}'.format(annotate_script, ' '.join(analysis_list))
-    pl.subprocess_cmd(command)
+
 
 def paired_report_analyses(samplesheet_file, use_qsub = False):
     '''
@@ -116,6 +122,25 @@ def paired_report_analyses(samplesheet_file, use_qsub = False):
         pl.subprocess_cmd(paired_command)
 
 
+def wait_annotation_finish(proc_stdout):
+    '''
+    If qsub was used to submit annotation jobs to the cluster, wait for the jobs to finish
+    '''
+    proc_stdout_lines = proc_stdout.split('\n')
+
+    job_submission_lines = []
+    for line in proc_stdout_lines:
+        if line.startswith("Your job "):
+            if line.endswith(" has been submitted"):
+                job_submission_lines.append(line)
+
+    job_id_list = []
+    for line in job_submission_lines:
+        job_id, job_name = pyqsub.get_qsub_job_ID_name(proc_stdout = line)
+        job_id_list.append(job_id)
+    pyqsub.wait_all_jobs_start(job_id_list)
+    pyqsub.wait_all_jobs_finished(job_id_list)
+
 def main(samplesheet_file, download = False, annotate = False, report = False, use_qsub = False, debug_mode = False):
     '''
     Main control function for the program
@@ -141,13 +166,20 @@ def main(samplesheet_file, download = False, annotate = False, report = False, u
 
     # d
     if download == True:
-        print("Downloading files...")
+        print("Downloading files, this might take a few minutes...")
         download_analysis_files(samplesheet_file, use_qsub)
 
     # a
     if annotate == True:
         print("Annotating the analyses...")
-        annotate_analyses(samplesheet_file, use_qsub)
+        if use_qsub == False:
+            annotate_analyses(samplesheet_file, use_qsub)
+        if use_qsub == True:
+            proc_stdout = annotate_analyses(samplesheet_file, use_qsub)
+            print(proc_stdout)
+            if report == True:
+                print("\nWaiting for annotation to finish before running reports...\n\n")
+                wait_annotation_finish(proc_stdout = proc_stdout)
 
     # r
     if report == True:

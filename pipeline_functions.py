@@ -100,7 +100,6 @@ def subprocess_cmd(command):
     proc_stdout = process.communicate()[0].strip()
     print proc_stdout
 
-
 def get_files(dir_path, ends_with = '', trunc = False):
     # get the files in the dir that match the end pattern
     # trunc : return just the file dirname + basename (truncate)
