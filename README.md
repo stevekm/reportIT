@@ -157,7 +157,9 @@ $ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
 $ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
 ```
 
-NOTE: Future developments may fix this and implement job waiting before reports start
+~~NOTE: Future developments may fix this and implement job waiting before reports start~~
+
+**NOTE: This has been updated and you can now totally do `-daqr` to run all steps sequentially, it will wait for annotation `qsub` jobs to finish before submitting the reporter jobs**
 
 ### Program Validation
 As a safety feature against undesired usage, the `run_samplesheet.py` script includes self-validating features to make sure the following items are set correctly before running the pipeline:
