@@ -89,85 +89,36 @@ The simplest way to run the reportIT pipeline is to use the `run_samplesheet.py`
 - Report: `-r`
 
 The following modifiers are available:
-- Submit to cluster: `-q`
+- Submit to cluster with `qsub`: `-q`
 
 
-Example usage is as follows:
 
-
-### Download Files
-
-If you have not already downloaded the files associated with your IonTorrent runs from the remote server to the local system, you should run that first:
+Multiple actions can be combined in a single command:
 
 ```bash
-code/run_samplesheet.py samplesheets/example-samplesheet.tsv -d
-```
-### Annotate Variants
-
-Then, you should annotate the variants in the VCF files downloaded, and create summary tables:
-
-```bash
-$ code/run_samplesheet.py samplesheets/example-samplesheet.tsv -a
-```
-### Visualize Coverages & Generate Reports
-
-Finally, you can create IGV snapshots of the BAM files, and generate reports:
-
-```bash
-code/run_samplesheet.py samplesheets/example-samplesheet.tsv -r
+# download all files, then annotate and report with qsub
+$ code/run_samplesheet.py samplesheets/samplesheet.tsv -darq
 ```
 
-Note that 'paired' and 'unpaired' analyses are automatically processed separately at this step, based on the samplesheet. 
+__NOTE:__ The `-q` method has been configured to work with the phoenix SGE compute cluster at NYULMC, and might need to be reconfigured to work on other HPC systems. 
 
-### Using HPC Cluster
 
-The annotation and reporting steps for all analyses can be run in parrallel by submitting the jobs to run on a computer cluster using `qsub`. To enable this feature, simply pass the `-q` argument with the previous commands:
+## Mail Results
 
-```bash
-# annotate with qsub
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -aq
+After manually reviewing the HTML report output, pipeline results can be delivered in a pre-formatted email using the following script:
 
-# report with qsub
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
+```
+code/mail_analysis_report.sh <analysis_ID>
 ```
 
-This method has been configured to work with the phoenix compute cluster at NYULMC, and might need to be reconfigured to work on other HPC systems. 
+Multiple `analysis_ID`'s can be passed to email all results sequentially. All summary tables, VCF files, IGV snapshots, and the analysis overview report will be included as email attachments. Configuration for emailing is saved in the file `mail_settings.sh`.
 
-### Multiple Actions
 
-Multiple pipeline actions can be chained together. For example:
-
-```bash
-# download all files, then annotate with qsub
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
-```
-
-```bash
-# download all files, then annotate and create reports (no qsub)
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -dar
-```
 ### Usage Notes
 
 Rough estimates for pipeline completeion time are ~5-10 minutes to download all files and annotate variants, and ~5-15 minutes to create all IGV snapshots and generate reports. In total this comes to roughly 10 - 30 minutes per analysis, depending on the number of variants present. 
 
 Running the pipeline without the `-q` argument will run all pipeline steps for all analyses in the current session; if you plan to do this, you should probably run the pipeline in `screen` in order to allow it to run in the background indepedent of your terminal connection. Note that running with `qsub` is currently disabled for the file download step, so all file downloads will always run in the current session. If you have a lot of analyses, this might take a while. 
-
-Reporting steps depend on the completion of annotation steps, so if you plan to use the `-q` argument to submit jobs to `qsub`, you need to run the annotation, wait for the jobs to complete, then run the reports. Your workflow would look like this:
-
-
-```bash
-# download all files, then annotate with qsub
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -daq
-
-# ... wait for jobs to finish ...
-
-# run the reports
-$ code/run_samplesheet.py samplesheets/samplesheet.tsv -rq
-```
-
-~~NOTE: Future developments may fix this and implement job waiting before reports start~~
-
-**NOTE: This has been updated and you can now totally do `-daqr` to run all steps sequentially, it will wait for annotation `qsub` jobs to finish before submitting the reporter jobs**
 
 ### Program Validation
 As a safety feature against undesired usage, the `run_samplesheet.py` script includes self-validating features to make sure the following items are set correctly before running the pipeline:
