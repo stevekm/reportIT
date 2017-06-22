@@ -5,21 +5,29 @@ This program will annotate, aggregate, and summarize clinical variant informatio
 
 # Overview
 
-Data from an IonTorrent sequencing run will be parsed to create a summary report for each sample in the run. Variant data will be downloaded from the IonTorrent server in VCF format for each sample, paired with a tab-separated XLS table of analyzed data (not used but needed for metadata). Coverage data will be downloaded from the server for each sample in BAM format files.
-
-All VCF files will be annotated and processed with ANNOVAR and bcftools, and a summary table will be created based on established lists of canonical gene transcripts, and genes included in the panel. 
-
-Sequencing reads will be visualized by loading the BAM file for each test sample, paired with the corresponding control sample for the run, into IGV for automated snapshots to manually review & determine variant qualities. 
-
-An HTML formatted analysis overview report will be generated to show a summary of significant cancer variants found amongst all samples in the IonTorrent run, with IGV snapshots for each variant. 
+Sequencing results are accessed directly from the lab's IonTorrent server via scripts using `ssh` and `rsync`. After downloading files for a given run to the local system, VCF formatted variant call files are annotated and summarized to identify mutations of known significance (ANNOVAR, `bcftools`), while BAM formatted coverage files are visualized with IGV. An HTML formatted report is generated from variant summary information and IGV snapshots. Results can be easily emailed to clinicians for review with the provided script. 
 
 ## In Progress
 Development of the following items is currently planned for the future:
 - Per-sample reports showing variant summary table and clinical interpretation of variants supplied by the Weill Cornell [Precision Medicine Knowledgebase](https://pmkb.weill.cornell.edu/). 
 
-- Analysis review feedback system to mark sequencing artifacts 
+- Analysis review feedback system to mark sequencing artifacts and remove them from report output
 
-- Deposition of pipeline output in a central database
+- Deposition of pipeline output in a central database (REDCap, or other)
+
+
+# Analysis Report Example
+__[[ A full HTML version of the report can be previewed [here](https://cdn.rawgit.com/stevekm/reportIT/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html) or [here](http://htmlpreview.github.io/?https://github.com/stevekm/reportIT/blob/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html). ]]__
+
+An analysis overview report displays the significant variants found across all samples in the run. 'SC' sensitivity control samples are shown in a separate table (hidden by default).
+
+<img width="810" alt="screen shot 2017-03-17 at 4 21 43 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061536/2f11cd3e-0b2e-11e7-9684-4cb9f4d2e0a6.png">
+
+IGV snapshots shown for all significant variants. For low frequency variants, a "long view" snapshot is included to ensure mutations can be seen amongst reads. If available, 'NC' control sample is included on the lower track. 
+
+<img width="800" alt="screen shot 2017-03-17 at 4 22 28 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061635/9111af4a-0b2e-11e7-9870-8485ccf38ec2.png">
+
+
 
 # Installation
 
@@ -168,19 +176,6 @@ As a safety feature against undesired usage, the `run_samplesheet.py` script inc
 - check that the proper output directory has been symlinked
 
 These validations can be skipped by adding the `--debug` argument to the script.
-
-# Analysis Report Example
-
-An HTML formatted analysis overview report displays the significant variants found across all samples in the run. 'SC' control samples are shown in a separate table (hidden by default).
-
-<img width="810" alt="screen shot 2017-03-17 at 4 21 43 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061536/2f11cd3e-0b2e-11e7-9684-4cb9f4d2e0a6.png">
-
-IGV snapshots shown for all significant variants. For low frequency variants, a "long view" snapshot is included to ensure mutations can be seen amongst reads. If available, 'NC' control sample is included on the lower track. 
-
-<img width="800" alt="screen shot 2017-03-17 at 4 22 28 pm" src="https://cloud.githubusercontent.com/assets/10505524/24061635/9111af4a-0b2e-11e7-9870-8485ccf38ec2.png">
-
-A full HTML version of the report can be previewed [here](https://cdn.rawgit.com/stevekm/reportIT/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html) or [here](http://htmlpreview.github.io/?https://github.com/stevekm/reportIT/blob/d8b0304f90064bcc1337cc8e4eb0c7a2005431a5/example_report/ExampleIonTorrentRun123_overview_report.html).
-
 
 # Files & Directories
 
