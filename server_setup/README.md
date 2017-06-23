@@ -27,4 +27,5 @@ ssh iontorrent@126.72.3.98
 ```
 
 NOTE: Steps 3 & 4 must be repeated for each local system user who plans to use the pipeline. 
-NOTE: The IonTorrent server account that is used for this process must match the one set in the 
+
+NOTE: The IonTorrent server account that is used for this process must match the one set in the `data/server_info.txt` file for the pipeline.
