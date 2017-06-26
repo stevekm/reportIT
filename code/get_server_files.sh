@@ -72,7 +72,7 @@ function get_server_file_mainfest {
         printf "# Sample BAIs:\n%s\n" "\$sample_bais"
 
         # grab all the rest of the stuff in the sample coverage dirs
-        # printf " # Extra Files:\n%s\n%s\n" "\$(find \$coverage_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')" "\$(find \$variant_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')"
+        printf " # Extra Files:\n%s\n%s\n" "\$(find \$coverage_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')" "\$(find \$variant_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')"
         #
         #
 EOF
