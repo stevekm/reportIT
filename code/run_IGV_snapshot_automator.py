@@ -113,9 +113,12 @@ def summary_table_to_bed(sample_summary_table, output_file, filename_suffix = ''
             print(entry)
             writer.writerow(entry)
 
-def summary_table_to_bed_long(sample_summary_table, output_file, filename_suffix = 'long', min_frequency = 0.25):
+def summary_table_to_bed_long(sample_summary_table, output_file, filename_suffix = 'long', min_frequency = 1):
     '''
     Write out the low frequency variants
+
+    NOTE: See 'check_for_IGV_long_regions_snapshot' function in run_parser.py
+    UPDATE: Naima wants long snapshots for ALL variants from now on.
     '''
     import csv
     print('Find low frequency variants...')

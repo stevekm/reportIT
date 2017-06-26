@@ -302,7 +302,7 @@ def make_sample_IGV_dir(analysis_outdir, barcode, return_path = True):
     if return_path == True:
         return(IGV_snapshots_dir)
 
-def check_for_IGV_long_regions_snapshot(sample_summary_table, min_frequency = 0.25):
+def check_for_IGV_long_regions_snapshot(sample_summary_table, min_frequency = 1):
     '''
     return path to the long regions file, or None
     (file doesnt exist yet we will write to it later)
@@ -315,6 +315,9 @@ def check_for_IGV_long_regions_snapshot(sample_summary_table, min_frequency = 0.
     This function will check if any variants from the sample summary table have low freq and if so, list this in the sample metadata
 
     # summary_df.ix[summary_df.ix[:,'Frequency'] < 0.25]
+
+    NOTE: See 'summary_table_to_bed_long' function in run_IGV_snapshot_automator.py
+    UPDATE: Naima wants long snapshots for ALL variants from now on.
     '''
     needs_long_regions_file = False
     any_variant_has_low_freq = False
