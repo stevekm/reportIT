@@ -40,64 +40,67 @@ def get_server_address():
     server_address = server_addresses[0]
     return(server_address)
 
-def get_remote_run_dirs():
+def ssh_exec_command(command):
     '''
-    Return a list of the run dirs on the remote IonTorrent Server
-    '''
-    # get the address to the remote server
-    server_address = get_server_address()
-
-    # build a system command to ssh into the remote server and check the current run dirs
-    ssh_command = '''
-ssh {0} << EOF
-find /results/analysis/output/Home/ -mindepth 1 -maxdepth 1 -type d
-EOF
-'''.format(server_address)
-
-    # get the output
-    ssh_stdout = subprocess_cmd(ssh_command, return_stdout = True)
-
-    # only keep entries that match
-    remote_run_dirs = []
-    for item in ssh_stdout.split('\n'):
-        if item.startswith('/results/analysis/output/Home/'):
-            remote_run_dirs.append(os.path.basename(item))
-    return(remote_run_dirs)
-
-def validate_remote_run_completion(run_ID):
-    '''
-    Check the run on the remote IonTorrent server to determine if the run has finished
+    Run a command remotely on the IonTorrent server via ssh, return stdout for parsing
     '''
     import time
-    run_complete = False
-
-    # print("now validating run: {0}".format(run_ID))
-    # get the address to the remote server
+    # get the address to the remote IonTorrent server
     server_address = get_server_address()
-    # build a system command to ssh into the remote server and check the current run dirs
-    remote_results_dir = "/results/analysis/output/Home"
-    remote_run_dir = remote_results_dir + "/" + run_ID # IonTorrent server is running Linux
-    remote_run_dir_status_file = remote_run_dir + "/status.txt" # only exists if run has finished! Thanks Yang!
-
-    # the ssh command prints a load of junk now after IT server OS upgrade;
-    # I need a thing to print so I know where the command output is in stdout
-    remote_validation_string = "VALIDATIONSTATUS:"
-    remote_validation_command = '''
-[ -f "{0}" ] && printf "{1} True" || printf "{1} False"
-'''.format(remote_run_dir_status_file, remote_validation_string)
-    # VALIDATIONSTATUS: True
-
+    # wrap the validation command in an ssh command to execute it remotely
     ssh_command = '''
 ssh {0} << EOF
 {1}
 EOF
-'''.format(server_address, remote_validation_command)
+'''.format(server_address, command)
 
     # get the output
     ssh_stdout = subprocess_cmd(ssh_command, return_stdout = True)
     time.sleep(1) # sleep timer so we don't blow up the IT server with requests
+    return(ssh_stdout)
 
-    # search for the validation line
+def get_remote_run_dirs():
+    '''
+    Return a list of the run dirs on the remote IonTorrent Server
+    '''
+    import global_settings
+    IT_server_results_home_dir = global_settings.IT_server_results_home_dir # "/results/analysis/output/Home/"
+
+    # build a system command to ssh into the remote server and check the current run dirs
+    find_command = '''
+find {0} -mindepth 1 -maxdepth 1 -type d
+'''.format(IT_server_results_home_dir)
+
+    # get the output
+    ssh_stdout = ssh_exec_command(command = find_command)
+
+    # only keep entries that match
+    remote_run_dirs = []
+    for item in ssh_stdout.split('\n'):
+        if item.startswith(IT_server_results_home_dir):
+            remote_run_dirs.append(os.path.basename(item))
+    return(remote_run_dirs)
+
+
+def validate_single_file_exists(filepath):
+    '''
+    Make sure a single file exists on the remote IT server
+    '''
+    # the ssh command prints a load of junk now after IT server OS upgrade;
+    # I need a reference string to print so I know where the command output starts in stdout
+    remote_validation_string = "VALIDATIONSTATUS:"
+
+    # the command to run remotely on the IT server via ssh
+    # will print out:
+    # VALIDATIONSTATUS: True
+    remote_validation_command = '''
+[ -f "{0}" ] && printf "{1} True" || printf "{1} False"
+'''.format(filepath, remote_validation_string)
+
+    # run the command via ssh
+    ssh_stdout = ssh_exec_command(command = remote_validation_command)
+
+    # search for the validation line in the stdout
     for line in ssh_stdout.split('\n'):
         if line.startswith(remote_validation_string):
             if len(line.strip().split()) == 2:
@@ -106,14 +109,74 @@ EOF
 
     if remote_validation_output == "True":
         # print("The run is valid and has finished running on the IT server")
-        run_complete = True
-        return(run_complete)
+        return(True)
     elif remote_validation_output == "False":
         # print("File 'status.txt' does not exist for the run on the IT server, its not a valid run for downloading")
-        return(run_complete)
+        return(False)
     else:
         # print("Did not recognize the run status output")
-        return(run_complete)
+        return(False)
+
+
+def remote_run_files_exist(run_ID):
+    '''
+    Check that the run on the remote IT server has desired files present:
+
+    sample .bam files
+    sample .vcf files
+    ...
+    (add more as we find things that are missing)
+
+    Check for 'status.txt' file in the run dir;
+    /results/analysis/output/Home/Auto_user_SN2-282-IT17-26-1_375_368/status.txt
+
+    Need to ssh into the remote server to check for the presence of this file
+    file only exists if run has finished! Thanks Yang!
+    '''
+    import global_settings
+    run_validations = []
+
+    # place on the remote server where files should be
+    remote_results_dir = global_settings.IT_server_results_home_dir # "/results/analysis/output/Home"
+    remote_run_dir = remote_results_dir + "/" + run_ID # IonTorrent server is running Linux!
+
+    remote_run_dir_status_file = remote_run_dir + "/status.txt"
+
+    # list of individual files that must exist on the remote run
+    single_files = []
+    single_files.append(remote_run_dir_status_file)
+
+    for item in single_files:
+        run_validations.append(validate_single_file_exists(filepath = item))
+
+    # find ./Auto_user_SN2-281-IT17-25-2_374_367/plugin_out/ -name "*.bam" ! -name "*rawlib*" | wc -l
+
+    if all(run_validations):
+        return(True)
+    else:
+        return(False)
+
+
+
+
+def validate_remote_run_completion(run_ID):
+    '''
+    Check the run on the remote IonTorrent server to determine if the run has finished
+    '''
+    import time
+    import global_settings
+    run_validations = []
+    run_complete = False
+
+    run_validations.append(remote_run_files_exist(run_ID = run_ID))
+
+
+    # all are True
+    if all(run_validations):
+        return(True)
+    else:
+        return(False)
+
 
 
 def get_local_run_dirs():
