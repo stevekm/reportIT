@@ -30,7 +30,7 @@ function get_server_file_mainfest {
     echo -e "GENERATING FILE LIST FOR ANALYSIS"
     echo -e "\nPLEASE LOG INTO SERVER TO GET ANALYSIS FILE LIST\n"
     ssh $server_info > "$analysis_manifest_file" << EOF
-        set -x
+        # set -x
         # unescaped shell variables get expanded locally by heredoc
         # escaped shell variables get expanded remotely during command execution on remote IT server
         echo "$manifest_start_string"
@@ -72,7 +72,7 @@ function get_server_file_mainfest {
         printf "# Sample BAIs:\n%s\n" "\$sample_bais"
 
         # grab all the rest of the stuff in the sample coverage dirs
-        printf "# Extra Files:\n%s\n%s\n" "\$(find \$coverage_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')" "\$(find \$variant_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')"
+        # printf "# Extra Files:\n%s\n%s\n" "\$(find \$coverage_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')" "\$(find \$variant_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')"
         #
         #
 EOF
@@ -157,7 +157,7 @@ function get_server_files_pipeline {
     make_file_list "$analysis_manifest_file" "$analysis_files_file"
     get_analysis_ID "$analysis_manifest_file"
     get_run_ID "$analysis_manifest_file"
-    # download_server_files "$server_info_file" "$outdir" "$analysis_files_file"
+    download_server_files "$server_info_file" "$outdir" "$analysis_files_file"
     # update_dirfiles_permissions "$analysis_outdir"
 
 }
