@@ -63,7 +63,7 @@ build_version="hg19"
 
 # path to the 'Home' directory on the IonTorrent remote server that holds the
 # run output results
-IT_server_results_home_dir="/results/analysis/output/Home/"
+IT_server_results_home_dir="/results/analysis/output/Home"
 
 # subdir name prefix for IT results dir that hold the coverege files for all samples; .bam and .bai files
 IT_coverage_dir_name_pattern="coverageAnalysis_out"

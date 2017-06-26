@@ -40,7 +40,7 @@ def get_server_address():
     server_address = server_addresses[0]
     return(server_address)
 
-def ssh_exec_command(command):
+def ssh_exec_command(command, print_command = False):
     '''
     Run a command remotely on the IonTorrent server via ssh, return stdout for parsing
     '''
@@ -55,6 +55,7 @@ EOF
 '''.format(server_address, command)
 
     # get the output
+    if print_command == True: print(ssh_command)
     ssh_stdout = subprocess_cmd(ssh_command, return_stdout = True)
     time.sleep(1) # sleep timer so we don't blow up the IT server with requests
     return(ssh_stdout)
@@ -117,6 +118,38 @@ def validate_single_file_exists(filepath):
         # print("Did not recognize the run status output")
         return(False)
 
+def validate_remote_run_min_num_items_exist(dirpath, pattern_include, pattern_exclude = None, min_num = 1):
+    '''
+    Check that a minimum number of items in a dir exist on the remote IonTorrent server
+    item basename must match pattern
+    item can be dir, file, or symlink
+    '''
+    remote_validation_string = "NUMFILESFOUND:"
+
+    if pattern_exclude != None:
+        pattern_exclude = '! -name "{0}" '.format(str(pattern_exclude))
+    elif pattern_exclude == None:
+        pattern_exclude = ''
+
+    find_command = '''
+# set -x
+printf "{0} \$(find "{1}" -name "{2}" {3} | wc -l)"
+'''.format(remote_validation_string, dirpath, pattern_include, pattern_exclude)
+
+    # run the command via ssh
+    ssh_stdout = ssh_exec_command(command = find_command)
+
+    # search for the validation line in the stdout
+    for line in ssh_stdout.split('\n'):
+        if line.startswith(remote_validation_string):
+            if len(line.strip().split()) == 2:
+                junk, remote_validation_output = line.strip().split()
+
+    if int(remote_validation_output) >= min_num:
+        return(True)
+    else:
+        return(False)
+
 
 def remote_run_files_exist(run_ID):
     '''
@@ -139,7 +172,6 @@ def remote_run_files_exist(run_ID):
     # place on the remote server where files should be
     remote_results_dir = global_settings.IT_server_results_home_dir # "/results/analysis/output/Home"
     remote_run_dir = remote_results_dir + "/" + run_ID # IonTorrent server is running Linux!
-
     remote_run_dir_status_file = remote_run_dir + "/status.txt"
 
     # list of individual files that must exist on the remote run
@@ -150,6 +182,10 @@ def remote_run_files_exist(run_ID):
         run_validations.append(validate_single_file_exists(filepath = item))
 
     # find ./Auto_user_SN2-281-IT17-25-2_374_367/plugin_out/ -name "*.bam" ! -name "*rawlib*" | wc -l
+    sample_bams_exist = validate_remote_run_min_num_items_exist(dirpath = remote_run_dir + '/plugin_out/' , pattern_include = "*.bam", pattern_exclude = "*rawlib*", min_num = 1)
+
+
+    run_validations.append(sample_bams_exist)
 
     if all(run_validations):
         return(True)
@@ -168,8 +204,10 @@ def validate_remote_run_completion(run_ID):
     run_validations = []
     run_complete = False
 
+    # make sure all the files needed exist on the remote server
     run_validations.append(remote_run_files_exist(run_ID = run_ID))
 
+    # other criteria will go here as needed in the future
 
     # all are True
     if all(run_validations):
