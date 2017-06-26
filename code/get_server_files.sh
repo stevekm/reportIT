@@ -16,26 +16,39 @@ function get_server_file_mainfest {
     local server_info="$1"
     local analysis_manifest_file="$2"
     local analysis_ID="$3"
+    local manifest_tmpfile="$(dirname "$analysis_manifest_file")/tmp"
+    # global from this script
+    local manifest_start_string="$manifest_start_string"
+    # from global settings
+    local IT_server_results_home_dir="$IT_server_results_home_dir"
+    local IT_variant_dir_name_pattern="$IT_variant_dir_name_pattern" # variantCaller_out
+    local IT_coverage_dir_name_pattern="$IT_coverage_dir_name_pattern" # coverageAnalysis_out
+    local source_vcf_basename="$source_vcf_basename" # "TSVC_variants.vcf"
+    local IT_sample_results_dir_name_pattern="$IT_sample_results_dir_name_pattern" # IonXpress
 
     echo -e "\n--------------------------------------------\n"
     echo -e "GENERATING FILE LIST FOR ANALYSIS"
     echo -e "\nPLEASE LOG INTO SERVER TO GET ANALYSIS FILE LIST\n"
     ssh $server_info > "$analysis_manifest_file" << EOF
+        set -x
+        # unescaped shell variables get expanded locally by heredoc
+        # escaped shell variables get expanded remotely during command execution on remote IT server
+        echo "$manifest_start_string"
         echo "# Analysis ID: $analysis_ID"
         #
         # parent dir for the run
-        analysis_dir="\$(find /results/analysis/output/Home/ -mindepth 1 -maxdepth 1 -type d -name "$analysis_ID")"
+        analysis_dir="\$(find "$IT_server_results_home_dir" -mindepth 1 -maxdepth 1 -type d -name "$analysis_ID")"
         echo "# Analysis dir: \$analysis_dir"
         #
         # dir for XLS and VCF
-        variant_dir="\$(find \$analysis_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*variantCaller_out*")"
+        variant_dir="\$(find \$analysis_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*$IT_variant_dir_name_pattern*")"
         echo "# Variants dir: \$variant_dir"
         #
         # dir for BAMs and BAIs
-        coverage_dir="\$(find \$analysis_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*coverageAnalysis_out*")"
+        coverage_dir="\$(find \$analysis_dir/plugin_out -mindepth 1 -maxdepth 1 -type d -name "*$IT_coverage_dir_name_pattern*")"
         echo "# Coverage dir: \$coverage_dir"
         #
-        run_xls="\$(find \$variant_dir -maxdepth 1 -name "*.xls" ! -name "*.cov.xls" | sed -n 's|^/results/analysis/output/Home/||p')"
+        run_xls="\$(find \$variant_dir -maxdepth 1 -name "*.xls" ! -name "*.cov.xls" | sed -n 's|^$IT_server_results_home_dir||p')"
         printf "# Run XLS:\n%s\n" "\$run_xls"
         #
         # run XLS name = run ID
@@ -43,24 +56,32 @@ function get_server_file_mainfest {
         run_ID="\${run_ID%%.xls}"
         echo "# Run ID: \$run_ID"
         #
-        sample_dirs="\$(find \$variant_dir -type d -name "*IonXpress_*")"
+        sample_dirs="\$(find \$variant_dir -type d -name "*$IT_sample_results_dir_name_pattern*")"
         # echo "# Sample dirs: \$sample_dirs"
         #
         # the VCFs for the samples
-        sample_vcfs="\$(find \$variant_dir -type f -name "TSVC_variants.vcf" | sed -n 's|^/results/analysis/output/Home/||p')"
+        sample_vcfs="\$(find \$variant_dir -type f -name "$source_vcf_basename" | sed -n 's|^$IT_server_results_home_dir||p')"
         printf "# Sample VCFs:\n%s\n" "\$sample_vcfs"
         #
         # the BAMs for the samples # these are all symlinks !
-        sample_bams="\$(find \$coverage_dir -name "Ion*" -name "*.bam" | sed -n 's|^/results/analysis/output/Home/||p')"
+        sample_bams="\$(find \$coverage_dir -name "$IT_sample_results_dir_name_pattern*" -name "*.bam" | sed -n 's|^$IT_server_results_home_dir||p')"
         printf "# Sample BAMs:\n%s\n" "\$sample_bams"
         #
         # the BAIs for the samples
-        sample_bais="\$(find \$coverage_dir -name "Ion*" -name "*.bai" | sed -n 's|^/results/analysis/output/Home/||p')"
+        sample_bais="\$(find \$coverage_dir -name "$IT_sample_results_dir_name_pattern*" -name "*.bai" | sed -n 's|^$IT_server_results_home_dir||p')"
         printf "# Sample BAIs:\n%s\n" "\$sample_bais"
+
+        # grab all the rest of the stuff in the sample coverage dirs
+        # printf " # Extra Files:\n%s\n%s\n" "\$(find \$coverage_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')" "\$(find \$variant_dir -type f | sed -n 's|^$IT_server_results_home_dir||p')"
         #
         #
 EOF
 
+    # strip the text before the start of the manifest;
+    # find all lines starting at the 'start string' and ending to the end of the file
+    grep -A"$(cat "$analysis_manifest_file" | wc -l)" "$manifest_start_string" "$analysis_manifest_file" > "$manifest_tmpfile" && /bin/mv "$manifest_tmpfile" "$analysis_manifest_file"
+
+    # check that file was created
     [ -f "$analysis_manifest_file" ] && echo -e "\nFile manifest written to:\n$analysis_manifest_file\n"
     [ ! -f "$analysis_manifest_file" ] && echo -e "ERROR: File not created:\n$analysis_manifest_file" && exit
 
@@ -78,11 +99,13 @@ function make_file_list {
 
 
 function get_analysis_ID {
+    # retrieve the analysis ID from the manifest file
     local analysis_manifest_file="$1"
     echo -e "Analysis ID:\n$(cat $analysis_manifest_file | grep 'Analysis ID' | cut -d ':' -f2 | cut -d ' ' -f2)\n"
 }
 
 function get_run_ID {
+    # retrieve the run ID from the manifest file
     # also in `code/custom_bash_functions.sh`
     local analysis_manifest_file="$1"
     echo -e "Run ID:\n$(cat $analysis_manifest_file | grep 'Run ID' | cut -d ':' -f2 | cut -d ' ' -f2)\n"
@@ -90,6 +113,7 @@ function get_run_ID {
 
 
 function download_server_files {
+    # download all the files written to the file list, created by truncating the file manifest
     local server_info_file="$1"
     local outdir="$2"
     local server_file_list="$3"
@@ -133,7 +157,7 @@ function get_server_files_pipeline {
     make_file_list "$analysis_manifest_file" "$analysis_files_file"
     get_analysis_ID "$analysis_manifest_file"
     get_run_ID "$analysis_manifest_file"
-    download_server_files "$server_info_file" "$outdir" "$analysis_files_file"
+    # download_server_files "$server_info_file" "$outdir" "$analysis_files_file"
     # update_dirfiles_permissions "$analysis_outdir"
 
 }
@@ -148,7 +172,11 @@ check_dirfile_exists "$server_info_file" "f" "Making sure server_info_file exist
 
 analysis_ID="${@:1}" # accept a space separated list of ID's
 
-
+# string to denote the beginning of the file manifest, so that it can be distinguished from
+# the ssh login text that is now being prepended to ssh command stdout as of the latest
+# IT server OS upgrade
+# make this a global since we'll need it a few places
+manifest_start_string="# FILEMANIFESTSTARTSHERE"
 #~~~~~ RUN PIPELINE ~~~~~~#
 for ID in $analysis_ID; do
     get_server_files_pipeline "$server_info_file" "$outdir" "$ID"

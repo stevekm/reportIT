@@ -202,7 +202,14 @@ function make_outdir {
 
 
 function get_run_ID {
-    # also in `code/get_server_files.sh`
+    # gets the run ID from the analysis_manifest_file; used by the following scripts:
+    # code/annotate_wrapper.sh
+    # code/server_download_annotate_wrapper.sh
+    # code/get_server_files.sh
+    # code/old/multi_wrapper.sh
+    # code/custom_bash_functions.sh
+    # code/get_run_IDs.sh
+    # also copied in `code/get_server_files.sh`
     local analysis_manifest_file="$1"
     echo -e "Run ID:\n$(cat $analysis_manifest_file | grep 'Run ID' | cut -d ':' -f2 | cut -d ' ' -f2)\n"
 }
