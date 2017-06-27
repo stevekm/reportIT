@@ -22,6 +22,8 @@ function mail_analysis_report {
     local zipfile="$5"
     local vcf_zipfile="$6"
     local tables_zip="$7"
+    local bcmatrix_xls="$8"
+    local report_file_new="$9"
 
     local file_fullpath="$(readlink -f "$attachment_file")"
     local file_basename="$(basename "$attachment_file")"
@@ -41,7 +43,7 @@ function mail_analysis_report {
     echo -e "\nAttachment file is:\n$attachment_file\n"
     echo -e "\nEmail subject line is:\n$SUBJECT_LINE\n"
 
-    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -a "$summary_file" -a "$zipfile" -a "$vcf_zipfile" -a "$tables_zip" -- "$recipient_list" <<E0F
+    mutt -s "$SUBJECT_LINE" -a "$attachment_file" -a "$summary_file" -a "$zipfile" -a "$vcf_zipfile" -a "$tables_zip" -a "$bcmatrix_xls" -a "$report_file_new" -- "$recipient_list" <<E0F
 
 IonTorrent Analysis overview report is attached: $file_basename
 IonTorrent Analysis variant summary table is attached: $summary_file_basename
@@ -136,8 +138,20 @@ for ID in $analysis_ID_list; do
     find "${analysis_outdir}" -type f -name "*${ID}*" -name "*.tsv" | xargs zip "$tables_zip"
     check_dirfile_exists "$tables_zip" "f" "Making sure the variant table zip was created..."
 
+    # find the bcmatrix for the run
+    echo "Now searching for .bcmatrix.xls file..."
+    bcmatrix_xls="$(find "$analysis_outdir" -path "*coverageAnalysis_out*" -name "*.bcmatrix.xls" | head -1)"
+    check_dirfile_exists "$bcmatrix_xls" "f" "Making sure the .bcmatrix.xls file was found..."
+
+    # find the "report.pdf" for the run
+    echo "Now searching for the report.pdf file..."
+    report_file_old="${analysis_outdir}/report.pdf"
+    report_file_new="${analysis_outdir}/${ID}_sequencing_report.pdf"
+    /bin/cp "$report_file_old" "$report_file_new"
+    check_dirfile_exists "$report_file_new" "f" "Making sure the sequencing_report was created..."
+
 
     # email the files!
-    mail_analysis_report "$ID" "$analysis_report_file" "$analysis_barcodes_file" "$analysis_summary_file" "$zipfile" "$vcf_zipfile" "$tables_zip"
+    mail_analysis_report "$ID" "$analysis_report_file" "$analysis_barcodes_file" "$analysis_summary_file" "$zipfile" "$vcf_zipfile" "$tables_zip" "$bcmatrix_xls" "$report_file_new"
     )
 done
