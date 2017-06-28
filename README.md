@@ -34,6 +34,7 @@ IGV snapshots shown for all significant variants. For low frequency variants, a 
 First, clone this repo:
 ```bash
 git clone --recursive https://github.com/stevekm/reportIT.git
+cd reportIT
 ```
 
 Then, run the `dir_setup.sh` script; 
