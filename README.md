@@ -3,6 +3,8 @@
 
 This program will annotate, aggregate, and summarize clinical variant information from the [IonTorrent suite](https://www.thermofisher.com/us/en/home/life-science/sequencing/next-generation-sequencing/ion-torrent-next-generation-sequencing-workflow/ion-torrent-next-generation-sequencing-data-analysis-workflow/ion-torrent-suite-software.html)
 
+- A brief graphical overview of the pipeline can be found [here](https://github.com/stevekm/reportIT/blob/master/docs/reportIT_pipeline_designs.pdf). 
+
 # Overview
 
 Sequencing results are accessed directly from the lab's IonTorrent server via scripts using `ssh` and `rsync`. After downloading files for a given run to the local system, VCF formatted variant call files are annotated and summarized to identify mutations of known significance (ANNOVAR, `bcftools`), while BAM formatted coverage files are visualized with IGV. An HTML formatted report is generated from variant summary information and IGV snapshots. Results can be easily emailed to clinicians for review with the provided script. 
@@ -31,26 +33,26 @@ IGV snapshots shown for all significant variants. For low frequency variants, a 
 
 # Installation
 
-First, run the `dir_setup.sh` script; 
+- First, clone this repo:
+```bash
+git clone --recursive https://github.com/stevekm/reportIT.git
+cd reportIT
+```
+
+- Then, run the `dir_setup.sh` script; 
 ```bash
 ./dir_setup.sh
 ```
-
 This should set up the `bin` and `ref` directories, along with creating and symlinking the external `input`, `output`, and `data` directories. You should verify these symlinks and directories, and then populate the `data` directory with files required for the pipeline (see the 'Data directory' section, below). You should also set up automatic ssh for your IonTorrent server as described [here](https://gist.github.com/stevekm/93de1539d8008d220c9a1c4d19110b3e).
+
+- Review the items described in the [Files & Directories](#files--directories) and [Pipeline Settings](#pipeline-settings) sections to make sure everything is set properly.
+
 
 # Usage
 
 ## Check For Runs
 
 Before you can run the pipeline, you need to know which runs are available on your IonTorrent server. The following steps require that your `data/server_info.txt` file is set correctly, as described below. It is also recommended to have ssh key authentication set up for your user account on the IonTorrent server. 
-
-### All Available Runs
-
-The following script will log into your IonTorrent server, and output a list of all run directories found:
-
-```bash
-code/get_server_run_list.sh
-```
 
 ### Missing Runs Only
 
@@ -61,6 +63,14 @@ code/check_for_new_runs.py
 ```
 
 By default, it will validate each missing run to make sure that IonTorrent sequencing data has been produced in the remote run directory. It will also automatically create an unpaired samplesheet for the missing runs. If you inlclude the `-d` argument to the script, it will also download the missing runs entered on the sample sheet produced. 
+
+### All Available Runs
+
+The following script will log into your IonTorrent server, and output a list of all run directories found:
+
+```bash
+code/get_server_run_list.sh
+```
 
 ## Make Samplesheet
 
@@ -130,7 +140,7 @@ These validations can be skipped by adding the `--debug` argument to the script.
 
 # Files & Directories
 
-Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks.
+Input, output, and reference data for the program is stored external to the program's directory and is set by symlinks. These should be automatically created when you run the `dir_setup.sh` script during initial installation.
 
 ## Data directory
 
@@ -138,37 +148,63 @@ The `data` directory should contain the following items:
 
 ```
 data/
+|-- control_sample_IDs.txt
+|-- control_sample_regex.txt
+|-- email_recipients.txt
 |-- actionable_genes.txt
 |-- panel_genes.txt
 |-- server_info.txt
-
+`-- summary_fields.txt
 ```
 
 Important files:
 
-`data/panel_genes.txt` : A list of genes to be included in the gene panel. Example:
+- `control_sample_IDs.txt`: ID's for IonTorrent samples which are used to denote 'control' samples, which should not be used for IGV snapshots. Example:
 
 ```bash
-$ head data/panel_genes.txt
+NC
+SC
+NTC
+NC HAPMAP
+HAPMAP
+Sc
+SC-ACROMETRIX
+```
+
+- `control_sample_regex.txt`: Regex patterns to use with `grep -F` in some scripts which try to identify NC control samples. Example:
+
+```bash
+^NC[[:space:]]
+^NC[[:space:]]HAPMAP[[:space:]]
+^HAPMAP[[:space:]]
+```
+
+- `email_recipients.txt`: A list of email addresses to use in the `To:` field of the outgoing email with analysis results. The addresses must be on a single line, formatted as such:
+
+```bash
+email1@gmail.com, email2@gmail.com
+```
+
+- `panel_genes.txt` : A list of genes to be included in the gene panel. Example:
+
+```bash
 AKT1
 ALK
 APC
 ATM
 ```
 
-`data/actionable_genes.txt` : A list of genes detertmined to be actionable. Example:
+- `actionable_genes.txt` : A list of genes determined to be actionable. Example:
 
 ```bash
-$ head data/actionable_genes.txt
 BRAF
 EGFR
 FLT3
 ```
 
-`server_info.txt` : The login info for the IonTorrent server. Example:
+- `server_info.txt` : The login info for the IonTorrent server. Must be formatted as such:
 
 ```bash
-$ cat data/server_info.txt
 username@server_IP
 ```
 
@@ -192,15 +228,46 @@ ref
 
 Important files:
 
-`data/hg19/canonical_transcript_list.tsv` : A list of canonical transcripts . Example:
+- `hg19/canonical_transcript_list.txt` : A list of canonical transcripts to use with the given genome (hg19). Each gene for should have only one 'canonical transcript' given in the list. Example:
 
 ```bash
-$ head ref/hg19/canonical_transcript_list.tsv
 NR_026820
 NM_001005484
 NR_039983
 NM_001005277
 ```
+
+- `IDs_to_replace.csv`: Transcript ID's that should be replaced in the default `canonical_transcript_list.txt` list during setup, in the format of `OLD,NEW`. Example:
+
+```bash
+NM_001276760,NM_000546
+```
+
+# Pipeline Settings
+
+Settings used by the pipeline have been saved in several files, for ease of access & modification. 
+
+- `filter_criteria.json`: Filtering criteria used identify quality variants for inclusion in the variant summary tables. The sample file `example_filter_criteria.json` has been provided, and should be renamed to `filter_criteria.json`
+
+- `global_settings.sh`: Global pipeline locations and settings used by `bash` scripts. References to hard-coded locations on your local system or IonTorrent system should be reviewed, and updated to match your criteria. 
+
+- `global_settings.py`: Many of the same settings as set in `global_settings.sh`, intended for use in Python scripts. 
+
+- `mail_settings.sh`: Settings to use with the `bash` email script(s).
+
+# Control Samples
+
+An important aspect of the IonTorrent reporting pipeline is the ability to recognize control samples included in a run. Unlike patient samples, these samples are included in a run for quality control purposes. Since the IonTorrent system is agnostic to the nature of samples in a run, these control samples must be denoted by their sample ID entered in the system during run setup. Similarly, the reporting pipeline is only able to identify which samples are controls by their sample ID. This makes sample labeling of control samples important during wet-lab IonTorrent run setup. The following control samples are typically used:
+
+- `SC`: Sensitivity control (positive control). This sample is expected to show a large number of mutations. Typically uses AcroMetrix Hotspot control sample.
+
+- `NC`: Negative control. DNA sample that should not have any mutations. Typically a HapMap sample. 
+
+- `NTC`: No template control. No DNA included in the sample, only water. 
+
+The best practice is to label these control samples as `SC`, `NC`, and `NTC` in every run. The ID's to be used should be entered in the appropriate settings files as described in the section [Files & Directories](#files--directories). 
+
+These control samples have special treatment when running the pipeline. During processing, IGV snapshots will not be taken for any sample that has a label matching a control sample. Instead, the pipeline will attempt to identify the `NC` control sample for a run, or pair of runs, and use it's corresponding .bam file as the lower track in IGV snapshots for all samples in the given run(s). During report generation, variants from the `SC` sample will be excluded from the primary variant summary table displayed, since it is expected to have a large number of variants. 
 
 # Software Requirements
 
