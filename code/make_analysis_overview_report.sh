@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+# set -x
 
 ## USAGE: code/make_analysis_overview_report.sh <analysis_ID> <analysis_ID> ...
 ## Description: This script will set up the overall analysis report directory in an analysis dir
@@ -89,10 +89,18 @@ for i in $analysis_ID_list; do
     check_dirfile_exists "$analysis_summary_table" "f" "Checking to make sure analysis summary table was found..."
     echo -e "\nAnalyis summary table is:\n$analysis_summary_table\n"
     echo -e "\nLinking to the summary table..."
-    set -x
+    # set -x
     analysis_summary_report_file="$(readlink -f $overview_report_dir)/summary_table.tsv"
     ln -fs "$analysis_summary_table" "$analysis_summary_report_file"
-    set +x
+    # set +x
+
+    # Copy over the SC control samples file for the report
+    check_dirfile_exists "$SC_control_sample_IDs_file" "f" "Checking to make sure the SC control sample ID file exists...."
+    printf "Copying over the report template...\n\n"
+    output_SC_control_sample_IDs_file="${overview_report_dir}/SC_control_sample_IDs.txt"
+    /bin/cp -v "$SC_control_sample_IDs_file" "$output_SC_control_sample_IDs_file"
+    check_dirfile_exists "$output_SC_control_sample_IDs_file" "f" "Checking to make sure the report SC control sample ID file was copied...."
+
 
     # copy over the report template
     echo -e "\nCopying over the report template..."
@@ -104,9 +112,9 @@ for i in $analysis_ID_list; do
 
     #~~~~~ COMPILE REPORT ~~~~~~#
     echo -e "\nAttempting to compile the report.."
-    set -x
+    # set -x
     $compile_report_script "$overview_report_file"
-    set +x
+    # set +x
 
     # hardlink the report back to the parent dir
     analysis_report_output="${overview_report_file%%.Rmd}.html"

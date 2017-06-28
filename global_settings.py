@@ -5,6 +5,7 @@ Contains copies of settings from 'global_settings.sh'
 for use in Python scripts
 make sure to keep these up to date with 'global_settings.sh'
 '''
+import os
 
 #~~~~~ DEFAULT LOCATIONS & ITEMS ~~~~~~#
 # path to output directory
@@ -19,10 +20,12 @@ samplesheet_dir="samplesheets"
 report_template_dir="report"
 
 # file for per sample full report template
-full_report_template="report/full_report.Rmd"
+# full_report_template="report/full_report.Rmd"
+full_report_template = os.path.join(report_template_dir, "full_report.Rmd")
 
 # file for the overall analysis full report
-overview_report_template="report/overview_report.Rmd"
+# overview_report_template="report/overview_report.Rmd"
+overview_report_template = os.path.join(report_template_dir, "overview_report.Rmd")
 
 # file containing list of actionable genes
 actionable_genes_file="data/actionable_genes.txt"
@@ -41,6 +44,9 @@ control_sample_regex_file="data/control_sample_regex.txt"
 
 # file with control sample ID's
 control_sample_ID_file="data/control_sample_IDs.txt"
+
+# file with SC control sample ID's to be hidden in report template
+SC_control_sample_IDs_file="data/SC_control_sample_IDs.txt"
 
 igv_bin="bin/IGV_2.3.81/igv.jar"
 

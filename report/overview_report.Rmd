@@ -9,6 +9,7 @@ params:
   summary_table_file: summary_table.tsv
   git_info_file: git_info.txt
   IGV_snapshot_dir: IGV_snapshots
+  SC_control_sample_IDs_file: SC_control_sample_IDs.txt
   analysis_ID: NA
   sample_ID: NA
   barcode_ID: NA
@@ -74,9 +75,11 @@ print_SC_variant_table <- function(df, cols_to_print){
 summary_table_file <- params$summary_table_file
 IGV_snapshot_dir <- params$IGV_snapshot_dir
 git_info_file <- params$git_info_file
+SC_control_sample_IDs_file <- params$SC_control_sample_IDs_file
 
 git_info <- get_file_content(git_info_file)
 analysis_ID <- get_file_content("analysis_ID.txt")
+SC_control_sampleIDs <- get_file_content(SC_control_sample_IDs_file)
 ```
 
 ```{r load_barcodes_tables, echo = FALSE, include = FALSE, eval=TRUE}
@@ -96,7 +99,7 @@ run_ID <- unique(as.character(sample_barcodes_df[["Run.Name"]]))
 summary_cols <- c("Gene", "Coding", "Amino.Acid.Change","Frequency", "Review", "Sample.Name", "Barcode")
 
 # ID's of the SC control samples; filter these from the primary table
-SC_control_sampleIDs <- c("SC", "Sc")
+# SC_control_sampleIDs <- c("SC", "Sc")
 
 # load variant summary table from file
 summary_df <- read.delim(summary_table_file, header = TRUE, sep = '\t')

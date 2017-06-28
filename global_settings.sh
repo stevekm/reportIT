@@ -39,7 +39,8 @@ control_sample_regex_file="data/control_sample_regex.txt"
 # file with control sample ID's
 control_sample_ID_file="data/control_sample_IDs.txt"
 
-
+# file with SC control sample ID's to be hidden in report template
+SC_control_sample_IDs_file="data/SC_control_sample_IDs.txt"
 
 #~~~~~ CUSTOM FUNCTIONS ~~~~~~#
 if [ -f "${codedir}/custom_bash_functions.sh" ]; then
