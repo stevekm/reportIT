@@ -31,7 +31,12 @@ IGV snapshots shown for all significant variants. For low frequency variants, a 
 
 # Installation
 
-First, run the `dir_setup.sh` script; 
+First, clone this repo:
+```bash
+git clone --recursive https://github.com/stevekm/reportIT.git
+```
+
+Then, run the `dir_setup.sh` script; 
 ```bash
 ./dir_setup.sh
 ```
