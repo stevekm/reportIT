@@ -3,6 +3,8 @@
 
 This program will annotate, aggregate, and summarize clinical variant information from the [IonTorrent suite](https://www.thermofisher.com/us/en/home/life-science/sequencing/next-generation-sequencing/ion-torrent-next-generation-sequencing-workflow/ion-torrent-next-generation-sequencing-data-analysis-workflow/ion-torrent-suite-software.html)
 
+- A brief graphical overview of the pipeline can be found [here](https://github.com/stevekm/reportIT/blob/master/docs/reportIT_pipeline_designs.pdf). 
+
 # Overview
 
 Sequencing results are accessed directly from the lab's IonTorrent server via scripts using `ssh` and `rsync`. After downloading files for a given run to the local system, VCF formatted variant call files are annotated and summarized to identify mutations of known significance (ANNOVAR, `bcftools`), while BAM formatted coverage files are visualized with IGV. An HTML formatted report is generated from variant summary information and IGV snapshots. Results can be easily emailed to clinicians for review with the provided script. 
