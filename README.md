@@ -253,6 +253,20 @@ Settings used by the pipeline have been saved in several files, for ease of acce
 
 - `mail_settings.sh`: Settings to use with the `bash` email script(s).
 
+# Control Samples
+
+An important aspect of the IonTorrent reporting pipeline is the ability to recognize control samples included in a run. Unlike patient samples, these samples are included in a run for quality control purposes. Since the IonTorrent system is agnostic to the nature of samples in a run, these control samples must be denoted by their sample ID entered in the system during run setup. Similarly, the reporting pipeline is only able to identify which samples are controls by their sample ID. This makes sample labeling of control samples important during wet-lab IonTorrent run setup. The following control samples are typically used:
+
+- `SC`: Sensitivity control (positive control). This sample is expected to show a large number of mutations. Typically uses AcroMetrix Hotspot control sample.
+
+- `NC`: Negative control. DNA sample that should not have any mutations. Typically a HapMap sample. 
+
+- `NTC`: No template control. No DNA included in the sample, only water. 
+
+The best practice is to label these control samples as `SC`, `NC`, and `NTC` in every run. The ID's to be used should be entered in the appropriate settings files as described in the section [Files & Directories](#files--directories). 
+
+These control samples have special treatment when running the pipeline. During processing, IGV snapshots will not be taken for any sample that has a label matching a control sample. Instead, the pipeline will attempt to identify the `NC` control sample for a run, or pair of runs, and use it's corresponding .bam file as the lower track in IGV snapshots for all samples in the given run(s). During report generation, variants from the `SC` sample will be excluded from the primary variant summary table displayed, since it is expected to have a large number of variants. 
+
 # Software Requirements
 
 This program has been developed in a Linux environment running CentOS 6. Some scripts issue system commands which rely on standard GNU Linux utilities. The current list of all binary dependencies are contained in the file `bin.txt`. Some download notes for obtaining these programs can be found in `bin_downloads.txt`
