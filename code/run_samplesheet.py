@@ -9,7 +9,7 @@ import argparse
 import csv
 import pipeline_functions as pl
 import pyqsub
-
+import global_settings
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
@@ -161,8 +161,8 @@ def main(samplesheet_file, download = False, annotate = False, report = False, u
     # ~~~~ RUN ~~~~~~ #
     # make sure we are on the 'production' brach (forked from 'master')
     if debug_mode != True:
-        pl.validate_git_branch(allowed = ['production'])
-        pl.validate_output_dir(allowed = ['/ifs/data/molecpathlab/IonTorrent_reporter/output'])
+        pl.validate_git_branch(allowed = global_settings.allowed_git_branches)
+        pl.validate_output_dir(allowed = global_settings.allowed_output_dirs)
 
     # d
     if download == True:

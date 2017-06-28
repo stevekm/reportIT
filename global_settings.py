@@ -50,7 +50,11 @@ SC_control_sample_IDs_file="data/SC_control_sample_IDs.txt"
 
 igv_bin="bin/IGV_2.3.81/igv.jar"
 
+# git branches allowed to run the pipeline on
+allowed_git_branches = ['production']
 
+# full absolute normalized path to the allowed output directory locations
+allowed_output_dirs = ['/ifs/data/molecpathlab/IonTorrent_reporter/output']
 
 # ~~~~~~ ANNOTATION PARAMETERS ~~~~~~ #
 # ANNOVAR version:
