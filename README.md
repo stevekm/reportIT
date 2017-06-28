@@ -179,6 +179,14 @@ SC-ACROMETRIX
 ^HAPMAP[[:space:]]
 ```
 
+- `SC_control_sample_IDs.txt`: ID's to identify SC control samples. Example:
+
+```bash
+SC
+Sc
+SC-ACROMETRIX
+```
+
 - `email_recipients.txt`: A list of email addresses to use in the `To:` field of the outgoing email with analysis results. The addresses must be on a single line, formatted as such:
 
 ```bash
