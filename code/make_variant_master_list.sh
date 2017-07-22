@@ -27,7 +27,7 @@ check_file () {
 }
 # Make concatenated table of all IonTorrent variants
 check_file "$version_table_file"
-find output/ -name "*summary_version.tsv" ! -path "*IonXpress*" | xargs code/toolbox/concat_tables.py > "$version_table_file" && printf "Made new version of file:\n%s\n\n" "$version_table_file"
+find output/ -name "*summary_version.tsv" ! -path "*Ion*" | xargs code/toolbox/concat_tables.py > "$version_table_file" && printf "Made new version of file:\n%s\n\n" "$version_table_file"
 
 # make the sample Index file
 check_file $sample_index_file
