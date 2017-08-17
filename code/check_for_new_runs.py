@@ -255,11 +255,16 @@ def download_runs(samplesheet_file, debug_mode = False):
 def main(download = False, debug_mode = False):
     '''
     Main control function for the program
+
+    return list of validated_missing_runs
     '''
     remote_run_dirs = get_remote_run_dirs()
     local_run_dirs = get_local_run_dirs()
     missing_runs = []
     validated_missing_runs = []
+    samplesheet_file = None
+
+
 
     for item in remote_run_dirs:
         if item not in local_run_dirs:
@@ -286,6 +291,10 @@ def main(download = False, debug_mode = False):
             download_runs(samplesheet_file = samplesheet_file, debug_mode = debug_mode)
     else:
         print("No missing runs found. ")
+
+    # make a dict for output to return
+    output = {'runs': validated_missing_runs, 'samplesheet_file': samplesheet_file}
+    return(output)
 
 
 
