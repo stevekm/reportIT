@@ -37,7 +37,7 @@ function mail_analysis_report {
     # custom mail settings
     source "mail_settings.sh"
 
-    local SUBJECT_LINE="IonTorrent Analysis: ${ID} Overview Report"
+    local SUBJECT_LINE="[IonTorrent] ${ID} Overview Report"
 
     echo -e "\nEmail recipient list:\n$recipient_list\n"
     echo -e "\nAttachment file is:\n$attachment_file\n"
