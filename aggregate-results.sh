@@ -3,12 +3,13 @@
 # this script will aggregate the output from from various tables for all runs in the 'output' directory
 output_dir="data/aggregate"
 tmp_file="${output_dir}/tmp"
+timestamp="$(date +"%Y-%m-%d_%H-%M-%S")"
 
-patterns="_summary.tsv _full_table.tsv _filtered.tsv _summary_version.tsv"
+patterns="_summary _full_table _filtered _summary_version"
 for pattern in $patterns; do
 
-    search_pattern="*${pattern}"
-    output_file="${output_dir}/NS50_all${pattern}"
+    search_pattern="*${pattern}.tsv"
+    output_file="${output_dir}/NGS50_all${pattern}_${timestamp}.tsv"
 
     printf "output file: %s\n" "$output_file"
 
