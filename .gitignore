@@ -43,3 +43,7 @@ ref/hg19/knownCanonical.txt
 API_url.txt
 test.txt
 qsub_error.txt
+nextflow
+.nextflow.log*
+work
+runs

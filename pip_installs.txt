@@ -1,2 +1,0 @@
-pip install numpy==1.11.0
-pip install pandas==0.17.1
