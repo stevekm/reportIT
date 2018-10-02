@@ -47,3 +47,5 @@ nextflow
 .nextflow.log*
 work
 runs
+runs*
+.nextflow*

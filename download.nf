@@ -19,7 +19,7 @@ if(params.server == null){
     if ( Config && Config.containsKey("server") && Config.server != null ) {
         server = "${Config.server}"
     } else {
-        server = "198.1.1.168"
+        server = "198.1.1.168" // dummy IP address
     }
 } else {
     server = "${params.server}"
@@ -34,7 +34,7 @@ if(params.server_login == null){
     if ( Config && Config.containsKey("server_login") && Config.server_login != null ) {
         server_login = "${Config.server_login}"
     } else {
-        server_login = "username@198.1.1.168"
+        server_login = "username@198.1.1.168" // dummy server login
     }
 } else {
     server_login = "${params.server_login}"
@@ -55,9 +55,11 @@ if(params.server_output_dir == null){
     server_output_dir = "${params.server_output_dir}"
 }
 
+// Ion Torrent run data output directory
 params.runDir = "runs"
 
-Channel.fromPath("${params.runDir}/*").set{ local_runs_ch }
+// find all the locally stored Ion Torrent runs
+Channel.fromPath("${params.runDir}/*", type: 'dir').set{ local_runs_ch }
 local_runs_ch.map{ path ->
     def basename = path.getName()
     def items = [basename, path]
@@ -67,6 +69,7 @@ local_runs_ch.map{ path ->
     .set{ all_local_runs }
 
 process check_available_runs {
+    // logs into the remote Ion Torrent server and gets a list of all runs available
     executor "local"
     echo true
 
@@ -99,15 +102,14 @@ EOF
     """
 }
 
-// parse the runs list
+// read the list of runs from the file
 remote_runs_txt.map{ txt ->
     def runs = txt.readLines()
     return([runs])
 }.collect().set{ all_remote_runs }
 
-
+// find all the remote runs that are not present locally
 all_remote_runs.combine(all_local_runs).map { remote_runs_list, local_runs_list ->
-    // find all the remote runs that are not present locally
     def missing_runs = []
     for (remote_run in remote_runs_list) {
         if ( ! local_runs_list.contains(remote_run) ){
@@ -118,6 +120,10 @@ all_remote_runs.combine(all_local_runs).map { remote_runs_list, local_runs_list 
 }.flatten().set { missing_remote_runs }
 
 process validate_remote_run {
+    // validate that a remote run is ready for download
+    // contains 'status.txt'; only exists if run is complete
+    // add other criteria here as needed
+    // output an integer status code representing validation; 0 = good, anything else is bad
     executor "local"
     maxForks 1
     echo true
@@ -130,10 +136,7 @@ process validate_remote_run {
     set val(runID), file("${status_file_exitcode_txt}") into remote_run_validations
 
     script:
-    // /results/analysis/output/Home/Auto_user_SN2-282-IT17-26-1_375_368
-    remote_run_dir = "${server_output_dir}/${runID}"
-    // file only exists if run is finished
-    // /results/analysis/output/Home/Auto_user_SN2-282-IT17-26-1_375_368/status.txt
+    remote_run_dir = "${server_output_dir}/${runID}" // /results/analysis/output/Home/Auto_user_SN2-282-IT17-26-1_375_368
     run_status_file = "${remote_run_dir}/status.txt"
     status_file_exitcode_txt = "status_code.txt"
     """
@@ -145,14 +148,33 @@ E0F
     """
 }
 
-remote_run_validations.filter { runID, status_code_file ->
+// filter out the bad runs that didn't pass validation
+valid_remote_runs_validations = Channel.create()
+invalid_remote_runs_validations = Channel.create()
+
+remote_run_validations.choice( valid_remote_runs_validations, invalid_remote_runs_validations ) { items ->
+    def runID = items[0]
+    def status_code_file = items[1]
+    def output = 1 // bad by default; good = 0
+    // read the exit code from the file; 0 = good
     int status_code = status_code_file.readLines()[0].toInteger()
-    status_code == 0
-}.map { runID, status_code_file ->
+    if (status_code == 0) output = 0
+    return(output)
+}
+
+valid_remote_runs_validations.map { runID, status_code_file ->
     return runID
 }.set { valid_remote_runs }
 
+invalid_remote_runs_validations.map { runID, status_code_file ->
+    int status_code = status_code_file.readLines()[0].toInteger()
+    log.warn "Invalid remote run found: ${runID}, status code: ${status_code}"
+    return runID
+}.set { invalid_remote_runs }
+
 process download_run {
+    // download a run from the remote Ion Torrent server
+    // only downloads select files; add criteria here
     maxForks 1
     executor "local"
     tag "${runID}"
